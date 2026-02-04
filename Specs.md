@@ -151,13 +151,14 @@ The Admin Web Application is the primary control center for the business. It mus
 
 ### 6.1. Application Development
 
-The entire application (Admin System Web App and Customer-Facing Web App) will be implemented using the **React** framework with **TypeScript** for type safety and maintainability.
+The entire application (Admin System Web App and Customer-Facing Web App) will be implemented using **Next.js** with **React** and **TypeScript** for type safety and maintainability.
 
 ### 6.2. Requirements
 
+* **Framework:** Next.js (App Router) with React and TypeScript.
 * **Cross-Platform Compatibility/Responsiveness:** Both applications must be fully mobile-responsive and function seamlessly across desktop browsers and all major mobile device sizes (iOS and Android).
 * **TypeScript Enforcement:** Development must enforce strict type checking using TypeScript to minimize runtime errors and improve code quality.
-* **Rapid Prototyping:** The choice of React is intended to support an agile development process and rapid deployment of updates.
+* **Rapid Prototyping:** Next.js supports an agile development process and rapid deployment of updates.
 * **Backend Integration:** Both applications must securely connect to the core backend system (API) to perform all tasks. The **backend/API must be built as part of this project**; separate backend specifications will be written after these general specs are finalized.
 * **Push Notifications (Admin):** Staff notifications for new appointment requests must use **Firebase Cloud Messaging (FCM)** for web push. The Admin app must support PWA (Progressive Web App) capabilities with a service worker to receive push notifications on web browsers (including mobile). This enables push notifications for Admin users on both desktop and mobile browsers.
 * **Single Location:** The system is designed for a **single business location**; multi-branch support is out of scope.

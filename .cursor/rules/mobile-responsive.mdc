@@ -11,7 +11,7 @@ Ensure the web app is mobile-optimized: works on phones and tablets, responsive 
 
 ### DO
 DO design mobile-first: base styles for 320px–375px width, then scale up with min-width media queries.
-DO include a proper viewport meta tag: `<meta name="viewport" content="width=device-width, initial-scale=1" />`
+DO include viewport: in Next.js use `export const viewport = { width: 'device-width', initialScale: 1 }` in `app/layout.tsx`, or the `viewport` export in metadata.
 DO use flexible layouts: CSS Grid and Flexbox; avoid fixed widths for containers.
 DO ensure touch targets (buttons, links, form controls) are ≥ 44×44px.
 DO avoid horizontal scroll on small screens; constrain images and tables.
@@ -31,7 +31,7 @@ MUST NOT use fixed positioning that obscures content on small screens without sa
 | xl   | 1280px    | Large desktop |
 
 ## Completion Checklist
-[ ] Viewport meta tag present in index.html or root layout.
+[ ] Viewport configured in app/layout.tsx (viewport export or metadata).
 [ ] No horizontal overflow at 320px width.
 [ ] Touch targets ≥ 44×44px.
 [ ] Layout tested at 375px, 768px, 1024px.

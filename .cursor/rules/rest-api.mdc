@@ -1,0 +1,27 @@
+---
+description: REST API consumption (centralized client, typed errors, security)
+globs: ["**/*.ts", "**/*.tsx"]
+alwaysApply: false
+---
+
+# Purpose
+Implement reliable REST consumption with typed errors, safe logging, and clear UX for failed/offline states.
+
+## Do / Don't
+
+### DO
+DO centralize all HTTP in a single client module; do not scatter fetch across components.
+DO enforce HTTPS base URL via environment (e.g., NEXT_PUBLIC_API_URL); no hardcoded secrets.
+DO define a typed error model: `{ kind: 'network' | 'http' | 'parse'; status?: number; message: string; retriable?: boolean }`
+DO provide offline/failed-network UX: clear message + retry action.
+DO redact logs: no Authorization headers, tokens, cookies, PII (emails, phones, addresses).
+
+### DON'T
+MUST NOT log secrets or PII.
+MUST NOT show raw server error payloads to users.
+MUST NOT retry non-idempotent requests (POST/PUT/PATCH/DELETE) by default.
+
+## Completion Checklist
+[ ] REST calls go through one client module.
+[ ] Typed error model; UX handles loading/error/offline states.
+[ ] No secrets/PII in logs.

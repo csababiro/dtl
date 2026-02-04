@@ -110,7 +110,7 @@
 
 ## 5. Tech Constraints
 
-- **Framework:** React + TypeScript
+- **Framework:** Next.js (App Router) + React + TypeScript
 - **Style:** Mobile-first, responsive
 - **Language:** Romanian (i18n-ready)
 - **Map:** Google Maps

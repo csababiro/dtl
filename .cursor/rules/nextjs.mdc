@@ -1,0 +1,39 @@
+---
+description: Next.js App Router patterns (layouts, routing, Server/Client components)
+globs: ["**/app/**/*", "**/*.tsx", "**/next.config.*"]
+alwaysApply: false
+---
+
+# Purpose
+Keep Next.js usage consistent: App Router, layouts, Server vs Client components, and routing conventions.
+
+## Do / Don't
+
+### DO
+DO use the App Router: routes live under `app/`, with `page.tsx` for pages and `layout.tsx` for layouts.
+DO use Server Components by default; add `"use client"` only when needed (hooks, event handlers, browser APIs).
+DO use the file-based routing: `app/dashboard/page.tsx`, `app/services/[id]/page.tsx` for dynamic segments.
+DO validate route params at runtime (searchParams, params); treat as unknown, narrow safely before use.
+DO use `metadata` export or `generateMetadata` for SEO (title, description, viewport).
+DO use functional components with hooks in Client Components; avoid class components.
+
+### DON'T
+MUST NOT rename/move route files without **BREAKING** label and migration notes (links, bookmarks).
+MUST NOT parse route params unsafely; guard NaN/undefined before using Number(param).
+MUST NOT mix Pages Router (`pages/`) with App Router (`app/`); use App Router only.
+MUST NOT use "use client" at the top level of layout.tsx unless required (prefer Server layout).
+
+## Structure (App Router)
+```
+app/
+  layout.tsx      # Root layout (metadata, viewport)
+  page.tsx        # Home
+  (group)/        # Route groups
+  [dynamic]/      # Dynamic segments
+```
+
+## Completion Checklist
+[ ] Routes follow App Router conventions (app/, page.tsx, layout.tsx).
+[ ] Server Components used by default; Client only when needed.
+[ ] Route params validated before use.
+[ ] Metadata/viewport set in root layout for SEO and mobile.

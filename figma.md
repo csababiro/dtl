@@ -22,7 +22,7 @@ Use this description with Figma Make (or similar AI design tools) to generate st
 - **Service management:** General services, Tyre services, Car wash packages – each with pricing.
 - **User management:** Staff roles (Super Admin, Admin, Technician), customer accounts.
 
-**Style:** Clean, professional, mobile-first. Romanian language throughout. Include placeholder content in Romanian where applicable. Design should feel i18n-ready.
+**Style:** Clean, professional, mobile-first. Romanian language throughout. Include placeholder content in Romanian where applicable. Design should feel i18n-ready. Target: Next.js web app.
 
 ---
 

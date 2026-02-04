@@ -27,15 +27,14 @@ MUST NOT refactor unrelated areas "for cleanup".
 MUST NOT change route paths, persisted storage keys, or API contracts silently.
 
 ## Verification Commands (choose the repo's package manager; do not guess)
-Health:
-  - npx expo doctor (if Expo project)
-  - npm run start OR npx expo start
+Next.js:
+  - npm run dev (development)
+  - npm run build (production build)
 Typecheck:
-  - npm run typecheck OR pnpm typecheck OR yarn typecheck
-  - If no script exists: npx tsc --noEmit
+  - npm run typecheck (if present) OR npx tsc --noEmit
 Lint / format:
   - npm run lint / pnpm lint / yarn lint
-  - npm run format / pnpm format / yarn format
+  - npm run format (if present)
 
 ## Completion Checklist
 [ ] File tree and package.json scripts were inspected (or requested explicitly).
@@ -46,5 +45,5 @@ Lint / format:
 
 ## Common Pitfalls
 Guessing the package manager or scripts.
-Referencing src/ / app/ structure without confirming what exists.
+Referencing app/ or src/ structure without confirming what exists (Next.js uses app/ by default).
 Claiming completion without runnable verification commands.
