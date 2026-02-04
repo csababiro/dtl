@@ -1,8 +1,8 @@
 # Comprehensive Specifications Document: All-Inclusive Car Service Business
 
-**Document Version:** Refined (February 2025)
+**Document Version:** Refined v2 (February 2025)
 
-This document outlines the functional and technical specifications for an all-inclusive car service business system. It incorporates refinements from stakeholder clarification sessions.
+This document outlines the functional and technical specifications for an all-inclusive car service business system. It incorporates refinements from stakeholder clarification sessions. **Backend/API specifications** will be developed separately after these general specs are finalized.
 
 ---
 
@@ -14,7 +14,7 @@ This document outlines the functional and technical specifications for developin
 
 ### 1.2. Scope
 
-The project scope includes the development of a unified management system comprising a core platform, an Admin Web Application, and a Customer-Facing Web Application. The system must be capable of managing services for *every type of car*.
+The project scope includes the development of a unified management system comprising a **core backend (API)**, an Admin Web Application, and a Customer-Facing Web Application. The backend must be built as part of this project. The system must be capable of managing services for *every type of car*.
 
 ### 1.3. Key Features
 
@@ -49,8 +49,8 @@ Covers standard vehicle upkeep, repair, and diagnostic services for all makes an
 
 * **Service Catalog:** Must integrate with the Admin system to fetch the current list of general services and their prices.
 * **Booking Management:** System must allow for scheduling service appointments, assigning technicians, and tracking vehicle status (e.g., *In Service*, *Awaiting Parts*, *Ready for Pickup*). This feature must be controlled by a dedicated **General Service Booking Flag**.
-  * **Customer-Facing Flow:** A structured three-step process: **Customer Details** (Name, Email, Phone), **Car Details** (Make, Model, Year as free-text fields), and **Preferred Date/Time** (customer selects from real available time slots).
-  * **Request-Based Model:** Submissions are appointment *requests*; staff must review and confirm or reject. See **Section 8.2** for full request-to-confirmation flow.
+  * **Customer-Facing Flow:** A structured process: **Customer Details** (Name, Email, Phone), **Car Details** (Make, Model, Year as free-text fields), **Service Description** (2–3 line textbox for customer to describe their problem), **Optional Service List** (business owner can configure a list; system must provide a default list of most common services), and **Preferred Date/Time** (customer selects from real available time slots).
+  * **Request-Based Model:** Submissions are appointment *requests*; staff must review and resolve. See **Section 8.2** for full request-to-confirmation flow.
 * **Parts Management & Ordering:** Ability to record and track parts used for each service job. A new feature for managing and ordering car parts must be included and controlled by a dedicated **Parts Ordering Flag**.
 * **Customer Records:** Maintain a history of all services performed on a customer's specific vehicle.
 
@@ -67,7 +67,7 @@ Covers the sale, fitting, balancing, and related services for all vehicle tyres.
 * **Module Activation:** The entire module's functionality must be controlled by a dedicated **Tyre Service Flag**.
 * **Service and Pricing:** Must integrate with the Admin system to dynamically fetch the types of tyre services offered (e.g., *Fitting*, *Balancing*, *Puncture Repair*) and their corresponding pricing.
 * **Inventory Integration:** System should track tyre stock levels, including size, brand, and type (e.g., *Summer*, *Winter*, *All-Season*).
-* **Booking Management:** Must allow for scheduling tyre service appointments. This feature must be controlled by a dedicated **Tyre Service Booking Flag**. The customer-facing flow must capture: Customer Info (Name, Email, Phone), Car Details (Make, Model, Year as free-text fields), and selection from **real available time slots**. Same request-based flow as General Service (see **Section 8.2**).
+* **Booking Management:** Must allow for scheduling tyre service appointments. This feature must be controlled by a dedicated **Tyre Service Booking Flag**. Same customer-facing flow as General Service: Customer Info, Car Details, Service Description (textbox + optional service list), and selection from **real available time slots**. Same request-based flow (see **Section 8.2**).
 * **Tire Specifics:** Ability to record tyre specifications used on a customer's vehicle.
 
 ---
@@ -82,7 +82,7 @@ Covers the administration and tracking of various car wash and detailing package
 
 * **Module Activation:** The entire module's functionality must be controlled by a dedicated **Car Wash Flag**.
 * **Service Packages:** Car wash packages (e.g., *Basic Wash*, *Premium Clean*, *Full Detail*) must be managed in a **separate Car Wash section** within the Admin system, not mixed with General Vehicle Services. Must fetch and display current packages and their prices.
-* **Appointment-Based Booking:** Car wash uses the same appointment-based booking flow as General Service and Tyre Services. Customers reserve time slots. Controlled by a dedicated **Car Wash Booking Flag**. Customer-facing flow: Customer Info, Car Details (free text), and selection from real available slots. Same request-based flow as General Service (see **Section 8.2**).
+* **Appointment-Based Booking:** Car wash uses the same appointment-based booking flow as General Service and Tyre Services. Customers reserve time slots. Controlled by a dedicated **Car Wash Booking Flag**. Same customer-facing flow: Customer Info, Car Details, Service Description (textbox + optional service list), and selection from real available slots. Same request-based flow (see **Section 8.2**).
 * **Queue Tracking:** A simple mechanism for tracking vehicles in the car wash queue (operational tracking once appointments are confirmed).
 
 ---
@@ -98,8 +98,9 @@ The Admin Web Application is the primary control center for the business. It mus
 * **Feature Flag Management:** See **Section 1.4** for two-tier control (Super Admin enables; Admin shows/hides).
 
 * **Business Settings:**
-  * **Contact Information:** Administrator can configure the business **phone number** and **email** for display on the customer-facing application.
-  * **Operating Hours:** Administrator can define and update operating hours (e.g., per day, with exceptions as needed).
+  * **Contact Information:** Super Admin or Admin can configure the business **phone number** and **email** for display on the customer-facing application.
+  * **Business Address:** Super Admin or Admin can configure the business **address**. Required for map display on the customer-facing application.
+  * **Operating Hours:** Administrator can define and update operating hours (e.g., per day, with exceptions as needed). By default, available appointment slots are derived from operating hours. Admin can further **restrict availability** (e.g., block specific times, adjust available slots).
 
 * **Vehicle Type Management:**
   * **Feature:** Administrator can create, update, and delete entries for supported car types/makes/models (for internal reference and catalog purposes).
@@ -109,7 +110,11 @@ The Admin Web Application is the primary control center for the business. It mus
   * **Feature:** Administrator can define and modify the list of all **General Vehicle Services** and set their specific pricing.
   * **Feature:** Administrator can define and modify the list of all **Car Tyre Services** (e.g., Fitting, Balancing) and set their specific pricing.
   * **Feature:** Administrator can define and modify **Car Wash packages** in a separate Car Wash section and set their pricing.
+  * **Feature:** Business owner can configure the **optional service list** shown during appointment booking. System must provide a default list of most common services.
   * **Requirement:** Pricing must be linked to the service catalog used by the entire system, only displaying options for currently active modules.
+
+* **Content Management (Images):**
+  * **Feature:** Business owner (Admin/Content Manager) can manage **photos** that appear on the customer-facing application (e.g., service images, gallery, branding). Mockups will be added to specify layout and usage.
 
 * **User Management:**
   * **Feature:** Ability to manage staff accounts and roles.
@@ -124,6 +129,8 @@ The Admin Web Application is the primary control center for the business. It mus
     * **Staff-Created:** Admin or Super Admin can create customer accounts from the Admin system.
 
 * **Reporting Dashboard:** Overview of daily/weekly/monthly revenue and service volume, only reflecting data from currently active modules.
+
+* **Customer Contact (No Backend SMS):** For contacting customers about appointment requests, Admin uses **click-to-call** and **click-to-SMS** links from the Admin app. These open the device's phone dialer or SMS app with the customer's number pre-filled. No backend SMS integration; Admin sends messages directly from their phone.
 
 * **Technician Interface:** Technicians log into the Admin application with a **restricted view** tailored to their role (e.g., assigned jobs, status updates). No separate Technician application.
 
@@ -140,7 +147,8 @@ The entire application (Admin System Web App and Customer-Facing Web App) will b
 * **Cross-Platform Compatibility/Responsiveness:** Both applications must be fully mobile-responsive and function seamlessly across desktop browsers and all major mobile device sizes (iOS and Android).
 * **TypeScript Enforcement:** Development must enforce strict type checking using TypeScript to minimize runtime errors and improve code quality.
 * **Rapid Prototyping:** The choice of React is intended to support an agile development process and rapid deployment of updates.
-* **Backend Integration:** Both applications must securely connect to the core backend system (API) to perform all tasks.
+* **Backend Integration:** Both applications must securely connect to the core backend system (API) to perform all tasks. The **backend/API must be built as part of this project**; separate backend specifications will be written after these general specs are finalized.
+* **Push Notifications (Admin):** Staff notifications for new appointment requests must use **Firebase Cloud Messaging (FCM)** for web push. The Admin app must support PWA (Progressive Web App) capabilities with a service worker to receive push notifications on web browsers (including mobile). This enables push notifications for Admin users on both desktop and mobile browsers.
 * **Single Location:** The system is designed for a **single business location**; multi-branch support is out of scope.
 
 ---
@@ -171,20 +179,23 @@ The customer-facing application provides a simple, responsive interface for cust
 
 * **Contact Accessibility:** The service's **phone number** and **email** must be prominently and persistently displayed (e.g., in the header or a sticky button) across all pages. These values are configured in **Business Settings** within the Admin system.
 
+* **Business Address & Map:** The business **address** must be displayed, and a **map** (showing the business location) is required. Address is configured in Business Settings.
+
 * **Appointment Request Flow (when booking is active via feature flag):**
-  * **Three-Step Process:** Customer Details (Name, Email, Phone), Car Details (Make, Model, Year as free text), and Preferred Date/Time (selection from **real available time slots**).
-  * **Request-Based:** Submissions create appointment *requests*; staff must review and confirm or reject.
+  * **Process:** Customer Details (Name, Email, Phone), Car Details (Make, Model, Year as free text), **Service Description** (2–3 line textbox for customer to describe their problem), **Optional Service List** (configurable by business owner; default list of common services provided), and Preferred Date/Time (selection from **real available time slots**).
+  * **Booking Window:** Customers can book up to **30 days** in advance.
+  * **Request-Based:** Submissions create appointment *requests*. Admin/business owner **contacts the customer** (e.g., by phone) to find a proper slot. Admin can **modify** the appointment with a new slot, or **delete** it if no solution is found. No silent rejection; resolution occurs through communication.
   * **Customer Notifications:**
     * Immediate email after submission: confirmation that the request has been received and will be reviewed by staff.
     * Email after staff confirms: final confirmation of the appointment.
-  * **Staff Notifications:** When a new request is submitted, staff receive a **push notification** and an **email**.
+  * **Staff Notifications:** When a new request is submitted, **Admins** receive a **push notification** (via Firebase) and an **email**.
   * **Staff Calendar:** Requests appear as **Pending** until staff action; after confirmation, they appear as **Confirmed**.
 
 * **Guest Access:** Customers may submit appointment requests **without creating an account** (guest submission).
 
 * **Authenticated Customer Benefits:** When logged in, customers can view:
   * Past and upcoming appointments (requested, confirmed, completed).
-  * Payment history and invoices.
+  * Invoices and payment history: Business owner can add the **final price** to completed jobs; optionally can describe **items and quantities** separately. This data is entered manually by staff after payment (payment occurs outside the app).
   The application should encourage customers to create an account to access these benefits.
 
 * **Mobile-First Design:** The application must be fully mobile-responsive and optimized for simple navigation on small screens.
