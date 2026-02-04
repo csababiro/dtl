@@ -1,6 +1,6 @@
 # Comprehensive Specifications Document: All-Inclusive Car Service Business
 
-**Document Version:** Refined v2 (February 2025)
+**Document Version:** Refined v3 (February 2025)
 
 This document outlines the functional and technical specifications for an all-inclusive car service business system. It incorporates refinements from stakeholder clarification sessions. **Backend/API specifications** will be developed separately after these general specs are finalized.
 
@@ -48,7 +48,7 @@ Covers standard vehicle upkeep, repair, and diagnostic services for all makes an
 ### 2.2. Requirements
 
 * **Service Catalog:** Must integrate with the Admin system to fetch the current list of general services and their prices.
-* **Booking Management:** System must allow for scheduling service appointments, assigning technicians, and tracking vehicle status (e.g., *In Service*, *Awaiting Parts*, *Ready for Pickup*). This feature must be controlled by a dedicated **General Service Booking Flag**.
+* **Booking Management:** System must allow for scheduling service appointments, assigning technicians, and tracking vehicle status (e.g., *In Service*, *Awaiting Parts*, *Ready for Pickup*). This feature must be controlled by a dedicated **General Service Booking Flag**. Customer notification when vehicle status changes is **not required for now**.
   * **Customer-Facing Flow:** A structured process: **Customer Details** (Name, Email, Phone), **Car Details** (Make, Model, Year as free-text fields), **Service Description** (2–3 line textbox for customer to describe their problem), **Optional Service List** (business owner can configure a list; system must provide a default list of most common services), and **Preferred Date/Time** (customer selects from real available time slots).
   * **Request-Based Model:** Submissions are appointment *requests*; staff must review and resolve. See **Section 8.2** for full request-to-confirmation flow.
 * **Parts Management & Ordering:** Ability to record and track parts used for each service job. A new feature for managing and ordering car parts must be included and controlled by a dedicated **Parts Ordering Flag**.
@@ -100,7 +100,15 @@ The Admin Web Application is the primary control center for the business. It mus
 * **Business Settings:**
   * **Contact Information:** Super Admin or Admin can configure the business **phone number** and **email** for display on the customer-facing application.
   * **Business Address:** Super Admin or Admin can configure the business **address**. Required for map display on the customer-facing application.
-  * **Operating Hours:** Administrator can define and update operating hours (e.g., per day, with exceptions as needed). By default, available appointment slots are derived from operating hours. Admin can further **restrict availability** (e.g., block specific times, adjust available slots).
+  * **Operating Hours:** Administrator can define and update operating hours (e.g., per day, with exceptions as needed). By default, available appointment slots are derived from operating hours. Admin can further **restrict availability** (e.g., block specific times, adjust available slots). **Romanian national holidays** are automatically included as exceptions (closed). Admin can add **extra off days or hours** (e.g., when a technician is not available).
+
+* **Appointment Slot Configuration:**
+  * **Separate calendars** for General Service, Tyre Service, and Car Wash (each has its own calendar and slot pool).
+  * **Slot duration:** 1 hour by default for each service type. Business owner or Admin can **adjust slot duration separately** for General Service, Tyre Service, and Car Wash.
+
+* **Staff Calendar:**
+  * **Views:** Day, Week, Month. Default view is **Week**.
+  * **Two interaction modes:** (1) **Calendar mode** – day/week/month grid view; (2) **Form mode** – date and time selection via form (date picker + time dropdown).
 
 * **Vehicle Type Management:**
   * **Feature:** Administrator can create, update, and delete entries for supported car types/makes/models (for internal reference and catalog purposes).
@@ -110,7 +118,10 @@ The Admin Web Application is the primary control center for the business. It mus
   * **Feature:** Administrator can define and modify the list of all **General Vehicle Services** and set their specific pricing.
   * **Feature:** Administrator can define and modify the list of all **Car Tyre Services** (e.g., Fitting, Balancing) and set their specific pricing.
   * **Feature:** Administrator can define and modify **Car Wash packages** in a separate Car Wash section and set their pricing.
-  * **Feature:** Business owner can configure the **optional service list** shown during appointment booking. System must provide a default list of most common services.
+  * **Optional Service List (Booking):** Three **separate lists** – one for General Service, one for Tyre Service, one for Car Wash. Each list is linked to its respective service catalog and can be expanded by Admin. System must provide **default lists in Romanian**:
+    * **General Service (default):** Schimb ulei, Revizie, Frâne, Filtre, Direcție, Diagnostic motor, Baterie, Climatizare, Rotație anvelope.
+    * **Tyre Service (default):** Montaj anvelope, Echilibrare, Reparare pană, Schimb valve.
+    * **Car Wash (default):** Spălare exterior, Spălare interior, Detaliu exterior, Detaliu complet.
   * **Requirement:** Pricing must be linked to the service catalog used by the entire system, only displaying options for currently active modules.
 
 * **Content Management (Images):**
@@ -151,6 +162,8 @@ The entire application (Admin System Web App and Customer-Facing Web App) will b
 * **Push Notifications (Admin):** Staff notifications for new appointment requests must use **Firebase Cloud Messaging (FCM)** for web push. The Admin app must support PWA (Progressive Web App) capabilities with a service worker to receive push notifications on web browsers (including mobile). This enables push notifications for Admin users on both desktop and mobile browsers.
 * **Single Location:** The system is designed for a **single business location**; multi-branch support is out of scope.
 
+* **Language:** The application is **Romanian only** for the initial release. The architecture must **allow for future multi-language support** (e.g., i18n-ready structure, externalized strings).
+
 ---
 
 ## 7. Payment Information (System-Wide Feature)
@@ -179,19 +192,31 @@ The customer-facing application provides a simple, responsive interface for cust
 
 * **Contact Accessibility:** The service's **phone number** and **email** must be prominently and persistently displayed (e.g., in the header or a sticky button) across all pages. These values are configured in **Business Settings** within the Admin system.
 
-* **Business Address & Map:** The business **address** must be displayed, and a **map** (showing the business location) is required. Address is configured in Business Settings.
+* **Business Address & Map:** The business **address** must be displayed, and a **map** (showing the business location) is required. Address is configured in Business Settings. **Map provider:** Google Maps.
 
-* **Appointment Request Flow (when booking is active via feature flag):**
-  * **Process:** Customer Details (Name, Email, Phone), Car Details (Make, Model, Year as free text), **Service Description** (2–3 line textbox for customer to describe their problem), **Optional Service List** (configurable by business owner; default list of common services provided), and Preferred Date/Time (selection from **real available time slots**).
+* **Appointment Request Flow (Programare – when booking is active via feature flag):**
+
+  **Form fields (required unless marked optional):**
+  | Field | Required | Description |
+  |-------|----------|-------------|
+  | Name | ✓ | Customer name |
+  | Phone | ✓ | Customer phone |
+  | Email | ✓ | Customer email |
+  | Car type | ✓ | Make, Model, Year (free text) |
+  | Car problem | ✓ | Textbox for customer to describe the issue |
+  | Optional service list | Optional | Selection from catalog (General/Tyre/Car Wash depending on booking type) |
+  | Date | ✓ | Preferred date |
+  | Time | ✓ | Preferred time (from available slots) |
+  | Attach photo | Optional | Customer can attach a photo if needed (e.g., damage, issue) |
   * **Booking Window:** Customers can book up to **30 days** in advance.
   * **Request-Based:** Submissions create appointment *requests*. Admin/business owner **contacts the customer** (e.g., by phone) to find a proper slot. Admin can **modify** the appointment with a new slot, or **delete** it if no solution is found. No silent rejection; resolution occurs through communication.
   * **Customer Notifications:**
     * Immediate email after submission: confirmation that the request has been received and will be reviewed by staff.
     * Email after staff confirms: final confirmation of the appointment.
-  * **Staff Notifications:** When a new request is submitted, **Admins** receive a **push notification** (via Firebase) and an **email**.
+  * **Staff Notifications:** When a new request is submitted, **Admins** receive a **push notification** (via Firebase) and an **email**. Notifications are always on; no opt-out.
   * **Staff Calendar:** Requests appear as **Pending** until staff action; after confirmation, they appear as **Confirmed**.
 
-* **Guest Access:** Customers may submit appointment requests **without creating an account** (guest submission).
+* **Guest Access:** Customers may submit appointment requests **without creating an account** (guest submission). When a guest later creates an account using the **same email**, their past guest submissions must be **linked** and visible in their appointment history.
 
 * **Authenticated Customer Benefits:** When logged in, customers can view:
   * Past and upcoming appointments (requested, confirmed, completed).
