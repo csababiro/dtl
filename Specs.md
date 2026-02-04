@@ -14,7 +14,10 @@ This document outlines the functional and technical specifications for developin
 
 ### 1.2. Scope
 
-The project scope includes the development of a unified management system comprising a **core backend (API)**, an Admin Web Application, and a Customer-Facing Web Application. The backend must be built as part of this project. The system must be capable of managing services for *every type of car*.
+The project scope includes the development of a unified management system comprising:
+* **Single Next.js application** – Customer-facing pages (e.g., `/`, `/servicii`, `/programare`, `/contact`) and Admin pages under the **`/admin`** route (dashboard, calendar, settings, etc.).
+* **Separate backend (API)** – Built as a distinct package/service within the project (monorepo). The frontend calls the API via a configurable base URL.
+* **Capability** – The system must manage services for *every type of car*.
 
 ### 1.3. Key Features
 
@@ -159,11 +162,13 @@ The entire application (Admin System Web App and Customer-Facing Web App) will b
 * **Cross-Platform Compatibility/Responsiveness:** Both applications must be fully mobile-responsive and function seamlessly across desktop browsers and all major mobile device sizes (iOS and Android).
 * **TypeScript Enforcement:** Development must enforce strict type checking using TypeScript to minimize runtime errors and improve code quality.
 * **Rapid Prototyping:** Next.js supports an agile development process and rapid deployment of updates.
-* **Backend Integration:** Both applications must securely connect to the core backend system (API) to perform all tasks. The **backend/API must be built as part of this project**; separate backend specifications will be written after these general specs are finalized.
+* **Backend Integration:** The Next.js app connects to the **separate backend API** via environment-configured base URL (e.g., `NEXT_PUBLIC_API_URL`). No hardcoded API URLs. Backend is a separate package in the monorepo; backend specs will be written separately.
 * **Push Notifications (Admin):** Staff notifications for new appointment requests must use **Firebase Cloud Messaging (FCM)** for web push. The Admin app must support PWA (Progressive Web App) capabilities with a service worker to receive push notifications on web browsers (including mobile). This enables push notifications for Admin users on both desktop and mobile browsers.
 * **Single Location:** The system is designed for a **single business location**; multi-branch support is out of scope.
 
 * **Language:** The application is **Romanian only** for the initial release. The architecture must **allow for future multi-language support** (e.g., i18n-ready structure, externalized strings).
+
+* **Environment Variables:** API base URL and other configuration must be provided via environment variables. Include `.env.example` with required variables (e.g., `NEXT_PUBLIC_API_URL`); never commit secrets to source control.
 
 ---
 

@@ -111,17 +111,25 @@
 ## 5. Tech Constraints
 
 - **Framework:** Next.js (App Router) + React + TypeScript
+- **App Structure:** Single Next.js app. Customer-facing routes at root (e.g., `/`, `/servicii`, `/programare`, `/contact`). Admin routes under `/admin` (e.g., `/admin`, `/admin/calendar`, `/admin/settings`).
+- **Backend:** Separate API package in monorepo; frontend calls via `NEXT_PUBLIC_API_URL`.
 - **Style:** Mobile-first, responsive
 - **Language:** Romanian (i18n-ready)
 - **Map:** Google Maps
 - **Push:** Firebase Cloud Messaging (Admin PWA)
 
+## 6. Environment
+
+Copy `.env.example` to `.env` and fill in values. Required variables:
+- `NEXT_PUBLIC_API_URL` – Backend API base URL (e.g., `http://localhost:3001`)
+
 ---
 
-## 6. Implementation Checklist (When Ready)
+## 7. Implementation Checklist (When Ready)
 
 - [ ] Fetch design context from Figma Make (`get_design_context`)
 - [ ] Extract/reuse components and styles from Make output
 - [ ] Implement customer app screens per this doc
 - [ ] Implement admin app screens per this doc
 - [ ] Align with Specs.md for behavior and data
+- [ ] Configure `.env` from `.env.example`
