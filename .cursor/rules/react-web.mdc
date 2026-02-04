@@ -1,0 +1,38 @@
+---
+description: React web app patterns (functional components, hooks, composition)
+globs: ["**/*.tsx", "**/*.jsx"]
+alwaysApply: false
+---
+
+# Purpose
+Keep React components consistent, maintainable, and optimized for web (desktop + mobile browsers).
+
+## Do / Don't
+
+### DO
+DO use functional components with hooks; avoid class components.
+DO design for mobile-first: base styles for small screens, then add min-width breakpoints for larger.
+DO ensure touch targets are at least 44×44px for interactive elements (buttons, links, inputs).
+DO use semantic HTML (main, nav, header, section, article, button, a) for accessibility.
+DO extract reusable logic into custom hooks; keep components focused on rendering.
+DO use React.memo or useMemo/useCallback only when profiling shows a benefit; avoid premature optimization.
+
+### DON'T
+MUST NOT rely on fixed pixel widths for layouts; use relative units (rem, %, min/max) and flex/grid.
+MUST NOT assume desktop viewport; test at 320px, 375px, 768px, 1024px+.
+MUST NOT inline large objects/arrays in JSX (creates new refs on each render); extract to constants or memoize.
+
+## Breakpoints (recommended)
+```css
+/* Mobile-first */
+@media (min-width: 640px) { /* sm */ }
+@media (min-width: 768px) { /* md */ }
+@media (min-width: 1024px) { /* lg */ }
+@media (min-width: 1280px) { /* xl */ }
+```
+
+## Completion Checklist
+[ ] Components are functional and use hooks.
+[ ] Layouts are responsive (no hardcoded widths that break on mobile).
+[ ] Touch targets meet 44×44px minimum.
+[ ] Semantic HTML used where applicable.

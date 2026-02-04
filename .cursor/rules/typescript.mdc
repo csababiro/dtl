@@ -1,0 +1,38 @@
+---
+description: TypeScript strictness and safe typing rules (no-any, null safety, typed boundaries)
+globs: ["**/*.ts", "**/*.tsx"]
+alwaysApply: false
+---
+
+# Purpose
+Keep TS strict and trustworthy to reduce runtime bugs and enable safe refactors.
+
+## Do / Don't
+
+### DO
+DO assume strict TypeScript (including strictNullChecks) and code defensively.
+DO type module boundaries explicitly:
+  - API client functions
+  - storage adapters
+  - reusable hooks
+  - navigation/route-param helpers
+DO prefer inference for locals; add annotations where they define contracts.
+DO use unknown for untrusted data and narrow via type guards.
+DO model errors as typed unions (e.g., { kind: 'network' | 'http' | 'parse' ... }).
+
+### DON'T
+MUST NOT use any unless unavoidable:
+  - If used, add // any: <reason> and immediately narrow at the boundary.
+MUST NOT use blind casts (as Foo) to silence errors; validate/narrow instead.
+MUST NOT use non-null assertions (!) except for proven invariants (and explain why).
+
+## Completion Checklist
+[ ] No new any without an inline justification comment.
+[ ] Untrusted inputs are unknown and narrowed safely.
+[ ] Public functions/hooks have explicit input/output types.
+[ ] No unsafe param parsing without guards.
+
+## Common Pitfalls
+Treating API responses as trusted objects.
+NaN/undefined bugs from unguarded conversions (Number(x) without checks).
+Over-annotating everything and fighting inference.

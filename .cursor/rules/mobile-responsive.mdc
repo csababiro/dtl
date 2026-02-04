@@ -1,0 +1,37 @@
+---
+description: Mobile-first responsive design (viewport, breakpoints, touch, performance)
+globs: ["**/*.tsx", "**/*.jsx", "**/*.css", "**/*.scss"]
+alwaysApply: false
+---
+
+# Purpose
+Ensure the web app is mobile-optimized: works on phones and tablets, responsive layouts, and good UX on small screens.
+
+## Do / Don't
+
+### DO
+DO design mobile-first: base styles for 320px–375px width, then scale up with min-width media queries.
+DO include a proper viewport meta tag: `<meta name="viewport" content="width=device-width, initial-scale=1" />`
+DO use flexible layouts: CSS Grid and Flexbox; avoid fixed widths for containers.
+DO ensure touch targets (buttons, links, form controls) are ≥ 44×44px.
+DO avoid horizontal scroll on small screens; constrain images and tables.
+DO test on real devices or browser DevTools device emulation (iPhone SE, Android, tablet).
+
+### DON'T
+MUST NOT use `user-scalable=no` or `maximum-scale=1` unless absolutely required (accessibility).
+MUST NOT rely on hover-only interactions; provide tap/click alternatives for touch.
+MUST NOT use fixed positioning that obscures content on small screens without safe-area consideration.
+
+## Breakpoints
+| Name | Min width | Typical use |
+|------|-----------|-------------|
+| sm   | 640px     | Large phone / small tablet |
+| md   | 768px     | Tablet |
+| lg   | 1024px    | Desktop |
+| xl   | 1280px    | Large desktop |
+
+## Completion Checklist
+[ ] Viewport meta tag present in index.html or root layout.
+[ ] No horizontal overflow at 320px width.
+[ ] Touch targets ≥ 44×44px.
+[ ] Layout tested at 375px, 768px, 1024px.

@@ -1,0 +1,28 @@
+---
+description: PWA and web deployment (service worker, manifest, HTTPS, offline)
+globs: ["**/*.ts", "**/*.tsx", "**/index.html", "**/manifest.json", "**/vite.config.*", "**/next.config.*"]
+alwaysApply: false
+---
+
+# Purpose
+Support PWA features (installable, push notifications) and web deployment best practices. App runs in browser on web; mobile-optimized via responsive design.
+
+## Do / Don't
+
+### DO
+DO serve over HTTPS in production (required for PWA, service workers, push).
+DO include a web app manifest (manifest.json) with name, short_name, icons, start_url, display.
+DO register a service worker for offline/caching and push notifications (e.g., Firebase Cloud Messaging).
+DO use relative or environment-based URLs for API base; never hardcode production URLs.
+DO ensure icons exist for common sizes (192×192, 512×512) for PWA install prompt.
+
+### DON'T
+MUST NOT assume native app capabilities; use web APIs (Web Push, Notifications) for push.
+MUST NOT block initial render for non-critical PWA setup; lazy-load service worker registration.
+MUST NOT cache API responses indefinitely without invalidation strategy.
+
+## PWA Checklist
+[ ] manifest.json present with required fields.
+[ ] Service worker registered (e.g., Workbox, custom).
+[ ] HTTPS in production.
+[ ] Icons for 192px and 512px.
