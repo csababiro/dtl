@@ -69,8 +69,15 @@
 
 ---
 
-## 5. Consistency Checklist
+## 5. Technical Foundation (per Specs §6.3)
 
+Build first, then add screen content: **customer routes** (`/`, `/servicii`, `/programare`, `/contact`, `/cont`), **admin routes** (layout + login, dashboard, calendar, appointments, settings, feature-flags, services, content, users), **API client** (env base URL, typed errors), **feature flags** (default all ON until API; hide nav/content when disabled), **i18n** (Romanian externalized), **root layout** (metadata, viewport, `lang="ro"`).
+
+---
+
+## 6. Consistency Checklist
+
+- [ ] Foundation in place (routes, API client, feature flags, i18n, root layout).
 - [ ] Viewport and `lang="ro"` in root layout.
 - [ ] Contact strip and map use same data source (API/settings).
 - [ ] Nav and Programare tabs respect feature flags (disabled = hidden).

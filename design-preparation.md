@@ -108,12 +108,23 @@
 ## 4. Tech Constraints
 
 - **Framework:** Next.js (App Router) + React + TypeScript
-- **App Structure:** Single Next.js app. Customer-facing routes at root (e.g., `/`, `/servicii`, `/programare`, `/contact`). Admin routes under `/admin` (e.g., `/admin`, `/admin/calendar`, `/admin/settings`).
+- **App Structure:** Single Next.js app. Customer-facing routes at root (e.g., `/`, `/servicii`, `/programare`, `/contact`, `/cont`). Admin routes under `/admin` (e.g., `/admin`, `/admin/login`, `/admin/calendar`, `/admin/appointments`, `/admin/settings`, `/admin/feature-flags`, `/admin/services`, `/admin/content`, `/admin/users`).
 - **Backend:** Separate API package in monorepo; frontend calls via `NEXT_PUBLIC_API_URL`.
 - **Style:** Web-first design that fits well on mobile; responsive everywhere
 - **Language:** Romanian (i18n-ready)
 - **Map:** Google Maps
 - **Push:** Firebase Cloud Messaging (Admin PWA)
+
+### 4.1. Implementation foundation (build first)
+
+Implement in this order; everything else depends on it. See also Specs §6.3.
+
+1. **Customer routes** – `/`, `/servicii`, `/programare`, `/contact`, `/cont` (placeholders OK initially).
+2. **Admin routes** – `app/admin/layout.tsx` (auth guard + shell), then one `page.tsx` per admin screen (Dashboard, login, calendar, appointments, settings, feature-flags, services, content, users).
+3. **API client** – Single module; all HTTP via `NEXT_PUBLIC_API_URL`; typed errors.
+4. **Feature flags** – Dedicated layer; default all ON until API exists; used to hide nav and content when disabled.
+5. **i18n** – Romanian strings externalized (e.g. `lib/i18n.ts` or `messages/ro.json`); use in layout and pages.
+6. **Root layout** – `lang="ro"`, metadata, viewport; optional shared customer header/footer.
 
 ## 5. Environment
 
@@ -124,6 +135,7 @@ Copy `.env.example` to `.env` and fill in values. Required variables:
 
 ## 6. Implementation Checklist (When Ready)
 
+- [ ] **Foundation (Specs §6.3):** Customer routes, admin route skeleton, API client, feature flags, i18n, root layout (metadata, viewport, `lang="ro"`).
 - [ ] Implement customer app screens per this doc
 - [ ] Implement admin app screens per this doc
 - [ ] Align with Specs.md for behavior and data

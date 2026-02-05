@@ -170,6 +170,22 @@ The entire application (Admin System Web App and Customer-Facing Web App) will b
 
 * **Environment Variables:** API base URL and other configuration must be provided via environment variables. Include `.env.example` with required variables (e.g., `NEXT_PUBLIC_API_URL`); never commit secrets to source control.
 
+### 6.3. Implementation Foundation
+
+The following must be in place first (routes, API client, feature flags, i18n, root layout). All other features build on this.
+
+* **Customer routes (App Router):** `/` (Home), `/servicii` (Services), `/programare` (Booking), `/contact` (Contact), `/cont` (Authenticated customer: appointment history and invoices). Implement as `app/page.tsx`, `app/servicii/page.tsx`, `app/programare/page.tsx`, `app/contact/page.tsx`, `app/cont/page.tsx`.
+
+* **Admin routes (under `/admin`):** Admin layout with auth guard (redirect unauthenticated to login), then: `/admin` (Dashboard), `/admin/login`, `/admin/calendar`, `/admin/appointments`, `/admin/settings`, `/admin/feature-flags`, `/admin/services`, `/admin/content` (image management), `/admin/users`. Implement as `app/admin/layout.tsx` and `app/admin/.../page.tsx` per screen.
+
+* **API client:** A single module (e.g. `lib/api-client.ts`) that performs all HTTP requests to the backend using `NEXT_PUBLIC_API_URL`. Expose a typed error shape (e.g. `kind`, `status`, `message`, optional `retriable`). No hardcoded API URLs.
+
+* **Feature flags:** A dedicated layer (e.g. `lib/feature-flags.ts`) that fetches flags from the API when available; until the API exists, use **default: all flags ON**. Expose helpers (e.g. `isModuleEnabled('tyre' | 'carWash')`, `isBookingEnabled('general' | 'tyre' | 'carWash')`). Layout and pages use this to hide nav, Programare tabs, and content when a flag is disabled (fully hidden, no placeholders).
+
+* **i18n (Romanian, v1):** Externalize all user-facing strings (e.g. `lib/i18n.ts` or `messages/ro.json`) for the initial Romanian release. Structure so additional locales can be added later. Use these strings in components; do not hardcode copy.
+
+* **Root layout:** Set `lang="ro"` on `<html>`. Export metadata (title, description) and viewport (e.g. `viewport` export or in metadata). Optionally add a shared customer shell (e.g. header with contact strip, footer) in the root or a layout group.
+
 ---
 
 ## 7. Payment Information (System-Wide Feature)
