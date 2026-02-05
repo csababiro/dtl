@@ -178,11 +178,17 @@ The following must be in place first (routes, API client, feature flags, i18n, r
 
 * **Admin routes (under `/admin`):** Admin layout with auth guard (redirect unauthenticated to login), then: `/admin` (Dashboard), `/admin/login`, `/admin/calendar`, `/admin/appointments`, `/admin/settings`, `/admin/feature-flags`, `/admin/services`, `/admin/content` (image management), `/admin/users`. Implement as `app/admin/layout.tsx` and `app/admin/.../page.tsx` per screen.
 
-* **API client:** A single module (e.g. `lib/api-client.ts`) that performs all HTTP requests to the backend using `NEXT_PUBLIC_API_URL`. Expose a typed error shape (e.g. `kind`, `status`, `message`, optional `retriable`). No hardcoded API URLs.
+* **API client:** A single module (e.g. `lib/api-client.ts`) that performs all HTTP requests to the backend using `NEXT_PUBLIC_API_URL`. No hardcoded API URLs. Expose at least `get<T>(path)` and `post<T>(path, body)` returning `{ data: T } | { error: ApiError }`, with a typed **ApiError** (e.g. `kind: 'network' | 'http' | 'parse'`, `status?`, `message`, optional `retriable`).
 
-* **Feature flags:** A dedicated layer (e.g. `lib/feature-flags.ts`) that fetches flags from the API when available; until the API exists, use **default: all flags ON**. Expose helpers (e.g. `isModuleEnabled('tyre' | 'carWash')`, `isBookingEnabled('general' | 'tyre' | 'carWash')`). Layout and pages use this to hide nav, Programare tabs, and content when a flag is disabled (fully hidden, no placeholders).
+* **Feature flags:** A dedicated layer (e.g. `lib/feature-flags.ts`) that fetches flags from the API when available; until the API exists, use **default: all flags ON**. Expose async `getFeatureFlags()` and **sync helpers that take the flags object as first argument** (e.g. `isModuleEnabled(flags, 'tyre' | 'carWash')`, `isBookingEnabled(flags, 'general' | 'tyre' | 'carWash')`). Layout or page calls `getFeatureFlags()` then passes the result into these helpers; **do not use a global store** for flags. Layout and pages use this to hide nav, Programare tabs, and content when a flag is disabled (fully hidden, no placeholders). **Flag staleness:** When a flag is disabled by Admin, the customer sees the change after a **refresh**. If the customer submits a request (e.g. booking) without refreshing, the **API** must reject it; the application shows that error in a **lightweight popup**. The API is the **source of truth** for enforcing disabled features.
 
-* **i18n (Romanian, v1):** Externalize all user-facing strings (e.g. `lib/i18n.ts` or `messages/ro.json`) for the initial Romanian release. Structure so additional locales can be added later. Use these strings in components; do not hardcode copy.
+* **i18n (Romanian, v1):** Externalize all user-facing strings in a messages file (e.g. `messages/ro.json`) and expose a resolver (e.g. `t(key)` in `lib/i18n.ts`) for keys such as `nav.home`, `common.submit`. Use these strings in components; do not hardcode copy. Structure so additional locales can be added later.
+
+* **Shared components:** Reusable UI (e.g. contact strip, map, booking form, service list) lives in a **`components/`** folder at the application root (e.g. `dtl/components/`), not under `app/`. Keep `app/` for routes and route-specific layout.
+
+* **Stub auth (development):** When the backend is not available, the application may support **`NEXT_PUBLIC_MOCK_AUTH=true`** so staff can access admin routes for local development. Document this in `.env.example`; once the real backend and session exist, remove or ignore the mock.
+
+* **Admin roles and nav:** The backend returns the user role with the session (e.g. JWT or `GET /me`). **Technician** users see in the admin nav only **Calendar** and **Mark job done**; Dashboard, Settings, Feature Flags, Appointments, Services, Content, and Users are hidden or restricted as specified. Admin and Super Admin see the full nav.
 
 * **Root layout:** Set `lang="ro"` on `<html>`. Export metadata (title, description) and viewport (e.g. `viewport` export or in metadata). Optionally add a shared customer shell (e.g. header with contact strip, footer) in the root or a layout group.
 
@@ -251,7 +257,7 @@ The customer-facing application provides a simple, responsive interface for cust
 
 * **Design and responsiveness:** The application must use **web-first design that fits well on mobile**: primary experience is desktop/web; layouts must work well on all screen sizes (fully responsive, no horizontal scroll on small screens, adequate touch targets on mobile).
 
-* **Error display:** Validation and API errors must be shown in **small, lightweight popups** (e.g. toast or compact modal). Dismissible; avoid heavy full-page error screens.
+* **Error display:** Validation and API errors must be shown in **small, lightweight popups** (e.g. toast or compact modal). Dismissible; avoid heavy full-page error screens. This includes when the API rejects a request (e.g. because a feature was disabled and the customer had not refreshed).
 
 ---
 
