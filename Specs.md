@@ -101,7 +101,8 @@ The Admin Web Application is the primary control center for the business. It mus
 * **Feature Flag Management:** See **Section 1.4** for two-tier control (Super Admin enables; Admin shows/hides).
 
 * **Business Settings:**
-  * **Contact Information:** Super Admin or Admin can configure the business **phone number** and **email** for display on the customer-facing application.
+  * **Contact Information:** Super Admin or Admin can configure the business **phone number** and **email** for display on the customer-facing application. Optionally, a **WhatsApp** number may be configured; when set, the customer-facing app and Admin contact actions (e.g. when staff contact customers) may offer WhatsApp (call or chat) alongside click-to-call and click-to-SMS.
+  * **Logo:** Super Admin or Admin can configure the business **logo** for display in the customer-facing header (e.g. via Business Settings or Content/Images).
   * **Business Address:** Super Admin or Admin can configure the business **address**. Required for map display on the customer-facing application.
   * **Operating Hours:** Administrator can define and update operating hours (e.g., per day, with exceptions as needed). By default, available appointment slots are derived from operating hours. Admin can further **restrict availability** (e.g., block specific times, adjust available slots). **Romanian national holidays** are automatically included as exceptions (closed). Admin can add **extra off days or hours** (e.g., when a technician is not available).
 
@@ -144,7 +145,7 @@ The Admin Web Application is the primary control center for the business. It mus
 
 * **Reporting Dashboard:** Overview of daily/weekly/monthly revenue and service volume, only reflecting data from currently active modules.
 
-* **Customer Contact (No Backend SMS):** For contacting customers about appointment requests, Admin uses **click-to-call** and **click-to-SMS** links from the Admin app. These open the device's phone dialer or SMS app with the customer's number pre-filled. No backend SMS integration; Admin sends messages directly from their phone.
+* **Customer Contact (No Backend SMS):** For contacting customers about appointment requests, Admin uses **click-to-call**, **click-to-SMS**, and optionally **WhatsApp** (when configured) links from the Admin app. These open the device's phone dialer, SMS app, or WhatsApp with the customer's number pre-filled. No backend SMS integration; Admin sends messages directly from their phone.
 
 * **Technician Interface:** Technicians log into the Admin application with a **restricted view** tailored to their role (e.g., assigned jobs, status updates). No separate Technician application.
 
@@ -218,7 +219,15 @@ The customer-facing application provides a simple, responsive interface for cust
 
 ### 8.2. Requirements
 
-* **Contact Accessibility:** The service's **phone number** and **email** must be prominently and persistently displayed (e.g., in the header or a sticky button) across all pages. These values are configured in **Business Settings** within the Admin system.
+* **Contact Accessibility:** The service's **phone number** and **email** must be **immediately visible** (e.g. in the header or a sticky bar), with sufficient size and contrast so users see them without scrolling. They must be prominently and persistently displayed across all pages. These values are configured in **Business Settings**. Optionally, a **WhatsApp** number may be configured; when set, the application must offer **WhatsApp** (call or chat) alongside click-to-call (tel:) and click-to-SMS, e.g. as an icon or button next to the phone number.
+
+* **Logo:** The customer-facing application must display the business **logo** in the header (e.g. left or centre). The logo links to the home page. The logo is configurable in Admin (Business Settings or Content/Images).
+
+* **Primary colour and visual tone:** The application must use **blue** as the primary/accent colour (e.g. CTAs, primary buttons, key links). Red must not be used as the primary colour; red only for destructive actions or error states where appropriate.
+
+* **Top navigation:** The customer-facing app must have a **single, straightforward top menu**: one level, no deep nesting. Typical items: Home, Servicii, Programare (when enabled), Contact, Cont. On small screens, a compact or hamburger menu is acceptable. Contact strip (phone, email, optional WhatsApp) sits in the header or immediately adjacent.
+
+* **Primary CTA – one-click programare:** A **single, highly visible** call-to-action for booking (e.g. “Programare” / “Rezervă programare”) must be present on the home page and, where relevant, on the services page. It must be **easy to see and one click away** from starting the booking flow (no extra landing step).
 
 * **Business Address & Map:** The business **address** must be displayed, and a **map** (showing the business location) is required. Address is configured in Business Settings. **Map provider:** Google Maps.
 
@@ -236,6 +245,7 @@ The customer-facing application provides a simple, responsive interface for cust
   | Date | ✓ | Preferred date |
   | Time | ✓ | Preferred time (from available slots) |
   | Attach photo | Optional | Customer can attach a photo if needed (e.g., damage, issue) |
+  * **Date and time selection – keep it simple:** Date and time must be selected in the **simplest possible way**: e.g. one step with date picker plus a **list of available time slots** (no free-text time). Prefer a **single, linear form**; avoid multi-step wizards unless necessary. The schedule (date + time) must be **obvious and easy** (e.g. calendar plus slot list in one view or one step).
   * **Booking Window:** Customers can book up to **30 days** in advance.
   * **Request-Based:** Submissions create appointment *requests*. Admin/business owner **contacts the customer** (e.g., by phone) to find a proper slot. Admin can **modify** the appointment with a new slot, or **delete** it if no solution is found. No silent rejection; resolution occurs through communication.
   * **Customer Notifications:**
@@ -256,6 +266,8 @@ The customer-facing application provides a simple, responsive interface for cust
 * **Promotional emails (v1):** **Admins** send promotional emails to customers. At sign-up, the customer must give **consent** via a **checkbox** (e.g. “Accept promotional emails”); only customers who opt in receive promo emails. In scope for v1.
 
 * **Design and responsiveness:** The application must use **web-first design that fits well on mobile**: primary experience is desktop/web; layouts must work well on all screen sizes (fully responsive, no horizontal scroll on small screens, adequate touch targets on mobile).
+
+* **Loading states:** The application must show a **clear, lightweight loading indicator** (e.g. spinner or skeleton) for: initial page load, form submission (e.g. programare), and any async data (services list, available slots). Avoid blank screens during loading; use a consistent, non-intrusive pattern.
 
 * **Error display:** Validation and API errors must be shown in **small, lightweight popups** (e.g. toast or compact modal). Dismissible; avoid heavy full-page error screens. This includes when the API rejects a request (e.g. because a feature was disabled and the customer had not refreshed).
 

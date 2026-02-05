@@ -9,11 +9,13 @@
 ## 1. Design Principles
 
 - **Web-first design that fits well on mobile** – Primary experience is desktop/web; layouts are designed for larger viewports first and must fit well on mobile (breakpoints sm 640px, md 768px, lg 1024px, xl 1280px). No horizontal scroll on small screens; touch targets ≥ 44×44px. Apply consistently across customer and admin apps.
+- **Primary colour: blue** – Use **blue** as primary/accent (CTAs, primary buttons, links). Red only for errors or destructive actions.
 - **Romanian only (v1)** – All copy in Romanian. Structure i18n-ready for future locales.
 - **Guest-first, simple account** – Customers can submit appointment requests without an account. Accounts are simple: for appointment history and to receive promotional emails (Admins send; consent checkbox at sign-up, v1). Encourage sign-up; when they register with the same email, link past guest submissions.
 - **Request-based booking** – Submissions are requests; staff confirm or adjust. No silent rejection.
 - **Feature-flag driven** – Disabled modules/features are fully hidden (no “Coming soon”). Nav and content reflect flags.
 - **Errors: small lightweight popups** – Handle validation and API errors with small, lightweight popups (e.g. toast or compact modal). No heavy overlays; dismissible and non-blocking where appropriate.
+- **Loading** – Use a clear, lightweight loading indicator (spinner or skeleton) for page load, form submit, and async data; avoid blank screens.
 
 ---
 
@@ -58,8 +60,11 @@
 
 ## 4. Key UI Decisions
 
-- **Contact strip** – Phone and email prominent and persistent (e.g. header or sticky) on all customer pages. Values from Business Settings.
-- **Booking form** – Single page with tabs for booking type (General / Tyre / Wash). One form; type selects which catalog/slots apply. 30-day booking window; time from real available slots.
+- **Top menu** – Single, straightforward top navigation: one level (Home, Servicii, Programare, Contact, Cont). No deep nesting; contact strip (phone, email, optional WhatsApp) in header or adjacent.
+- **Logo** – Business logo in header (left or centre), links to home. Configurable in Admin (Business Settings or Content).
+- **Contact strip** – Phone and email **immediately visible**, high contrast, prominent and persistent (header or sticky). Optional **WhatsApp** icon/button when configured. Values from Business Settings.
+- **Primary CTA** – One highly visible “Programare” / “Rezervă” CTA on Home and Servicii; **one click** to start the booking flow.
+- **Booking form** – Single page with tabs for booking type (General / Tyre / Wash). One form; type selects which catalog/slots apply. **Date and time:** keep simple – date picker + **list of available slots** (one step); 30-day window.
 - **Map** – Google Maps, one component; address from settings. Shown on Home and Contact.
 - **Calendar (admin)** – Default view: Week. Modes: calendar grid and form (date + time). Separate calendars per service type; slots from operating hours and restrictions.
 - **Card Installment** – When flag on: show configurable message (no payment in app). Admin sets message/placement in Business Settings.

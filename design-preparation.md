@@ -9,11 +9,14 @@
 ## 1. Customer-Facing App – Screens
 
 ### 1.1. Home
+- **Header:** Logo (left or centre, links to home), straightforward top menu (Home, Servicii, Programare, Contact, Cont), contact strip – phone and email **immediately visible**, optional WhatsApp icon
+- **Primary CTA:** One highly visible “Programare” / “Rezervă” button – one click to booking flow
 - Hero section
 - Service categories (General Service, Tyre, Car Wash – respect feature flags)
-- Contact info: phone + email (prominent, sticky or header)
+- Contact info: phone + email (prominent, sticky or header); optional WhatsApp
 - Business address
 - Embedded Google Map
+- **Visual:** Primary colour blue (not red); loading indicator (spinner/skeleton) when needed
 
 ### 1.2. Services
 - List of services with prices and photos
@@ -21,6 +24,7 @@
 - Content from Admin service catalog
 
 ### 1.3. Programare (Booking Form)
+- **Keep schedule simple:** One step for date + time: date picker and **list of available slots** (no free-text time); single linear form
 **Fields:**
 
 | Field | Required | Type |
@@ -39,8 +43,8 @@
 - Submissions are requests (staff confirms)
 
 ### 1.4. Contact
-- Phone, email, address, map
-- Phone and email always visible (sticky/floating)
+- Phone, email, optional WhatsApp, address, map
+- Phone and email **immediately visible** (sticky/floating), high contrast
 
 ### 1.5. Authenticated User (simple account)
 - Purpose: appointment history and receiving promotional emails. No complex membership UX.
@@ -110,7 +114,7 @@
 - **Framework:** Next.js (App Router) + React + TypeScript
 - **App Structure:** Single Next.js app. Customer-facing routes at root (e.g., `/`, `/servicii`, `/programare`, `/contact`, `/cont`). Admin routes under `/admin` (e.g., `/admin`, `/admin/login`, `/admin/calendar`, `/admin/appointments`, `/admin/settings`, `/admin/feature-flags`, `/admin/services`, `/admin/content`, `/admin/users`).
 - **Backend:** Separate API package in monorepo; frontend calls via `NEXT_PUBLIC_API_URL`.
-- **Style:** Web-first design that fits well on mobile; responsive everywhere
+- **Style:** Web-first design that fits well on mobile; responsive everywhere. **Primary colour: blue** (CTAs, primary buttons); red only for errors/destructive. **Loading:** lightweight spinner or skeleton for load and submit.
 - **Language:** Romanian (i18n-ready)
 - **Map:** Google Maps
 - **Push:** Firebase Cloud Messaging (Admin PWA)
