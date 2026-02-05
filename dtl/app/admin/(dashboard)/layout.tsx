@@ -3,6 +3,9 @@ import Link from "next/link";
 import { t } from "@/lib/i18n";
 import RegisterServiceWorker from "@/components/RegisterServiceWorker";
 
+/** Force auth check at request time so NEXT_PUBLIC_MOCK_AUTH from .env is read. */
+export const dynamic = "force-dynamic";
+
 /**
  * Auth guard: redirect to /admin/login if no session.
  * When NEXT_PUBLIC_MOCK_AUTH=true, allow through for dev.
