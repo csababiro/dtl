@@ -1,6 +1,6 @@
 # Car Service Application – Implementation Plan
 
-Based on [Specs.md](Specs.md), [design-preparation.md](design-preparation.md), and [figma.md](figma.md). Current codebase: **dtl/** (Next.js 16, App Router, Tailwind 4, TypeScript). All paths below are relative to **dtl/** unless noted.
+Based on [Specs.md](Specs.md) and [design-preparation.md](design-preparation.md). Current codebase: **dtl/** (Next.js 16, App Router, Tailwind 4, TypeScript). All paths below are relative to **dtl/** unless noted.
 
 ---
 
@@ -87,7 +87,6 @@ flowchart LR
 ### 1.5 Root layout and design
 
 - [ ] Update **dtl/app/layout.tsx**: metadata (title, description), viewport, `lang="ro"`, fonts. Add shared customer layout group if needed (e.g. header with contact strip, footer).
-- [ ] Design: use Figma MCP `get_design_context` (fileKey `JcgKSBJg35eQwk1zig9H6e`, nodeId `0:0`) and reuse components/styles; if issues, ask user—no fallback.
 
 ### 1.6 Verification
 
@@ -243,7 +242,7 @@ flowchart LR
 
 | Area       | Deliverables |
 | ---------- | ------------ |
-| Foundation | Routes, API client, feature flags, i18n (RO), root layout, Figma design alignment |
+| Foundation | Routes, API client, feature flags, i18n (RO), root layout |
 | Customer   | Home, Servicii, Programare (tabs by flags), Contact, Map, persistent contact, guest + auth booking, guest linking, /cont (appointments + invoices), Card Installment ads |
 | Admin      | Auth + roles (Technician: calendar + mark job done only), Dashboard, Business Settings, Feature Flags, Calendars (3), Appointments, Service/Pricing CRUD, User management, Content (images) |
 | PWA/Push   | Manifest, service worker, FCM for admin push on new requests |
