@@ -1,0 +1,43 @@
+{
+  "nav": {
+    "home": "Acasă",
+    "servicii": "Servicii",
+    "programare": "Programare",
+    "contact": "Contact",
+    "cont": "Contul meu",
+    "admin": "Admin"
+  },
+  "common": {
+    "submit": "Trimite",
+    "back": "Înapoi",
+    "loading": "Se încarcă..."
+  },
+  "home": {
+    "title": "Acasă",
+    "hero": "Servicii auto complete"
+  },
+  "servicii": {
+    "title": "Servicii"
+  },
+  "programare": {
+    "title": "Programare"
+  },
+  "contact": {
+    "title": "Contact"
+  },
+  "cont": {
+    "title": "Contul meu"
+  },
+  "admin": {
+    "dashboard": "Panou",
+    "calendar": "Calendar",
+    "appointments": "Programări",
+    "settings": "Setări",
+    "featureFlags": "Funcționalități",
+    "services": "Servicii",
+    "content": "Conținut",
+    "users": "Utilizatori",
+    "login": "Autentificare",
+    "markJobDone": "Marchează lucrarea efectuată"
+  }
+}

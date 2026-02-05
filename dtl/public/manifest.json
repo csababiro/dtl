@@ -1,0 +1,15 @@
+{
+  "name": "Servicii Auto – Admin",
+  "short_name": "Servicii Auto",
+  "description": "Panou admin servicii auto",
+  "start_url": "/admin",
+  "display": "standalone",
+  "icons": [
+    {
+      "src": "/next.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
