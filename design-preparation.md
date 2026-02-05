@@ -1,6 +1,6 @@
 # Design Preparation for Implementation
 
-**Purpose:** Consolidated design reference for pixel-perfect implementation. Do not start code implementation until explicitly requested.
+**Purpose:** Consolidated design reference for implementation. Design will be generated from this document and Specs.
 
 **Last updated:** February 2025
 
@@ -42,7 +42,9 @@
 - Phone, email, address, map
 - Phone and email always visible (sticky/floating)
 
-### 1.5. Authenticated User
+### 1.5. Authenticated User (simple account)
+- Purpose: appointment history and receiving promotional emails. No complex membership UX.
+- Sign-up: include **consent checkbox** for promotional emails (Admins send; opt-in only). v1.
 - Appointment history (requested, confirmed, completed)
 - Invoices and payment history (final price, optional items/quantities)
 
@@ -84,6 +86,13 @@
 - Super Admin: enable/disable
 - Admin: show/hide to customers
 
+### 2.8. Content – Images
+- Admin UI to manage photos for the customer-facing app (gallery, service images, branding).
+- Images used on Home, Servicii, etc.; single source managed from admin.
+
+### 2.9. Errors and feedback
+- Validation and API errors: show in small, lightweight popups (toast or compact modal). Dismissible; avoid heavy full-page error screens.
+
 ---
 
 ## 3. Default Content (Romanian)
@@ -101,7 +110,7 @@
 - **Framework:** Next.js (App Router) + React + TypeScript
 - **App Structure:** Single Next.js app. Customer-facing routes at root (e.g., `/`, `/servicii`, `/programare`, `/contact`). Admin routes under `/admin` (e.g., `/admin`, `/admin/calendar`, `/admin/settings`).
 - **Backend:** Separate API package in monorepo; frontend calls via `NEXT_PUBLIC_API_URL`.
-- **Style:** Mobile-first, responsive
+- **Style:** Web-first design that fits well on mobile; responsive everywhere
 - **Language:** Romanian (i18n-ready)
 - **Map:** Google Maps
 - **Push:** Firebase Cloud Messaging (Admin PWA)

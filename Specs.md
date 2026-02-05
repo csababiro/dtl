@@ -229,7 +229,13 @@ The customer-facing application provides a simple, responsive interface for cust
   * Invoices and payment history: Business owner can add the **final price** to completed jobs; optionally can describe **items and quantities** separately. This data is entered manually by staff after payment (payment occurs outside the app).
   The application should encourage customers to create an account to access these benefits.
 
-* **Mobile-First Design:** The application must be fully mobile-responsive and optimized for simple navigation on small screens.
+* **Simple Customer Account:** Customer accounts are simple: purpose is to have appointment history and to receive promotional emails. No complex membership or loyalty UX.
+
+* **Promotional emails (v1):** **Admins** send promotional emails to customers. At sign-up, the customer must give **consent** via a **checkbox** (e.g. “Accept promotional emails”); only customers who opt in receive promo emails. In scope for v1.
+
+* **Design and responsiveness:** The application must use **web-first design that fits well on mobile**: primary experience is desktop/web; layouts must work well on all screen sizes (fully responsive, no horizontal scroll on small screens, adequate touch targets on mobile).
+
+* **Error display:** Validation and API errors must be shown in **small, lightweight popups** (e.g. toast or compact modal). Dismissible; avoid heavy full-page error screens.
 
 ---
 

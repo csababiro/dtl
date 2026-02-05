@@ -1,16 +1,16 @@
 ---
-description: Mobile-first responsive design (viewport, breakpoints, touch, performance)
+description: Web-first design that fits well on mobile (viewport, breakpoints, touch, performance)
 globs: ["**/*.tsx", "**/*.jsx", "**/*.css", "**/*.scss"]
 alwaysApply: false
 ---
 
 # Purpose
-Ensure the web app is mobile-optimized: works on phones and tablets, responsive layouts, and good UX on small screens.
+Design is web-first; ensure the app also fits well on mobile: works on phones and tablets, responsive layouts, and good UX on small screens.
 
 ## Do / Don't
 
 ### DO
-DO design mobile-first: base styles for 320px–375px width, then scale up with min-width media queries.
+DO use web-first layouts (desktop as primary), then ensure they scale down well: test from 320px up; use min-width media queries when adapting for smaller viewports.
 DO include viewport: in Next.js use `export const viewport = { width: 'device-width', initialScale: 1 }` in `app/layout.tsx`, or the `viewport` export in metadata.
 DO use flexible layouts: CSS Grid and Flexbox; avoid fixed widths for containers.
 DO ensure touch targets (buttons, links, form controls) are ≥ 44×44px.
