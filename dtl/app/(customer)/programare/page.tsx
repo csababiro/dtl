@@ -1,7 +1,11 @@
-import { getFeatureFlags } from "@/lib/feature-flags";
+import { BookingForm } from "@/components/BookingForm";
+import {
+  getFeatureFlags,
+  isAnyBookingEnabled,
+  isBookingEnabled,
+} from "@/lib/feature-flags";
 import { t } from "@/lib/i18n";
 import Link from "next/link";
-import { isAnyBookingEnabled } from "@/lib/feature-flags";
 
 export default async function ProgramarePage() {
   const flags = await getFeatureFlags();
@@ -21,12 +25,13 @@ export default async function ProgramarePage() {
     );
   }
 
-  return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold text-slate-900 mb-4">
-        {t("programare.title")}
-      </h1>
-      <p className="text-slate-600">Conținut programare – placeholder.</p>
-    </div>
-  );
+  const tabs: { id: string; label: string }[] = [];
+  if (isBookingEnabled(flags, "general"))
+    tabs.push({ id: "general", label: t("programare.tabGeneral") });
+  if (isBookingEnabled(flags, "tyre"))
+    tabs.push({ id: "tyre", label: t("programare.tabTyre") });
+  if (isBookingEnabled(flags, "carWash"))
+    tabs.push({ id: "carWash", label: t("programare.tabCarWash") });
+
+  return <BookingForm tabs={tabs} />;
 }
