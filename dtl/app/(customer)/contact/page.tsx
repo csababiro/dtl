@@ -1,0 +1,190 @@
+import Link from "next/link";
+import {
+  Phone,
+  Mail,
+  MapPin,
+  MessageCircle,
+  Clock,
+  Send,
+} from "lucide-react";
+import { getBusinessSettings } from "@/lib/settings";
+import { t } from "@/lib/i18n";
+
+function formatHoursShort(hours: Record<string, string> | undefined): string {
+  if (!hours) return "L-V: 08:00 - 18:00";
+  const mon = hours.monday ?? "08:00–17:00";
+  const sat = hours.saturday ?? "08:00–13:30";
+  return `L-V: ${mon}, Sâm: ${sat}`;
+}
+
+export default async function ContactPage() {
+  const settings = await getBusinessSettings();
+  const hoursShort = formatHoursShort(settings.hours);
+
+  const contactItems = [
+    {
+      icon: Phone,
+      title: t("contact.phone"),
+      val: settings.phone ?? "—",
+      color: "bg-blue-100 text-blue-600",
+      href: settings.phone ? `tel:${settings.phone}` : null,
+    },
+    {
+      icon: MessageCircle,
+      title: "WhatsApp",
+      val: "Trimite mesaj",
+      color: "bg-green-100 text-green-600",
+      href: settings.whatsapp
+        ? `https://wa.me/${settings.whatsapp.replace(/\D/g, "")}`
+        : settings.phone
+          ? `https://wa.me/${settings.phone.replace(/\D/g, "")}`
+          : null,
+    },
+    {
+      icon: Mail,
+      title: t("contact.email"),
+      val: settings.email || "—",
+      color: "bg-purple-100 text-purple-600",
+      href: settings.email ? `mailto:${settings.email}` : null,
+    },
+    {
+      icon: Clock,
+      title: "Program",
+      val: hoursShort,
+      color: "bg-amber-100 text-amber-600",
+      href: null,
+    },
+  ];
+
+  return (
+    <div className="flex flex-col">
+      <section className="bg-slate-900 pt-32 pb-20 px-4">
+        <div className="max-w-7xl mx-auto">
+          <h1 className="text-4xl md:text-6xl font-black text-white mb-6">
+            {t("contact.title")}
+          </h1>
+          <p className="text-xl text-slate-400 max-w-2xl">
+            Suntem aici să te ajutăm. Alege modalitatea cea mai confortabilă de a
+            lua legătura cu noi.
+          </p>
+        </div>
+      </section>
+
+      <section className="py-20 max-w-7xl mx-auto px-4 w-full grid grid-cols-1 lg:grid-cols-2 gap-20">
+        <div>
+          <h2 className="text-3xl font-black text-slate-900 mb-12">
+            Informații de contact
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+            {contactItems.map((item, i) => (
+              <div
+                key={i}
+                className="p-8 rounded-3xl bg-white border border-slate-100 shadow-sm hover:shadow-md transition-shadow"
+              >
+                <div
+                  className={`w-12 h-12 rounded-2xl ${item.color} flex items-center justify-center mb-6`}
+                >
+                  <item.icon size={24} />
+                </div>
+                <h4 className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-1">
+                  {item.title}
+                </h4>
+                {item.href ? (
+                  <a
+                    href={item.href}
+                    target={item.href.startsWith("http") ? "_blank" : undefined}
+                    rel={
+                      item.href.startsWith("http")
+                        ? "noopener noreferrer"
+                        : undefined
+                    }
+                    className="text-xl font-bold text-slate-900 hover:text-blue-600"
+                  >
+                    {item.val}
+                  </a>
+                ) : (
+                  <p className="text-xl font-bold text-slate-900">{item.val}</p>
+                )}
+              </div>
+            ))}
+          </div>
+          <div className="p-8 rounded-3xl bg-slate-900 text-white">
+            <div className="flex items-start gap-6 mb-8">
+              <div className="w-12 h-12 rounded-2xl bg-blue-600 flex items-center justify-center shrink-0">
+                <MapPin size={24} />
+              </div>
+              <div>
+                <h4 className="text-xl font-bold mb-2">Locația noastră</h4>
+                <p className="text-slate-400 leading-relaxed">
+                  {settings.address ?? "—"}
+                </p>
+              </div>
+            </div>
+            <div className="aspect-video w-full bg-slate-800 rounded-2xl flex items-center justify-center overflow-hidden">
+              <div className="text-center opacity-50">
+                <MapPin size={32} className="mx-auto mb-2" />
+                <p className="text-sm font-bold uppercase">Harta Google Maps</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white p-10 rounded-3xl border border-slate-100 shadow-xl shadow-slate-200/50">
+          <h2 className="text-3xl font-black text-slate-900 mb-4">
+            Trimite-ne un mesaj
+          </h2>
+          <p className="text-slate-500 mb-10">
+            Dacă ai întrebări specifice, completează formularul de mai jos și îți
+            vom răspunde în cel mai scurt timp.
+          </p>
+          <form className="space-y-6">
+            <div className="space-y-2">
+              <label className="text-sm font-bold text-slate-700">
+                Nume Complet
+              </label>
+              <input
+                type="text"
+                className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Ion Popescu"
+              />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-slate-700">Email</label>
+                <input
+                  type="email"
+                  className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="ion@exemplu.ro"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-slate-700">
+                  Telefon
+                </label>
+                <input
+                  type="tel"
+                  className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="07xx xxx xxx"
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-bold text-slate-700">Mesaj</label>
+              <textarea
+                rows={5}
+                className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                placeholder="Cum te putem ajuta?"
+              />
+            </div>
+            <button
+              type="button"
+              className="w-full bg-blue-600 text-white py-4 rounded-xl font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-600/20 flex items-center justify-center gap-2"
+            >
+              Trimite mesajul <Send size={20} />
+            </button>
+          </form>
+        </div>
+      </section>
+    </div>
+  );
+}
