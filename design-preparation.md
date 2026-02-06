@@ -140,21 +140,103 @@
 
 Implement in this order; everything else depends on it. See also Specs §6.3.
 
-1. **Customer routes** – `/`, `/servicii`, `/programare`, `/contact`, `/cont` (placeholders OK initially).
-2. **Admin routes** – `app/admin/layout.tsx` (auth guard + shell), then one `page.tsx` per admin screen (Dashboard, login, calendar, appointments, settings, feature-flags, services, content, users).
+1. **Customer routes** – `/`, `/servicii`, `/programare`, `/cere-oferta`, `/contact`, `/cont` (placeholders OK initially).
+2. **Admin routes** – `app/admin/layout.tsx` (auth guard + shell), then one `page.tsx` per admin screen (Dashboard, login, calendar, appointments, **quotes**, settings, feature-flags, services, content, users).
 3. **API client** – Single module; all HTTP via `NEXT_PUBLIC_API_URL`; typed errors.
-4. **Feature flags** – Dedicated layer; default all ON until API exists; used to hide nav and content when disabled.
-5. **i18n** – Romanian strings externalized (e.g. `lib/i18n.ts` or `messages/ro.json`); use in layout and pages.
+4. **Feature flags** – Dedicated layer; **default all ON** until API exists; used to hide nav and content when disabled. See §5.1 for flag keys.
+5. **i18n** – Romanian strings externalized (e.g. `lib/i18n.ts` or `messages/ro.json`); use in layout and pages. Required keys in §5.4.
 6. **Root layout** – `lang="ro"`, metadata, viewport; optional shared customer header/footer.
 
-## 5. Environment
+---
+
+## 5. Implementation specification
+
+### 5.1. Feature flags
+
+Flags needed for implementation. **Default: all ON** when API is unavailable or returns error.
+
+| Key | Purpose | Default |
+|-----|---------|--------|
+| `tyreService` | Tyre module visible (services, nav) | ON |
+| `carWash` | Car Wash module visible | ON |
+| `requestQuote` | Cerere ofertă flow and nav item | ON |
+| `generalServiceBooking` | General Service booking (Programare tab) | ON |
+| `tyreServiceBooking` | Tyre Service booking tab | ON |
+| `carWashBooking` | Car Wash booking tab | ON |
+| `partsOrdering` | Parts ordering feature | ON |
+| `cardInstallmentPayment` | Card installment message | ON |
+
+Admin can show/hide enabled features to customers; use visibility overrides (e.g. `tyreServiceVisible`, `carWashVisible`, `requestQuoteVisible`) when provided by API. Sync helpers: e.g. `isModuleEnabled(flags, 'tyre' | 'carWash')`, `isRequestQuoteEnabled(flags)`, `isBookingEnabled(flags, 'general' | 'tyre' | 'carWash')`. Layout/pages pass the flags object into helpers; no global store.
+
+### 5.2. API endpoints (quote requests)
+
+Backend must expose:
+
+| Method | Path | Purpose |
+|--------|------|---------|
+| `POST` | `/quote-requests` | Create a quote request. Body: see §5.3. Returns created resource or error. |
+| `GET` | `/quote-requests` | List quote requests (admin). Returns `{ items: QuoteRequest[] }`. |
+| `PATCH` | `/quote-requests/:id` | (Optional) Update status (e.g. close). Body: e.g. `{ status: string }`. |
+
+**QuoteRequest** (response item): `id`, `createdAt`, `name`, `phone`, `email`, `carMake`, `carModel`, `carYear`, `description`, `photoUrl?`, `status?`.
+
+### 5.3. Quote form (Cerere ofertă) – fields and API
+
+Use this for **Cerere ofertă** only. **Booking form** stays as in §1.3 (Programare) with date, time slots, optional services, etc.
+
+**Quote form fields:**
+
+| Field | Required | Input type | i18n label key |
+|-------|----------|------------|-----------------|
+| Name | Yes | text | cereOferta.name |
+| Phone | Yes | tel | cereOferta.phone |
+| Email | Yes | email | cereOferta.email |
+| Car Make | Yes | text | cereOferta.carMake |
+| Car Model | Yes | text | cereOferta.carModel |
+| Car Year | Yes | text | cereOferta.carYear |
+| Description | Yes | textarea | cereOferta.description, cereOferta.descriptionPlaceholder |
+| Photo | No | file | cereOferta.attachPhoto |
+
+**POST /quote-requests body:** `{ name: string; phone: string; email: string; carMake: string; carModel: string; carYear: string; description: string; photoUrl?: string }`. Photo: upload separately if needed, then send `photoUrl`; or omit if not implemented.
+
+Submit button: `t('cereOferta.submitRequest')`. Success: show `t('cereOferta.successMessage')`. Errors: show in lightweight popup (toast).
+
+### 5.4. i18n – required keys (messages/ro.json)
+
+Use dot notation (e.g. `nav.home`). Ensure these exist:
+
+- **nav:** home, servicii, programare, cereOferta, contact, cont, login, logout
+- **common:** submit, cancel, save, delete, edit, loading, error, close, back, next, previous, search, yes, no
+- **home:** title, heroTitle, heroSubtitle, ctaProgramare, ctaRezerva, serviceGeneral, serviceTyre, serviceCarWash, address, contactUs
+- **servicii:** title, requestAppointment, price, from, noServices
+- **programare:** title, tabGeneral, tabTyre, tabCarWash, customerDetails, name, phone, email, carDetails, carMake, carModel, carYear, carProblem, carProblemPlaceholder, optionalServices, selectDate, selectTime, availableSlots, noSlots, attachPhoto, submitRequest, successMessage, bookingWindow
+- **cereOferta:** title, name, phone, email, carMake, carModel, carYear, description, descriptionPlaceholder, attachPhoto, submitRequest, successMessage
+- **contact:** title, phone, email, address, whatsapp, call, sms
+- **cont:** title, signIn, signUp, appointmentHistory, invoices, promoConsent, requested, confirmed, completed, encourageAccount, noAppointments, noInvoices
+- **admin:** title, dashboard, calendar, appointments, quotes, settings, featureFlags, services, content, users, markJobDone, loginTitle, email, password, loginSubmit, pending, confirmed, contactCustomer, noData, businessSettings, contactInfo, operatingHours, slotDuration, cardInstallmentMessage
+- **errors:** network, featureDisabled, validation
+
+### 5.5. Component contracts
+
+Shared components receive data via props; no hardcoded copy (use `t()`).
+
+- **ContactStrip** – Props: `phone?`, `email?`, `whatsapp?`. Render phone as `tel:`, email as `mailto:`, whatsapp as `https://wa.me/` (digits only). Min touch target 44px. Aria-labels from i18n (e.g. contact.call).
+- **Header** – Props: `flags` (feature flags), `logoUrl?`, `phone?`, `email?`, `whatsapp?`. Logo links to `/`. Nav: Home, Servicii; Programare only if any booking enabled; **Cerere ofertă only if `isRequestQuoteEnabled(flags)`**; Contact, Cont. Include ContactStrip. Primary CTA: “Programare” to /programare when booking enabled. All labels from i18n.
+- **Footer** – Props: `phone?`, `email?`, `whatsapp?`, `address?`. ContactStrip + address + links (Acasă, Servicii, Contact).
+- **Map** – Props: `address?`, `className?`. Placeholder or Google Maps embed; address from settings.
+- **LoadingSpinner** – No props. Accessible; aria-label from `t('common.loading')`.
+- **ErrorToast** – Props: `message`, `onDismiss`. Dismissible compact bar; red/warning style.
+
+---
+
+## 6. Environment
 
 Copy `.env.example` to `.env` and fill in values. Required variables:
 - `NEXT_PUBLIC_API_URL` – Backend API base URL (e.g., `http://localhost:3001`)
 
 ---
 
-## 6. Implementation Checklist (When Ready)
+## 7. Implementation Checklist (When Ready)
 
 - [ ] **Foundation (Specs §6.3):** Customer routes, admin route skeleton, API client, feature flags, i18n, root layout (metadata, viewport, `lang="ro"`).
 - [ ] Implement customer app screens per this doc

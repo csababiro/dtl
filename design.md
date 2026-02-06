@@ -6,6 +6,8 @@
 
 **Design reference:** Screen structure and routes follow the **`figma-src/`** folder (`app/pages/`, `app/components/`, `app/components/ui/`). **Site owner data** (contact, address, hours) for the main business is defined in [dtl-company-info.md](dtl-company-info.md); use it to populate the contact strip, map, footer, and Business Settings.
 
+**Implementation specification:** Feature flags (tyre, car wash, quote; default ON), quote-request API endpoints, quote form fields/API, i18n key list, and component contracts are in [design-preparation.md](design-preparation.md) **§5**.
+
 ---
 
 ## 1. Design Principles
@@ -15,7 +17,7 @@
 - **Romanian only (v1)** – All copy in Romanian. Structure i18n-ready for future locales.
 - **Guest-first, simple account** – Customers can submit appointment requests without an account. Accounts are simple: for appointment history and to receive promotional emails (Admins send; consent checkbox at sign-up, v1). Encourage sign-up; when they register with the same email, link past guest submissions.
 - **Request-based booking** – Submissions are requests; staff confirm or adjust. No silent rejection.
-- **Feature-flag driven** – Disabled modules/features are fully hidden (no “Coming soon”). Nav and content reflect flags.
+- **Feature-flag driven** – Disabled modules/features are fully hidden (no “Coming soon”). Nav and content reflect flags. Required flags: **tyre**, **car wash**, **request quote** (Cerere ofertă); plus booking per type, parts ordering, card installment. **Default: all ON** when API unavailable. See [design-preparation.md](design-preparation.md) §5.1.
 - **Errors: small lightweight popups** – Handle validation and API errors with small, lightweight popups (e.g. toast or compact modal). No heavy overlays; dismissible and non-blocking where appropriate.
 - **Loading** – Use a clear, lightweight loading indicator (spinner or skeleton) for page load, form submit, and async data; avoid blank screens.
 
@@ -66,11 +68,12 @@
 
 ## 4. Key UI Decisions
 
-- **Top menu** – Single, straightforward top navigation: one level (Home, Servicii, Programare, Cerere ofertă when enabled, Contact, Cont). No deep nesting; contact strip (phone, email, optional WhatsApp) in header or adjacent. Contact and business data from Business Settings; default/seed from [dtl-company-info.md](dtl-company-info.md).
+- **Top menu** – Single, straightforward top navigation: one level (Home, Servicii, Programare when booking enabled, Cerere ofertă when request-quote flag enabled, Contact, Cont). No deep nesting; contact strip (phone, email, optional WhatsApp) in header or adjacent. Contact and business data from Business Settings; default/seed from [dtl-company-info.md](dtl-company-info.md). Component props and behaviour: [design-preparation.md](design-preparation.md) §5.5.
 - **Logo** – Business logo in header (left or centre), links to home. Configurable in Admin (Business Settings or Content).
-- **Contact strip** – Phone and email **immediately visible**, high contrast, prominent and persistent (header or sticky). Optional **WhatsApp** icon/button when configured. Values from Business Settings.
+- **Contact strip** – Phone and email **immediately visible**, high contrast, prominent and persistent (header or sticky). Optional **WhatsApp** icon/button when configured. Values from Business Settings. Props: [design-preparation.md](design-preparation.md) §5.5.
 - **Primary CTA** – One highly visible “Programare” / “Rezervă” CTA on Home and Servicii; **one click** to start the booking flow.
-- **Booking form** – Single page with tabs for booking type (General / Tyre / Wash). One form; type selects which catalog/slots apply. **Date and time:** keep simple – date picker + **list of available slots** (one step); 30-day window.
+- **Booking form (Programare)** – Single page with tabs for booking type (General / Tyre / Wash). Fields and behaviour as in [design-preparation.md](design-preparation.md) §1.3 (name, phone, email, car, problem, optional services, date, time slots, optional photo). **Date and time:** date picker + list of available slots; 30-day window.
+- **Quote form (Cerere ofertă)** – Fields and API as in [design-preparation.md](design-preparation.md) §5.3. No date/time. Endpoints: [design-preparation.md](design-preparation.md) §5.2.
 - **Map** – Google Maps, one component; address from settings. Shown on Home and Contact.
 - **Calendar (admin)** – Default view: Week. Modes: calendar grid and form (date + time). Separate calendars per service type; slots from operating hours and restrictions.
 - **Card Installment** – When flag on: show configurable message (no payment in app). Admin sets message/placement in Business Settings.
@@ -82,7 +85,7 @@
 
 ## 5. Technical Foundation (per Specs §6.3)
 
-Build first, then add screen content: **customer routes** (`/`, `/servicii`, `/programare`, `/cere-oferta`, `/contact`, `/cont`), **admin routes** (layout + login, dashboard, calendar, appointments, quotes, settings, feature-flags, services, content, users), **API client** (env base URL, typed errors), **feature flags** (default all ON until API; hide nav/content when disabled), **i18n** (Romanian externalized), **root layout** (metadata, viewport, `lang="ro"`). Align screen structure with **`figma-src/`**; use **`dtl-company-info.md`** for default site owner data.
+Build first, then add screen content: **customer routes** (`/`, `/servicii`, `/programare`, `/cere-oferta`, `/contact`, `/cont`), **admin routes** (layout + login, dashboard, calendar, appointments, quotes, settings, feature-flags, services, content, users), **API client** (env base URL, typed errors), **feature flags** (tyre, car wash, request quote + others; default all ON; see [design-preparation.md](design-preparation.md) §5.1), **i18n** (Romanian; required keys in [design-preparation.md](design-preparation.md) §5.4), **root layout** (metadata, viewport, `lang="ro"`). Quote-request endpoints: [design-preparation.md](design-preparation.md) §5.2. Align screen structure with **`figma-src/`**; use **`dtl-company-info.md`** for default site owner data.
 
 ---
 
@@ -93,6 +96,6 @@ Build first, then add screen content: **customer routes** (`/`, `/servicii`, `/p
 - [ ] Contact strip and map use same data source (API/settings).
 - [ ] Nav, Programare, and Cerere ofertă respect feature flags (disabled = hidden).
 - [ ] Contact strip, map, and footer use Business Settings; seed/default from dtl-company-info.md.
-- [ ] Booking form fields and validation align with Specs §8.2 and design-preparation.
+- [ ] Booking form fields and validation align with Specs §8.2 and design-preparation §1.3; quote form and API with design-preparation §5.2–5.3.
 - [ ] Errors surfaced via small lightweight popups (toast or compact modal).
 - [ ] Customer account presented as simple (history + promo emails); no complex membership UX.
