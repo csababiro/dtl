@@ -195,7 +195,7 @@ The following must be in place first (routes, API client, feature flags, i18n, r
 
 * **Root layout:** Set `lang="ro"` on `<html>`. Export metadata (title, description) and viewport (e.g. `viewport` export or in metadata). Optionally add a shared customer shell (e.g. header with contact strip, footer) in the root or a layout group.
 
-* **Design reference:** Customer and admin screen structure and routes align with the design in the **`figma-design/`** folder (e.g. Home, Services, Booking, RequestQuote, Contact, Account; admin: Dashboard, Calendar, Appointments, Quotes, Services, Content, Users, Feature Flags, Settings).
+* **Design reference:** Customer and admin screen structure and routes align with the **`figma-src/`** folder: `app/pages/` (Home, Services, Booking, RequestQuote, Contact, Account), `app/pages/admin/` (AdminLogin, Dashboard, AdminCalendar, Appointments, AdminQuotes, Settings, FeatureFlags, ServicesAdmin, ContentAdmin, UsersAdmin), `app/components/` (Header, Footer, ContactStrip, CustomerLayout, AdminLayout, AdminSidebar), `app/components/ui/` (shadcn-style primitives). Use as layout and copy reference; implement in Next.js App Router with i18n and dtl-company-info defaults.
 
 * **Site owner data:** Main business data (name, description, address, phone, email, operating hours) for the site owner is defined in **`dtl-company-info.md`**. Use it to seed the application and Business Settings; contact strip, map, and footer use this data when the API is unavailable or as defaults.
 

@@ -4,7 +4,7 @@
 
 **Last updated:** February 2025
 
-**Design reference:** Screen structure and routes align with the **`figma-design/`** folder (e.g. Home, Services, Booking, RequestQuote at `/cere-oferta`, Contact, Account; admin: Dashboard, Calendar, Appointments, Quotes, Services, Content, Users, Feature Flags, Settings).
+**Design reference:** Screen structure and routes align with the **`figma-src/`** folder: customer pages (Home, Services, Booking, RequestQuote at `/cere-oferta`, Contact, Account) in `app/pages/`, admin pages in `app/pages/admin/` (AdminLogin, Dashboard, AdminCalendar, Appointments, AdminQuotes, Settings, FeatureFlags, ServicesAdmin, ContentAdmin, UsersAdmin), shared components in `app/components/` (Header, Footer, ContactStrip, CustomerLayout, AdminLayout, AdminSidebar) and `app/components/ui/` for primitives.
 
 **Site owner data:** Main business data (name, description, address, phone, email, operating hours) for populating the contact strip, map, footer, and Business Settings is defined in **`dtl-company-info.md`**. Use it as default/seed data and for design reference.
 
@@ -129,7 +129,7 @@
 ## 4. Tech Constraints
 
 - **Framework:** Next.js (App Router) + React + TypeScript
-- **App Structure:** Single Next.js app. Customer-facing routes at root (e.g., `/`, `/servicii`, `/programare`, `/cere-oferta`, `/contact`, `/cont`). Admin routes under `/admin` (e.g., `/admin`, `/admin/login`, `/admin/calendar`, `/admin/appointments`, `/admin/quotes`, `/admin/settings`, `/admin/feature-flags`, `/admin/services`, `/admin/content`, `/admin/users`). Design reference: **`figma-design/`**. Default site owner data: **`dtl-company-info.md`**.
+- **App Structure:** Single Next.js app. Customer-facing routes at root (e.g., `/`, `/servicii`, `/programare`, `/cere-oferta`, `/contact`, `/cont`). Admin routes under `/admin` (e.g., `/admin`, `/admin/login`, `/admin/calendar`, `/admin/appointments`, `/admin/quotes`, `/admin/settings`, `/admin/feature-flags`, `/admin/services`, `/admin/content`, `/admin/users`). Design reference: **`figma-src/`**. Default site owner data: **`dtl-company-info.md`**.
 - **Backend:** Separate API package in monorepo; frontend calls via `NEXT_PUBLIC_API_URL`.
 - **Style:** Web-first design that fits well on mobile; responsive everywhere. **Primary colour: blue** (CTAs, primary buttons); red only for errors/destructive. **Loading:** lightweight spinner or skeleton for load and submit.
 - **Language:** Romanian (i18n-ready)

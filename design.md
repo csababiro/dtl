@@ -4,7 +4,7 @@
 
 **Last updated:** February 2025
 
-**Design reference:** Screen structure and routes follow the **`figma-design/`** folder. **Site owner data** (contact, address, hours) for the main business is defined in [dtl-company-info.md](dtl-company-info.md); use it to populate the contact strip, map, footer, and Business Settings.
+**Design reference:** Screen structure and routes follow the **`figma-src/`** folder (`app/pages/`, `app/components/`, `app/components/ui/`). **Site owner data** (contact, address, hours) for the main business is defined in [dtl-company-info.md](dtl-company-info.md); use it to populate the contact strip, map, footer, and Business Settings.
 
 ---
 
@@ -82,7 +82,7 @@
 
 ## 5. Technical Foundation (per Specs §6.3)
 
-Build first, then add screen content: **customer routes** (`/`, `/servicii`, `/programare`, `/cere-oferta`, `/contact`, `/cont`), **admin routes** (layout + login, dashboard, calendar, appointments, quotes, settings, feature-flags, services, content, users), **API client** (env base URL, typed errors), **feature flags** (default all ON until API; hide nav/content when disabled), **i18n** (Romanian externalized), **root layout** (metadata, viewport, `lang="ro"`). Align screen structure with **`figma-design/`**; use **`dtl-company-info.md`** for default site owner data.
+Build first, then add screen content: **customer routes** (`/`, `/servicii`, `/programare`, `/cere-oferta`, `/contact`, `/cont`), **admin routes** (layout + login, dashboard, calendar, appointments, quotes, settings, feature-flags, services, content, users), **API client** (env base URL, typed errors), **feature flags** (default all ON until API; hide nav/content when disabled), **i18n** (Romanian externalized), **root layout** (metadata, viewport, `lang="ro"`). Align screen structure with **`figma-src/`**; use **`dtl-company-info.md`** for default site owner data.
 
 ---
 
