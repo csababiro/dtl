@@ -4,6 +4,8 @@
 
 **Last updated:** February 2025
 
+**Design reference:** Screen structure and routes follow the **`figma-design/`** folder. **Site owner data** (contact, address, hours) for the main business is defined in [dtl-company-info.md](dtl-company-info.md); use it to populate the contact strip, map, footer, and Business Settings.
+
 ---
 
 ## 1. Design Principles
@@ -26,7 +28,9 @@
 | **Guest booking** | Choose service type (General / Tyre / Wash per flags) → Fill form (name, phone, email, car, problem, optional services, date, time, optional photo) → Submit request → Email: “request received”. Later: staff confirm → Email: “appointment confirmed”. |
 | **Customer sign-up** | Simple account: email+password, or phone+SMS, or Google SSO. Consent checkbox for promotional emails (Admins send; opt-in only). Purpose: history and promo emails. Guest submissions with same email are linked. |
 | **Admin: request handling** | New request → Push + email to Admin → Open list/calendar → Contact customer (click-to-call/SMS) → Confirm (set slot) or modify or delete. |
-| **Admin: daily ops** | Dashboard (revenue/volume), Calendar (Day/Week/Month, Pending/Confirmed), Business Settings, Feature Flags, Services, Users. Technician: calendar + mark job done only. |
+| **Cerere ofertă** | Customer fills form (name, phone, email, car, description of need) at `/cere-oferta` → Submit quote request → Staff see at `/admin/quotes` → Contact customer (click-to-call/SMS/WhatsApp), respond with offer. No date/time. |
+| **Admin: quote handling** | New quote request → Admin sees at `/admin/quotes` → Contact customer → Update or close request. |
+| **Admin: daily ops** | Dashboard (revenue/volume), Calendar (Day/Week/Month, Pending/Confirmed), Appointments, Quotes, Business Settings, Feature Flags, Services, Users. Technician: calendar + mark job done only. |
 
 ---
 
@@ -36,9 +40,10 @@
 
 | Route | Purpose |
 |-------|---------|
-| `/` | Home: hero, service categories (by flags), contact strip, address, map |
+| `/` | Home: hero, service categories (by flags), contact strip, address, map (data from [dtl-company-info.md](dtl-company-info.md) when seeded) |
 | `/servicii` | Services list with prices/photos; CTA “Request appointment” when booking on |
 | `/programare` | Booking form; tabs by type (General / Tyre / Wash) when respective booking flag on |
+| `/cere-oferta` | Cerere ofertă: request quote form (name, contact, car, description); when Request Quote Flag on |
 | `/contact` | Phone, email, address, map; contact strip persistent |
 | `/cont` | Authenticated: appointment history + invoices |
 
@@ -50,6 +55,7 @@
 | `/admin/login` | Staff login (unauthenticated only) |
 | `/admin/calendar` | Staff calendar (3 types, Day/Week/Month, Pending/Confirmed) |
 | `/admin/appointments` | Request list; confirm, modify, delete; click-to-call/SMS |
+| `/admin/quotes` | Quote requests (Cerere ofertă); list, contact customer, update/close |
 | `/admin/settings` | Business: contact, address, hours, slot duration, Card Installment message |
 | `/admin/feature-flags` | Super Admin: enable/disable; Admin: show/hide to customers |
 | `/admin/services` | Service/pricing CRUD + optional booking lists (General, Tyre, Wash) |
@@ -60,7 +66,7 @@
 
 ## 4. Key UI Decisions
 
-- **Top menu** – Single, straightforward top navigation: one level (Home, Servicii, Programare, Contact, Cont). No deep nesting; contact strip (phone, email, optional WhatsApp) in header or adjacent.
+- **Top menu** – Single, straightforward top navigation: one level (Home, Servicii, Programare, Cerere ofertă when enabled, Contact, Cont). No deep nesting; contact strip (phone, email, optional WhatsApp) in header or adjacent. Contact and business data from Business Settings; default/seed from [dtl-company-info.md](dtl-company-info.md).
 - **Logo** – Business logo in header (left or centre), links to home. Configurable in Admin (Business Settings or Content).
 - **Contact strip** – Phone and email **immediately visible**, high contrast, prominent and persistent (header or sticky). Optional **WhatsApp** icon/button when configured. Values from Business Settings.
 - **Primary CTA** – One highly visible “Programare” / “Rezervă” CTA on Home and Servicii; **one click** to start the booking flow.
@@ -76,7 +82,7 @@
 
 ## 5. Technical Foundation (per Specs §6.3)
 
-Build first, then add screen content: **customer routes** (`/`, `/servicii`, `/programare`, `/contact`, `/cont`), **admin routes** (layout + login, dashboard, calendar, appointments, settings, feature-flags, services, content, users), **API client** (env base URL, typed errors), **feature flags** (default all ON until API; hide nav/content when disabled), **i18n** (Romanian externalized), **root layout** (metadata, viewport, `lang="ro"`).
+Build first, then add screen content: **customer routes** (`/`, `/servicii`, `/programare`, `/cere-oferta`, `/contact`, `/cont`), **admin routes** (layout + login, dashboard, calendar, appointments, quotes, settings, feature-flags, services, content, users), **API client** (env base URL, typed errors), **feature flags** (default all ON until API; hide nav/content when disabled), **i18n** (Romanian externalized), **root layout** (metadata, viewport, `lang="ro"`). Align screen structure with **`figma-design/`**; use **`dtl-company-info.md`** for default site owner data.
 
 ---
 
@@ -85,7 +91,8 @@ Build first, then add screen content: **customer routes** (`/`, `/servicii`, `/p
 - [ ] Foundation in place (routes, API client, feature flags, i18n, root layout).
 - [ ] Viewport and `lang="ro"` in root layout.
 - [ ] Contact strip and map use same data source (API/settings).
-- [ ] Nav and Programare tabs respect feature flags (disabled = hidden).
+- [ ] Nav, Programare, and Cerere ofertă respect feature flags (disabled = hidden).
+- [ ] Contact strip, map, and footer use Business Settings; seed/default from dtl-company-info.md.
 - [ ] Booking form fields and validation align with Specs §8.2 and design-preparation.
 - [ ] Errors surfaced via small lightweight popups (toast or compact modal).
 - [ ] Customer account presented as simple (history + promo emails); no complex membership UX.

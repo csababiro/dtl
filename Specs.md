@@ -15,7 +15,7 @@ This document outlines the functional and technical specifications for developin
 ### 1.2. Scope
 
 The project scope includes the development of a unified management system comprising:
-* **Single Next.js application** – Customer-facing pages (e.g., `/`, `/servicii`, `/programare`, `/contact`) and Admin pages under the **`/admin`** route (dashboard, calendar, settings, etc.).
+* **Single Next.js application** – Customer-facing pages (e.g., `/`, `/servicii`, `/programare`, `/cere-oferta`, `/contact`, `/cont`) and Admin pages under the **`/admin`** route (dashboard, calendar, appointments, quotes, settings, etc.).
 * **Separate backend (API)** – Built as a distinct package/service within the project (monorepo). The frontend calls the API via a configurable base URL.
 * **Capability** – The system must manage services for *every type of car*.
 
@@ -31,7 +31,7 @@ The project scope includes the development of a unified management system compri
 The system must utilize a robust feature flag mechanism to dynamically activate or deactivate major modules and critical sub-features. The core **General Vehicle Service and Maintenance** module is considered the baseline and is always active.
 
 * **Primary Modules (Optional):** Car Wash Services, Car Tyre Sales and Fitting Services.
-* **Module Sub-Features (Optional):** Car Parts Ordering, Booking Management for each module, **Card Installment Payment**.
+* **Module Sub-Features (Optional):** Car Parts Ordering, Booking Management for each module, **Card Installment Payment**, **Cerere ofertă** (Request quote).
 
 **Feature Flag Control (Two-Tier):**
 
@@ -149,6 +149,8 @@ The Admin Web Application is the primary control center for the business. It mus
 
 * **Technician Interface:** Technicians log into the Admin application with a **restricted view** tailored to their role (e.g., assigned jobs, status updates). No separate Technician application.
 
+* **Quote requests (Cerere ofertă):** When the Request Quote Flag is enabled, Admin has a **Quote requests** screen at `/admin/quotes`. Staff see a list of quote requests (customer name, contact, car, description, date submitted). Staff can contact the customer (click-to-call, click-to-SMS, optional WhatsApp) and update or close the request. New quote requests may trigger push and email notifications to Admins (same pattern as appointment requests).
+
 ---
 
 ## 6. Technology Stack
@@ -175,9 +177,9 @@ The entire application (Admin System Web App and Customer-Facing Web App) will b
 
 The following must be in place first (routes, API client, feature flags, i18n, root layout). All other features build on this.
 
-* **Customer routes (App Router):** `/` (Home), `/servicii` (Services), `/programare` (Booking), `/contact` (Contact), `/cont` (Authenticated customer: appointment history and invoices). Implement as `app/page.tsx`, `app/servicii/page.tsx`, `app/programare/page.tsx`, `app/contact/page.tsx`, `app/cont/page.tsx`.
+* **Customer routes (App Router):** `/` (Home), `/servicii` (Services), `/programare` (Booking), `/cere-oferta` (Cerere ofertă – request quote), `/contact` (Contact), `/cont` (Authenticated customer: appointment history and invoices). Implement as `app/page.tsx`, `app/servicii/page.tsx`, `app/programare/page.tsx`, `app/cere-oferta/page.tsx`, `app/contact/page.tsx`, `app/cont/page.tsx`.
 
-* **Admin routes (under `/admin`):** Admin layout with auth guard (redirect unauthenticated to login), then: `/admin` (Dashboard), `/admin/login`, `/admin/calendar`, `/admin/appointments`, `/admin/settings`, `/admin/feature-flags`, `/admin/services`, `/admin/content` (image management), `/admin/users`. Implement as `app/admin/layout.tsx` and `app/admin/.../page.tsx` per screen.
+* **Admin routes (under `/admin`):** Admin layout with auth guard (redirect unauthenticated to login), then: `/admin` (Dashboard), `/admin/login`, `/admin/calendar`, `/admin/appointments`, `/admin/quotes` (quote requests), `/admin/settings`, `/admin/feature-flags`, `/admin/services`, `/admin/content` (image management), `/admin/users`. Implement as `app/admin/layout.tsx` and `app/admin/.../page.tsx` per screen.
 
 * **API client:** A single module (e.g. `lib/api-client.ts`) that performs all HTTP requests to the backend using `NEXT_PUBLIC_API_URL`. No hardcoded API URLs. Expose at least `get<T>(path)` and `post<T>(path, body)` returning `{ data: T } | { error: ApiError }`, with a typed **ApiError** (e.g. `kind: 'network' | 'http' | 'parse'`, `status?`, `message`, optional `retriable`).
 
@@ -192,6 +194,10 @@ The following must be in place first (routes, API client, feature flags, i18n, r
 * **Admin roles and nav:** The backend returns the user role with the session (e.g. JWT or `GET /me`). **Technician** users see in the admin nav only **Calendar** and **Mark job done**; Dashboard, Settings, Feature Flags, Appointments, Services, Content, and Users are hidden or restricted as specified. Admin and Super Admin see the full nav.
 
 * **Root layout:** Set `lang="ro"` on `<html>`. Export metadata (title, description) and viewport (e.g. `viewport` export or in metadata). Optionally add a shared customer shell (e.g. header with contact strip, footer) in the root or a layout group.
+
+* **Design reference:** Customer and admin screen structure and routes align with the design in the **`figma-design/`** folder (e.g. Home, Services, Booking, RequestQuote, Contact, Account; admin: Dashboard, Calendar, Appointments, Quotes, Services, Content, Users, Feature Flags, Settings).
+
+* **Site owner data:** Main business data (name, description, address, phone, email, operating hours) for the site owner is defined in **`dtl-company-info.md`**. Use it to seed the application and Business Settings; contact strip, map, and footer use this data when the API is unavailable or as defaults.
 
 ---
 
@@ -225,7 +231,7 @@ The customer-facing application provides a simple, responsive interface for cust
 
 * **Primary colour and visual tone:** The application must use **blue** as the primary/accent colour (e.g. CTAs, primary buttons, key links). Red must not be used as the primary colour; red only for destructive actions or error states where appropriate.
 
-* **Top navigation:** The customer-facing app must have a **single, straightforward top menu**: one level, no deep nesting. Typical items: Home, Servicii, Programare (when enabled), Contact, Cont. On small screens, a compact or hamburger menu is acceptable. Contact strip (phone, email, optional WhatsApp) sits in the header or immediately adjacent.
+* **Top navigation:** The customer-facing app must have a **single, straightforward top menu**: one level, no deep nesting. Typical items: Home, Servicii, Programare (when enabled), Cerere ofertă (when enabled), Contact, Cont. On small screens, a compact or hamburger menu is acceptable. Contact strip (phone, email, optional WhatsApp) sits in the header or immediately adjacent. Contact and business data (phone, email, address, hours) are configurable in Admin; default/seed values are in **`dtl-company-info.md`**.
 
 * **Primary CTA – one-click programare:** A **single, highly visible** call-to-action for booking (e.g. “Programare” / “Rezervă programare”) must be present on the home page and, where relevant, on the services page. It must be **easy to see and one click away** from starting the booking flow (no extra landing step).
 
@@ -271,6 +277,8 @@ The customer-facing application provides a simple, responsive interface for cust
 
 * **Error display:** Validation and API errors must be shown in **small, lightweight popups** (e.g. toast or compact modal). Dismissible; avoid heavy full-page error screens. This includes when the API rejects a request (e.g. because a feature was disabled and the customer had not refreshed).
 
+* **Cerere ofertă (Request quote):** When enabled by feature flag, the customer-facing app exposes a **Cerere ofertă** flow at `/cere-oferta`. Customers submit a **quote request** (not an appointment): name, phone, email, car details (make, model, year – free text), description of need or service interest, optional photo. Submissions create quote requests; staff review them in Admin at `/admin/quotes`, contact the customer (click-to-call, SMS, WhatsApp) and respond with an offer or follow-up. No date/time slot selection; this is for price or service inquiries. Customer may receive an email confirming the request was received. Admin may receive push/email notification for new quote requests (same pattern as appointment requests). Visibility of the Cerere ofertă nav item and page is controlled by a **Request Quote Flag** (Super Admin enables; Admin can show/hide to customers).
+
 ---
 
 ## Summary of Feature Flags
@@ -284,5 +292,6 @@ The customer-facing application provides a simple, responsive interface for cust
 | Car Wash Booking Flag | Super Admin | Enable/disable Car Wash booking |
 | Parts Ordering Flag | Super Admin | Enable/disable Parts Ordering |
 | Card Installment Payment Flag | Super Admin | Show/hide installment payment information |
+| Request Quote Flag | Super Admin | Enable/disable Cerere ofertă (request quote) flow; Admin can show/hide to customers |
 
 Admin can show/hide enabled features to customers. When Super Admin enables a flag, it is visible by default to Admin.

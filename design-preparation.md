@@ -4,6 +4,10 @@
 
 **Last updated:** February 2025
 
+**Design reference:** Screen structure and routes align with the **`figma-design/`** folder (e.g. Home, Services, Booking, RequestQuote at `/cere-oferta`, Contact, Account; admin: Dashboard, Calendar, Appointments, Quotes, Services, Content, Users, Feature Flags, Settings).
+
+**Site owner data:** Main business data (name, description, address, phone, email, operating hours) for populating the contact strip, map, footer, and Business Settings is defined in **`dtl-company-info.md`**. Use it as default/seed data and for design reference.
+
 ---
 
 ## 1. Customer-Facing App – Screens
@@ -42,11 +46,18 @@
 - Booking window: 30 days ahead
 - Submissions are requests (staff confirms)
 
-### 1.4. Contact
+### 1.4. Cerere ofertă (Request quote)
+- **Route:** `/cere-oferta`. Visibility controlled by Request Quote Flag.
+- **Purpose:** Customer requests a price or service offer (no appointment slot).
+- **Fields:** Name, Phone, Email (required); Car (Make, Model, Year – free text); Description of need or service interest (textarea); optional photo.
+- **Flow:** Submit request → confirmation email (optional); staff see list at Admin → contact customer (click-to-call/SMS/WhatsApp), respond with offer.
+- **No date/time** selection; distinct from Programare.
+
+### 1.5. Contact
 - Phone, email, optional WhatsApp, address, map
 - Phone and email **immediately visible** (sticky/floating), high contrast
 
-### 1.5. Authenticated User (simple account)
+### 1.6. Authenticated User (simple account)
 - Purpose: appointment history and receiving promotional emails. No complex membership UX.
 - Sign-up: include **consent checkbox** for promotional emails (Admins send; opt-in only). v1.
 - Appointment history (requested, confirmed, completed)
@@ -70,31 +81,37 @@
 - Modify slot, delete
 - Click-to-call, click-to-SMS for customer contact
 
-### 2.4. Business Settings
+### 2.4. Quote Requests (Cerere ofertă)
+- **Route:** `/admin/quotes`
+- List of quote requests (customer, contact, car, description, date)
+- Click-to-call, click-to-SMS, WhatsApp for customer contact
+- Update or close request
+
+### 2.5. Business Settings
 - Contact info (phone, email)
 - Address
 - Operating hours + Romanian holidays (auto) + extra off days/hours
 - Slot duration per service type (default 1h each)
 
-### 2.5. Service Management
+### 2.6. Service Management
 - General services (with pricing)
 - Tyre services (with pricing)
 - Car wash packages (with pricing)
 - Optional service lists for booking (3 lists, configurable)
 
-### 2.6. User Management
+### 2.7. User Management
 - Staff roles: Super Admin, Admin, Technician
 - Customer accounts (self-registration + staff-created)
 
-### 2.7. Feature Flags
+### 2.8. Feature Flags
 - Super Admin: enable/disable
 - Admin: show/hide to customers
 
-### 2.8. Content – Images
+### 2.9. Content – Images
 - Admin UI to manage photos for the customer-facing app (gallery, service images, branding).
 - Images used on Home, Servicii, etc.; single source managed from admin.
 
-### 2.9. Errors and feedback
+### 2.10. Errors and feedback
 - Validation and API errors: show in small, lightweight popups (toast or compact modal). Dismissible; avoid heavy full-page error screens.
 
 ---
@@ -112,7 +129,7 @@
 ## 4. Tech Constraints
 
 - **Framework:** Next.js (App Router) + React + TypeScript
-- **App Structure:** Single Next.js app. Customer-facing routes at root (e.g., `/`, `/servicii`, `/programare`, `/contact`, `/cont`). Admin routes under `/admin` (e.g., `/admin`, `/admin/login`, `/admin/calendar`, `/admin/appointments`, `/admin/settings`, `/admin/feature-flags`, `/admin/services`, `/admin/content`, `/admin/users`).
+- **App Structure:** Single Next.js app. Customer-facing routes at root (e.g., `/`, `/servicii`, `/programare`, `/cere-oferta`, `/contact`, `/cont`). Admin routes under `/admin` (e.g., `/admin`, `/admin/login`, `/admin/calendar`, `/admin/appointments`, `/admin/quotes`, `/admin/settings`, `/admin/feature-flags`, `/admin/services`, `/admin/content`, `/admin/users`). Design reference: **`figma-design/`**. Default site owner data: **`dtl-company-info.md`**.
 - **Backend:** Separate API package in monorepo; frontend calls via `NEXT_PUBLIC_API_URL`.
 - **Style:** Web-first design that fits well on mobile; responsive everywhere. **Primary colour: blue** (CTAs, primary buttons); red only for errors/destructive. **Loading:** lightweight spinner or skeleton for load and submit.
 - **Language:** Romanian (i18n-ready)

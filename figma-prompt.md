@@ -1,6 +1,6 @@
 # Figma Design Prompt: DTL – All Screens for Car Service Web App
 
-Create a complete set of UI screens for a **Romanian, mobile-first car service web app** (Next.js). One design system; two areas: **customer-facing** and **admin**. All copy in **Romanian**.
+Create a complete set of UI screens for a **Romanian, mobile-first car service web app** (Next.js). One design system; two areas: **customer-facing** and **admin**. All copy in **Romanian**. **Site owner data** (business name, address, phone, hours) for contact strip, map, and footer: use **`dtl-company-info.md`** as reference (e.g. DTL service-vulcanizare-spalatorie, Strada Principală 446, Sîntandrei, +40 744 927 038, Mon–Fri 8–17, Sat 8–13:30, Sun closed).
 
 ---
 
@@ -66,7 +66,7 @@ Use this file as a **design brief**: keep it open (or in a doc) and build screen
 
 ## Shared Customer Components (reuse across customer screens)
 
-- **Header:** Logo (left or centre, links to home); **contact strip** with phone and email **always visible** (high contrast); optional WhatsApp icon when configured; top nav: Acasă, Servicii, Programare, Contact, Cont. One level only; on mobile use a compact or hamburger menu. Primary CTA: “Programare” / “Rezervă programare” (blue button).
+- **Header:** Logo (left or centre, links to home); **contact strip** with phone and email **always visible** (high contrast); optional WhatsApp icon when configured; top nav: Acasă, Servicii, Programare, Cerere ofertă (when enabled), Contact, Cont. One level only; on mobile use a compact or hamburger menu. Primary CTA: “Programare” / “Rezervă programare” (blue button).
 - **Footer:** Same contact strip (phone, email, optional WhatsApp), business address, small links (Acasă, Servicii, Contact).
 - **Map:** One reusable block for “business location” (placeholder or simple map style); used on Home and Contact.
 
@@ -83,13 +83,16 @@ List of services with name, price (“Preț”, “de la X RON”), optional ima
 ### 3. Programare (/programare)
 Single booking form (one page). Tabs at top: “Service general” / “Anvelope” / “Spălătorie” (only show tabs for active booking types). Fields: Nume, Telefon, Email (required); Marca, Model, An (free text); “Descriere problemă” (textarea 2–3 lines); optional “Servicii opționale” (checkboxes from list); “Data preferată” (date picker); “Ora preferată” (list of time slots, no free text); optional “Atașează poză”. One step: date + list of slots together. Helper text: “Poți programa cu maximum 30 zile în avans.” Submit: “Trimite cererea.” Success state: short message “Cererea a fost primită…”.
 
-### 4. Contact (/contact)
+### 4. Cerere ofertă (/cere-oferta)
+Request quote form (no appointment slot). When Request Quote Flag on. Fields: Nume, Telefon, Email (required); Marca, Model, An (free text); "Descriere nevoie / serviciu" (textarea). Optional "Atașează poză". Submit: "Trimite cererea de ofertă." Success: "Cererea a fost primită. Veți fi contactat." No date/time. Staff manage at /admin/quotes.
+
+### 5. Contact (/contact)
 Phone, email, optional WhatsApp, address; all prominent. Same map component. Contact strip in header/footer.
 
-### 5. Cont (/cont) – not logged in
+### 6. Cont (/cont) – not logged in
 Title “Contul meu”. Short text encouraging account (istoric programări, facturi). Buttons/links: “Autentificare”, “Înregistrare”. Checkbox: “Accept să primesc oferte și noutăți pe email”.
 
-### 6. Cont (/cont) – logged in
+### 7. Cont (/cont) – logged in
 Same header/footer. Sections: “Istoric programări” (list: requested / confirmed / completed); “Facturi și plăți” (list: final price, optional items). Simple, no complex membership UI.
 
 ---
@@ -110,19 +113,22 @@ Title “Calendar”. View switcher: Zi | Săptămână (default) | Lună. Optio
 ### 10. Appointments (/admin/appointments)
 Title “Programări”. Table: Data, Client, Tip, Status, Acțiuni. Acțiuni: Confirmă, Modifică, Șterge; contact: click-to-call, click-to-SMS, WhatsApp (icons/links). No in-app SMS; links open device dialer/SMS/WhatsApp.
 
-### 11. Settings (/admin/settings)
+### 11. Quote Requests (/admin/quotes)
+Title "Cereri ofertă". Table: Data, Client, Contact, Mașină, Descriere, Acțiuni. Contact customer (click-to-call, SMS, WhatsApp); update or close request.
+
+### 12. Settings (/admin/settings)
 Title “Setări”. Sections: Contact (telefon, email, WhatsApp opțional); Logo; Adresă; Program (per zi + excepții); Durată slot (per tip serviciu, default 1h); Mesaj plăți rate (când e activ).
 
-### 12. Feature Flags (/admin/feature-flags)
-Title “Feature flags”. List of flags with two controls each: “Activ (Super Admin)” on/off, “Vizibil clienți (Admin)” on/off. Labels: Modul Anvelope, Modul Spălătorie, Programare Service general, Programare Anvelope, Programare Spălătorie, Comandă piese, Info plăți în rate.
+### 13. Feature Flags (/admin/feature-flags)
+Title “Feature flags”. List of flags with two controls each: “Activ (Super Admin)” on/off, “Vizibil clienți (Admin)” on/off. Labels: Modul Anvelope, Modul Spălătorie, Programare Service general, Programare Anvelope, Programare Spălătorie, Cerere ofertă, Comandă piese, Info plăți în rate.
 
-### 13. Services (/admin/services)
+### 14. Services (/admin/services)
 Title “Servicii”. Three sections: Service general (list + preț), Anvelope (list + preț), Spălătorie (list + preț). Per section: add/edit/delete; optional “Listă servicii opționale pentru programare” (default list in Romanian).
 
-### 14. Content (/admin/content)
+### 15. Content (/admin/content)
 Title “Conținut”. Image management: upload, reorder, delete. Used for galerie, imagini servicii, branding pe site-ul client.
 
-### 15. Users (/admin/users)
+### 16. Users (/admin/users)
 Title “Utilizatori”. Two parts: Staff (Super Admin, Admin, Technician – create/edit); Clienți (list, create from admin). Roles and permissions as in specs.
 
 ---
