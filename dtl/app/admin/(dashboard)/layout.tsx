@@ -1,14 +1,20 @@
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 import Link from "next/link";
 import { t } from "@/lib/i18n";
 
-export default function DashboardLayout({
+const ADMIN_SESSION_COOKIE = "dtl_admin_session";
+
+export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const mockAuth = process.env.NEXT_PUBLIC_MOCK_AUTH === "true";
-  if (!mockAuth) {
+  const mockEnv = process.env.NEXT_PUBLIC_MOCK_AUTH === "true";
+  const cookieStore = await cookies();
+  const session = cookieStore.get(ADMIN_SESSION_COOKIE)?.value;
+  const allowed = mockEnv || session === "mock";
+  if (!allowed) {
     redirect("/admin/login");
   }
 
@@ -42,6 +48,12 @@ export default function DashboardLayout({
           </Link>
           <Link href="/admin/users" className="block py-2 text-slate-700 hover:text-blue-600">
             {t("admin.users")}
+          </Link>
+          <Link
+            href="/admin/logout"
+            className="block py-2 text-red-600 hover:text-red-700 mt-4"
+          >
+            {t("nav.logout")}
           </Link>
         </nav>
       </aside>
