@@ -46,7 +46,7 @@ export function ContactStrip({
           </a>
         ) : null}
       </div>
-      <div className="hidden sm:flex items-center gap-4">
+      <div className="flex flex-wrap items-center gap-4">
         {whatsapp ? (
           <a
             href={`https://wa.me/${digitsOnly(whatsapp)}`}
@@ -55,7 +55,7 @@ export function ContactStrip({
             className="flex items-center gap-2 hover:opacity-80 transition-opacity min-h-[44px] items-center"
           >
             <MessageCircle size={16} className="text-green-400" />
-            <span>WhatsApp</span>
+            <span>{t("contact.whatsapp")}</span>
           </a>
         ) : null}
         {address ? (

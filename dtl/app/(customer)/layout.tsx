@@ -2,6 +2,7 @@ import { getFeatureFlags } from "@/lib/feature-flags";
 import { getBusinessSettings } from "@/lib/settings";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { WhatsAppButton } from "@/components/WhatsAppButton";
 
 export default async function CustomerLayout({
   children,
@@ -29,6 +30,9 @@ export default async function CustomerLayout({
         description={settings.description}
         hours={settings.hours}
       />
+      {(settings.whatsapp || settings.phone) && (
+        <WhatsAppButton whatsapp={settings.whatsapp || settings.phone || ""} />
+      )}
     </>
   );
 }
