@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useForm } from "react-hook-form";
 import { t } from "@/lib/i18n";
 
 const ADMIN_SESSION_COOKIE = "dtl_admin_session";
@@ -12,20 +13,38 @@ function setAdminSessionCookie() {
   document.cookie = `${ADMIN_SESSION_COOKIE}=mock; path=/; max-age=${maxAge}; SameSite=Lax`;
 }
 
+type AdminLoginFormValues = { email: string; password: string };
+
+const inputBase = "w-full px-3 py-2 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 border transition-all";
+const inputNormal = "border-slate-300";
+const inputError = "border-red-500";
+
 export function AdminLoginForm() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
 
-  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
+  const {
+    register,
+    handleSubmit,
+    setError,
+    formState: { errors },
+  } = useForm<AdminLoginFormValues>({ mode: "onChange" });
+
+  function onSubmit(data: AdminLoginFormValues) {
     setLoading(true);
+    // Simulated auth failure: show error under email the same way as real auth would
+    if (data.password === "fail") {
+      setError("email", { type: "server", message: t("errors.invalidCredentials") });
+      setLoading(false);
+      return;
+    }
     setAdminSessionCookie();
     router.push("/admin");
     router.refresh();
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <div>
         <label
           htmlFor="email"
@@ -36,10 +55,16 @@ export function AdminLoginForm() {
         <input
           id="email"
           type="email"
-          name="email"
-          required
-          className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          {...register("email", {
+          required: t("errors.completeThisField"),
+          validate: (v) =>
+            !v || v.includes("@") ? true : t("errors.emailIncludeAt"),
+        })}
+          className={`${inputBase} ${errors.email ? inputError : inputNormal}`}
         />
+        {errors.email && (
+          <p className="text-xs text-red-500 mt-1">{errors.email.message}</p>
+        )}
       </div>
       <div>
         <label
@@ -51,10 +76,12 @@ export function AdminLoginForm() {
         <input
           id="password"
           type="password"
-          name="password"
-          required
-          className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          {...register("password", { required: t("errors.completeThisField") })}
+          className={`${inputBase} ${errors.password ? inputError : inputNormal}`}
         />
+        {errors.password && (
+          <p className="text-xs text-red-500 mt-1">{errors.password.message}</p>
+        )}
       </div>
       <button
         type="submit"

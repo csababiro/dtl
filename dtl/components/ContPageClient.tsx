@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useForm } from "react-hook-form";
 import {
   User,
   LogIn,
@@ -21,41 +22,43 @@ const STORAGE_KEY = "dtl_customer_session";
 
 type Tab = "signIn" | "signUp";
 
+type LoginFormValues = { email: string; password: string };
+type RegisterFormValues = { name: string; email: string; password: string; repeatPassword: string };
+
+const inputBase = "w-full p-4 bg-slate-50 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 transition-all border";
+const inputBasePr = "w-full p-4 pr-12 bg-slate-50 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 transition-all border";
+const inputNormal = "border-slate-200";
+const inputError = "border-red-500";
+
 export function ContPageClient() {
   const [tab, setTab] = useState<Tab>("signIn");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [promoConsent, setPromoConsent] = useState(false);
-  const [registerName, setRegisterName] = useState("");
-  const [registerEmail, setRegisterEmail] = useState("");
-  const [registerPassword, setRegisterPassword] = useState("");
-  const [registerPasswordRepeat, setRegisterPasswordRepeat] = useState("");
   const [registerPromo, setRegisterPromo] = useState(false);
   const [showLoginPassword, setShowLoginPassword] = useState(false);
   const [showRegisterPassword, setShowRegisterPassword] = useState(false);
   const [showRegisterPasswordRepeat, setShowRegisterPasswordRepeat] = useState(false);
-  const [registerError, setRegisterError] = useState<string | null>(null);
+
+  const loginForm = useForm<LoginFormValues>({ mode: "onChange" });
+  const registerForm = useForm<RegisterFormValues>({
+    mode: "onChange",
+  });
 
   useEffect(() => {
     const stored = typeof window !== "undefined" ? sessionStorage.getItem(STORAGE_KEY) : null;
     if (stored === "true") setIsLoggedIn(true);
   }, []);
 
-  function handleLogin(e: React.FormEvent) {
-    e.preventDefault();
+  function onLoginSubmit(data: LoginFormValues) {
     if (typeof window !== "undefined") sessionStorage.setItem(STORAGE_KEY, "true");
+    setEmail(data.email);
     setIsLoggedIn(true);
   }
 
-  function handleRegister(e: React.FormEvent) {
-    e.preventDefault();
-    setRegisterError(null);
-    if (registerPassword !== registerPasswordRepeat) {
-      setRegisterError(t("cont.passwordMismatch"));
-      return;
-    }
+  function onRegisterSubmit(data: RegisterFormValues) {
     if (typeof window !== "undefined") sessionStorage.setItem(STORAGE_KEY, "true");
+    setEmail(data.email);
     setIsLoggedIn(true);
   }
 
@@ -303,19 +306,24 @@ export function ContPageClient() {
         </div>
 
         {tab === "signIn" ? (
-          <form onSubmit={handleLogin} className="space-y-6">
+          <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-6">
             <div className="space-y-2">
               <label className="text-sm font-bold text-slate-700">
                 {t("admin.email")}
               </label>
               <input
                 type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                {...loginForm.register("email", {
+                required: t("cont.requiredEmail"),
+                validate: (v) =>
+                  !v || v.includes("@") ? true : t("errors.emailIncludeAt"),
+              })}
                 placeholder="ion@exemplu.ro"
-                className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500"
-                required
+                className={`${inputBase} ${loginForm.formState.errors.email ? inputError : inputNormal}`}
               />
+              {loginForm.formState.errors.email && (
+                <p className="text-xs text-red-500 mt-1">{loginForm.formState.errors.email.message}</p>
+              )}
             </div>
             <div className="space-y-2">
               <label className="text-sm font-bold text-slate-700 flex justify-between items-center">
@@ -330,11 +338,9 @@ export function ContPageClient() {
               <div className="relative">
                 <input
                   type={showLoginPassword ? "text" : "password"}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  {...loginForm.register("password", { required: t("cont.requiredPassword") })}
                   placeholder="••••••••"
-                  className="w-full p-4 pr-12 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500"
-                  required
+                  className={`${inputBasePr} ${loginForm.formState.errors.password ? inputError : inputNormal}`}
                 />
                 <button
                   type="button"
@@ -345,6 +351,9 @@ export function ContPageClient() {
                   {showLoginPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
               </div>
+              {loginForm.formState.errors.password && (
+                <p className="text-xs text-red-500 mt-1">{loginForm.formState.errors.password.message}</p>
+              )}
             </div>
             <label className="flex items-center gap-3 cursor-pointer group">
               <input
@@ -365,24 +374,20 @@ export function ContPageClient() {
             </button>
           </form>
         ) : (
-          <form onSubmit={handleRegister} className="space-y-6">
-            {registerError && (
-              <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl px-4 py-3">
-                {registerError}
-              </p>
-            )}
+          <form onSubmit={registerForm.handleSubmit(onRegisterSubmit)} className="space-y-6">
             <div className="space-y-2">
               <label className="text-sm font-bold text-slate-700">
                 {t("programare.name")}
               </label>
               <input
                 type="text"
-                value={registerName}
-                onChange={(e) => setRegisterName(e.target.value)}
+                {...registerForm.register("name", { required: t("cont.requiredName") })}
                 placeholder="Ion Popescu"
-                className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500"
-                required
+                className={`${inputBase} ${registerForm.formState.errors.name ? inputError : inputNormal}`}
               />
+              {registerForm.formState.errors.name && (
+                <p className="text-xs text-red-500 mt-1">{registerForm.formState.errors.name.message}</p>
+              )}
             </div>
             <div className="space-y-2">
               <label className="text-sm font-bold text-slate-700">
@@ -390,12 +395,21 @@ export function ContPageClient() {
               </label>
               <input
                 type="email"
-                value={registerEmail}
-                onChange={(e) => setRegisterEmail(e.target.value)}
+                {...registerForm.register("email", {
+                  required: t("cont.requiredEmail"),
+                  validate: (v) =>
+                    !v || v.includes("@") ? true : t("errors.emailIncludeAt"),
+                  pattern: {
+                    value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                    message: t("cereOferta.invalidEmail"),
+                  },
+                })}
                 placeholder="ion@exemplu.ro"
-                className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500"
-                required
+                className={`${inputBase} ${registerForm.formState.errors.email ? inputError : inputNormal}`}
               />
+              {registerForm.formState.errors.email && (
+                <p className="text-xs text-red-500 mt-1">{registerForm.formState.errors.email.message}</p>
+              )}
             </div>
             <div className="space-y-2">
               <label className="text-sm font-bold text-slate-700">
@@ -404,11 +418,9 @@ export function ContPageClient() {
               <div className="relative">
                 <input
                   type={showRegisterPassword ? "text" : "password"}
-                  value={registerPassword}
-                  onChange={(e) => setRegisterPassword(e.target.value)}
+                  {...registerForm.register("password", { required: t("cont.requiredPassword") })}
                   placeholder="••••••••"
-                  className="w-full p-4 pr-12 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500"
-                  required
+                  className={`${inputBasePr} ${registerForm.formState.errors.password ? inputError : inputNormal}`}
                 />
                 <button
                   type="button"
@@ -419,6 +431,9 @@ export function ContPageClient() {
                   {showRegisterPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
               </div>
+              {registerForm.formState.errors.password && (
+                <p className="text-xs text-red-500 mt-1">{registerForm.formState.errors.password.message}</p>
+              )}
             </div>
             <div className="space-y-2">
               <label className="text-sm font-bold text-slate-700">
@@ -427,11 +442,12 @@ export function ContPageClient() {
               <div className="relative">
                 <input
                   type={showRegisterPasswordRepeat ? "text" : "password"}
-                  value={registerPasswordRepeat}
-                  onChange={(e) => setRegisterPasswordRepeat(e.target.value)}
+                  {...registerForm.register("repeatPassword", {
+                    required: t("cont.requiredPassword"),
+                    validate: (v) => v === registerForm.watch("password") ? true : t("cont.passwordMismatch"),
+                  })}
                   placeholder="••••••••"
-                  className="w-full p-4 pr-12 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500"
-                  required
+                  className={`${inputBasePr} ${registerForm.formState.errors.repeatPassword ? inputError : inputNormal}`}
                 />
                 <button
                   type="button"
@@ -442,6 +458,9 @@ export function ContPageClient() {
                   {showRegisterPasswordRepeat ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
               </div>
+              {registerForm.formState.errors.repeatPassword && (
+                <p className="text-xs text-red-500 mt-1">{registerForm.formState.errors.repeatPassword.message}</p>
+              )}
             </div>
             <label className="flex items-center gap-3 cursor-pointer group">
               <input

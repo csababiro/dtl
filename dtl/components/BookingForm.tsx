@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useForm } from "react-hook-form";
 import {
   Calendar as CalendarIcon,
   Car,
@@ -13,45 +14,23 @@ import {
 } from "lucide-react";
 import { t } from "@/lib/i18n";
 import { post } from "@/lib/api-client";
-import { ErrorToast } from "./ErrorToast";
 
 const TIME_SLOTS = [
-  "08:00",
-  "09:00",
-  "10:00",
-  "11:00",
-  "12:00",
-  "13:00",
-  "14:00",
-  "15:00",
-  "16:00",
-  "17:00",
+  "08:00", "09:00", "10:00", "11:00", "12:00",
+  "13:00", "14:00", "15:00", "16:00", "17:00",
 ];
 
 const OPTIONAL_SERVICES_GENERAL = [
-  "Schimb ulei",
-  "Revizie",
-  "Frâne",
-  "Filtre",
-  "Direcție",
-  "Diagnostic motor",
-  "Baterie",
-  "Climatizare",
-  "Rotație anvelope",
+  "Schimb ulei", "Revizie", "Frâne", "Filtre", "Direcție",
+  "Diagnostic motor", "Baterie", "Climatizare", "Rotație anvelope",
 ];
 
 const OPTIONAL_SERVICES_TYRE = [
-  "Montaj anvelope",
-  "Echilibrare",
-  "Reparare pană",
-  "Schimb valve",
+  "Montaj anvelope", "Echilibrare", "Reparare pană", "Schimb valve",
 ];
 
 const OPTIONAL_SERVICES_WASH = [
-  "Spălare exterior",
-  "Spălare interior",
-  "Detaliu exterior",
-  "Detaliu complet",
+  "Spălare exterior", "Spălare interior", "Detaliu exterior", "Detaliu complet",
 ];
 
 function getOptionalServices(type: string): string[] {
@@ -79,21 +58,35 @@ interface BookingFormProps {
   tabs: BookingTab[];
 }
 
+type BookingFormValues = {
+  name: string;
+  phone: string;
+  email: string;
+  carMake: string;
+  carModel: string;
+  carYear: string;
+  description: string;
+  date: string;
+  time: string;
+};
+
+const inputBase = "w-full p-4 bg-slate-50 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 transition-all border";
+const inputBasePl = "w-full p-4 pl-12 bg-slate-50 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 transition-all border";
+const inputNormal = "border-slate-200";
+const inputError = "border-red-500";
+
 export function BookingForm({ tabs }: BookingFormProps) {
   const [activeTab, setActiveTab] = useState(tabs[0]?.id ?? "general");
-  const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [email, setEmail] = useState("");
-  const [carMake, setCarMake] = useState("");
-  const [carModel, setCarModel] = useState("");
-  const [carYear, setCarYear] = useState("");
-  const [description, setDescription] = useState("");
-  const [date, setDate] = useState("");
-  const [time, setTime] = useState("");
   const [optionalServices, setOptionalServices] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const {
+    register,
+    handleSubmit,
+    setError,
+    formState: { errors },
+  } = useForm<BookingFormValues>({ mode: "onChange" });
 
   const optionalList = getOptionalServices(activeTab);
 
@@ -103,41 +96,33 @@ export function BookingForm({ tabs }: BookingFormProps) {
     );
   }
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    const n = name.trim();
-    const p = phone.trim();
-    const em = email.trim();
-    const make = carMake.trim();
-    const model = carModel.trim();
-    const year = carYear.trim();
-    const desc = description.trim();
-    if (!n || !p || !em || !make || !model || !year || !desc || !date || !time) {
-      setErrorMessage(t("errors.validation"));
-      return;
-    }
-    setErrorMessage(null);
+  const onSubmit = async (data: BookingFormValues) => {
     setLoading(true);
-    const result = await post<unknown>("/appointment-requests", {
-      name: n,
-      phone: p,
-      email: em,
-      carMake: make,
-      carModel: model,
-      carYear: year,
-      description: desc,
-      date,
-      time,
-      bookingType: activeTab,
-      optionalServices: optionalServices.length > 0 ? optionalServices : undefined,
-    });
-    setLoading(false);
-    if ("error" in result) {
-      setErrorMessage(result.error.message || t("errors.network"));
-      return;
+    try {
+      const result = await post<unknown>("/appointment-requests", {
+        name: data.name.trim(),
+        phone: data.phone.trim(),
+        email: data.email.trim(),
+        carMake: data.carMake.trim(),
+        carModel: data.carModel.trim(),
+        carYear: data.carYear.trim(),
+        description: data.description.trim(),
+        date: data.date,
+        time: data.time,
+        bookingType: activeTab,
+        optionalServices: optionalServices.length > 0 ? optionalServices : undefined,
+      });
+      if ("error" in result) {
+        setError("email", { type: "server", message: result.error.message || t("errors.network") });
+        return;
+      }
+      setSuccess(true);
+    } catch {
+      setError("email", { type: "server", message: t("errors.submitError") });
+    } finally {
+      setLoading(false);
     }
-    setSuccess(true);
-  }
+  };
 
   if (success) {
     return (
@@ -194,18 +179,10 @@ export function BookingForm({ tabs }: BookingFormProps) {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-8">
-        {errorMessage ? (
-          <ErrorToast
-            message={errorMessage}
-            onDismiss={() => setErrorMessage(null)}
-          />
-        ) : null}
-
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
         <div className="bg-white p-8 rounded-3xl shadow-sm border border-slate-100">
           <h3 className="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2">
-            <Car size={20} className="text-blue-600" />{" "}
-            {t("programare.carDetails")}
+            <Car size={20} className="text-blue-600" /> {t("programare.carDetails")}
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="space-y-2">
@@ -214,12 +191,13 @@ export function BookingForm({ tabs }: BookingFormProps) {
               </label>
               <input
                 type="text"
-                value={carMake}
-                onChange={(e) => setCarMake(e.target.value)}
+                {...register("carMake", { required: t("programare.requiredCarMake") })}
                 placeholder="Ex: BMW"
-                className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-                required
+                className={`${inputBase} ${errors.carMake ? inputError : inputNormal}`}
               />
+              {errors.carMake && (
+                <p className="text-xs text-red-500 mt-1">{errors.carMake.message}</p>
+              )}
             </div>
             <div className="space-y-2">
               <label className="text-sm font-bold text-slate-700">
@@ -227,12 +205,13 @@ export function BookingForm({ tabs }: BookingFormProps) {
               </label>
               <input
                 type="text"
-                value={carModel}
-                onChange={(e) => setCarModel(e.target.value)}
+                {...register("carModel", { required: t("programare.requiredCarModel") })}
                 placeholder="Ex: Seria 3"
-                className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-                required
+                className={`${inputBase} ${errors.carModel ? inputError : inputNormal}`}
               />
+              {errors.carModel && (
+                <p className="text-xs text-red-500 mt-1">{errors.carModel.message}</p>
+              )}
             </div>
             <div className="space-y-2">
               <label className="text-sm font-bold text-slate-700">
@@ -240,12 +219,13 @@ export function BookingForm({ tabs }: BookingFormProps) {
               </label>
               <input
                 type="text"
-                value={carYear}
-                onChange={(e) => setCarYear(e.target.value)}
+                {...register("carYear", { required: t("programare.requiredCarYear") })}
                 placeholder="Ex: 2020"
-                className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-                required
+                className={`${inputBase} ${errors.carYear ? inputError : inputNormal}`}
               />
+              {errors.carYear && (
+                <p className="text-xs text-red-500 mt-1">{errors.carYear.message}</p>
+              )}
             </div>
           </div>
           <div className="mt-6 space-y-2">
@@ -253,13 +233,14 @@ export function BookingForm({ tabs }: BookingFormProps) {
               {t("programare.carProblem")} *
             </label>
             <textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              {...register("description", { required: t("programare.requiredDescription") })}
               rows={3}
               placeholder={t("programare.carProblemPlaceholder")}
-              className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 transition-all resize-none"
-              required
+              className={`${inputBase} resize-none ${errors.description ? inputError : inputNormal}`}
             />
+            {errors.description && (
+              <p className="text-xs text-red-500 mt-1">{errors.description.message}</p>
+            )}
           </div>
           {optionalList.length > 0 && (
             <div className="mt-6 space-y-2">
@@ -268,10 +249,7 @@ export function BookingForm({ tabs }: BookingFormProps) {
               </label>
               <div className="flex flex-wrap gap-3">
                 {optionalList.map((item) => (
-                  <label
-                    key={item}
-                    className="flex items-center gap-2 cursor-pointer"
-                  >
+                  <label key={item} className="flex items-center gap-2 cursor-pointer">
                     <input
                       type="checkbox"
                       checked={optionalServices.includes(item)}
@@ -288,8 +266,7 @@ export function BookingForm({ tabs }: BookingFormProps) {
 
         <div className="bg-white p-8 rounded-3xl shadow-sm border border-slate-100">
           <h3 className="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2">
-            <CalendarIcon size={20} className="text-blue-600" />{" "}
-            {t("programare.selectDate")} / {t("programare.selectTime")}
+            <CalendarIcon size={20} className="text-blue-600" /> {t("programare.selectDate")} / {t("programare.selectTime")}
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="space-y-2">
@@ -298,13 +275,14 @@ export function BookingForm({ tabs }: BookingFormProps) {
               </label>
               <input
                 type="date"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
+                {...register("date", { required: t("programare.requiredDate") })}
                 min={getDateMin()}
                 max={getDateMax()}
-                className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-                required
+                className={`${inputBase} ${errors.date ? inputError : inputNormal}`}
               />
+              {errors.date && (
+                <p className="text-xs text-red-500 mt-1">{errors.date.message}</p>
+              )}
               <p className="text-xs text-slate-400 mt-1">
                 {t("programare.bookingWindow")}
               </p>
@@ -318,26 +296,26 @@ export function BookingForm({ tabs }: BookingFormProps) {
                   <label key={slot} className="relative group cursor-pointer">
                     <input
                       type="radio"
-                      name="time"
                       value={slot}
-                      checked={time === slot}
-                      onChange={() => setTime(slot)}
+                      {...register("time", { required: t("programare.requiredTime") })}
                       className="peer absolute opacity-0"
                     />
-                    <div className="p-3 text-center border border-slate-200 rounded-lg text-sm font-bold text-slate-600 peer-checked:bg-blue-600 peer-checked:text-white peer-checked:border-blue-600 group-hover:border-blue-300 transition-all">
+                    <div className="p-3 text-center border rounded-lg text-sm font-bold text-slate-600 peer-checked:bg-blue-600 peer-checked:text-white peer-checked:border-blue-600 group-hover:border-blue-300 transition-all border-slate-200">
                       {slot}
                     </div>
                   </label>
                 ))}
               </div>
+              {errors.time && (
+                <p className="text-xs text-red-500 mt-1">{errors.time.message}</p>
+              )}
             </div>
           </div>
         </div>
 
         <div className="bg-white p-8 rounded-3xl shadow-sm border border-slate-100">
           <h3 className="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2">
-            <User size={20} className="text-blue-600" />{" "}
-            {t("programare.customerDetails")}
+            <User size={20} className="text-blue-600" /> {t("programare.customerDetails")}
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
@@ -345,57 +323,59 @@ export function BookingForm({ tabs }: BookingFormProps) {
                 {t("programare.name")} *
               </label>
               <div className="relative">
-                <User
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
-                  size={18}
-                />
+                <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                 <input
                   type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
+                  {...register("name", { required: t("programare.requiredName") })}
                   placeholder="Ion Popescu"
-                  className="w-full p-4 pl-12 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-                  required
+                  className={`${inputBasePl} ${errors.name ? inputError : inputNormal}`}
                 />
               </div>
+              {errors.name && (
+                <p className="text-xs text-red-500 mt-1">{errors.name.message}</p>
+              )}
             </div>
             <div className="space-y-2">
               <label className="text-sm font-bold text-slate-700">
                 {t("programare.phone")} *
               </label>
               <div className="relative">
-                <Phone
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
-                  size={18}
-                />
+                <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                 <input
                   type="tel"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
+                  {...register("phone", { required: t("programare.requiredPhone") })}
                   placeholder="07xx xxx xxx"
-                  className="w-full p-4 pl-12 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-                  required
+                  className={`${inputBasePl} ${errors.phone ? inputError : inputNormal}`}
                 />
               </div>
+              {errors.phone && (
+                <p className="text-xs text-red-500 mt-1">{errors.phone.message}</p>
+              )}
             </div>
             <div className="md:col-span-2 space-y-2">
               <label className="text-sm font-bold text-slate-700">
                 {t("programare.email")} *
               </label>
               <div className="relative">
-                <Mail
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
-                  size={18}
-                />
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                 <input
                   type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  {...register("email", {
+                    required: t("programare.requiredEmail"),
+                    validate: (v) =>
+                      !v || v.includes("@") ? true : t("errors.emailIncludeAt"),
+                    pattern: {
+                      value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                      message: t("cereOferta.invalidEmail"),
+                    },
+                  })}
                   placeholder="ion.popescu@exemplu.ro"
-                  className="w-full p-4 pl-12 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-                  required
+                  className={`${inputBasePl} ${errors.email ? inputError : inputNormal}`}
                 />
               </div>
+              {errors.email && (
+                <p className="text-xs text-red-500 mt-1">{errors.email.message}</p>
+              )}
             </div>
           </div>
         </div>
@@ -409,8 +389,7 @@ export function BookingForm({ tabs }: BookingFormProps) {
             <Loader2 className="animate-spin" size={24} />
           ) : (
             <>
-              {t("programare.submitRequest")}{" "}
-              <ChevronRight size={24} />
+              {t("programare.submitRequest")} <ChevronRight size={24} />
             </>
           )}
         </button>

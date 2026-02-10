@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useForm } from "react-hook-form";
 import {
   User,
   Mail,
@@ -14,60 +15,64 @@ import {
 } from "lucide-react";
 import { t } from "@/lib/i18n";
 import { post } from "@/lib/api-client";
-import { ErrorToast } from "./ErrorToast";
+import { toast } from "sonner";
+
+type CereOfertaFormValues = {
+  name: string;
+  phone: string;
+  email: string;
+  carMake: string;
+  carModel: string;
+  carYear: string;
+  description: string;
+};
+
+const inputBase =
+  "w-full p-4 pl-12 bg-slate-50 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 transition-all border";
+const inputNormal = "border-slate-200";
+const inputError = "border-red-500";
 
 export function CereOfertaForm() {
-  const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [email, setEmail] = useState("");
-  const [carMake, setCarMake] = useState("");
-  const [carModel, setCarModel] = useState("");
-  const [carYear, setCarYear] = useState("");
-  const [description, setDescription] = useState("");
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [file, setFile] = useState<File | null>(null);
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    const n = name.trim();
-    const p = phone.trim();
-    const em = email.trim();
-    const make = carMake.trim();
-    const model = carModel.trim();
-    const year = carYear.trim();
-    const desc = description.trim();
-    if (!n || !p || !em || !make || !model || !year || !desc) {
-      setErrorMessage(t("errors.validation"));
-      return;
-    }
-    setErrorMessage(null);
+  const {
+    register,
+    handleSubmit,
+    setError,
+    formState: { errors },
+    reset,
+  } = useForm<CereOfertaFormValues>({
+    mode: "onChange",
+  });
+
+  const onSubmit = async (data: CereOfertaFormValues) => {
     setLoading(true);
-    const result = await post<unknown>("/quote-requests", {
-      name: n,
-      phone: p,
-      email: em,
-      carMake: make,
-      carModel: model,
-      carYear: year,
-      description: desc,
-    });
-    setLoading(false);
-    if ("error" in result) {
-      setErrorMessage(result.error.message || t("errors.network"));
-      return;
+    try {
+      const result = await post<unknown>("/quote-requests", {
+        name: data.name.trim(),
+        phone: data.phone.trim(),
+        email: data.email.trim(),
+        carMake: data.carMake.trim(),
+        carModel: data.carModel.trim(),
+        carYear: data.carYear.trim(),
+        description: data.description.trim(),
+      });
+      if ("error" in result) {
+        setError("email", { type: "server", message: result.error.message || t("errors.network") });
+        return;
+      }
+      setSuccess(true);
+      reset();
+      setFile(null);
+      toast.success(t("cereOferta.successToast"));
+    } catch {
+      setError("email", { type: "server", message: t("errors.submitError") });
+    } finally {
+      setLoading(false);
     }
-    setSuccess(true);
-    setName("");
-    setPhone("");
-    setEmail("");
-    setCarMake("");
-    setCarModel("");
-    setCarYear("");
-    setDescription("");
-    setFile(null);
-  }
+  };
 
   if (success) {
     return (
@@ -105,14 +110,7 @@ export function CereOfertaForm() {
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
-        {errorMessage ? (
-          <ErrorToast
-            message={errorMessage}
-            onDismiss={() => setErrorMessage(null)}
-          />
-        ) : null}
-
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <div className="bg-white p-8 rounded-3xl shadow-sm border border-slate-100">
           <h3 className="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2">
             <User size={20} className="text-blue-600" /> Date personale
@@ -129,12 +127,13 @@ export function CereOfertaForm() {
                 />
                 <input
                   type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
+                  {...register("name", { required: t("cereOferta.requiredName") })}
                   placeholder="Ex: Popescu Ion"
-                  className="w-full p-4 pl-12 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-                  required
+                  className={`${inputBase} ${errors.name ? inputError : inputNormal}`}
                 />
+                {errors.name && (
+                  <p className="text-xs text-red-500 mt-1">{errors.name.message}</p>
+                )}
               </div>
             </div>
             <div className="space-y-2">
@@ -148,12 +147,21 @@ export function CereOfertaForm() {
                 />
                 <input
                   type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  {...register("email", {
+                    required: t("cereOferta.requiredEmail"),
+                    validate: (v) =>
+                      !v || v.includes("@") ? true : t("errors.emailIncludeAt"),
+                    pattern: {
+                      value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                      message: t("cereOferta.invalidEmail"),
+                    },
+                  })}
                   placeholder="Ex: ion@exemplu.ro"
-                  className="w-full p-4 pl-12 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-                  required
+                  className={`${inputBase} ${errors.email ? inputError : inputNormal}`}
                 />
+                {errors.email && (
+                  <p className="text-xs text-red-500 mt-1">{errors.email.message}</p>
+                )}
               </div>
             </div>
             <div className="space-y-2 md:col-span-2">
@@ -167,12 +175,13 @@ export function CereOfertaForm() {
                 />
                 <input
                   type="tel"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
+                  {...register("phone", { required: t("cereOferta.requiredPhone") })}
                   placeholder="07xx xxx xxx"
-                  className="w-full p-4 pl-12 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-                  required
+                  className={`${inputBase} ${errors.phone ? inputError : inputNormal}`}
                 />
+                {errors.phone && (
+                  <p className="text-xs text-red-500 mt-1">{errors.phone.message}</p>
+                )}
               </div>
             </div>
           </div>
@@ -194,12 +203,13 @@ export function CereOfertaForm() {
                 />
                 <input
                   type="text"
-                  value={carMake}
-                  onChange={(e) => setCarMake(e.target.value)}
+                  {...register("carMake", { required: t("cereOferta.requiredCarMake") })}
                   placeholder="Ex: BMW"
-                  className="w-full p-4 pl-12 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-                  required
+                  className={`${inputBase} ${errors.carMake ? inputError : inputNormal}`}
                 />
+                {errors.carMake && (
+                  <p className="text-xs text-red-500 mt-1">{errors.carMake.message}</p>
+                )}
               </div>
             </div>
             <div className="space-y-2">
@@ -213,12 +223,13 @@ export function CereOfertaForm() {
                 />
                 <input
                   type="text"
-                  value={carModel}
-                  onChange={(e) => setCarModel(e.target.value)}
+                  {...register("carModel", { required: t("cereOferta.requiredCarModel") })}
                   placeholder="Ex: Seria 3"
-                  className="w-full p-4 pl-12 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-                  required
+                  className={`${inputBase} ${errors.carModel ? inputError : inputNormal}`}
                 />
+                {errors.carModel && (
+                  <p className="text-xs text-red-500 mt-1">{errors.carModel.message}</p>
+                )}
               </div>
             </div>
             <div className="space-y-2">
@@ -232,12 +243,13 @@ export function CereOfertaForm() {
                 />
                 <input
                   type="text"
-                  value={carYear}
-                  onChange={(e) => setCarYear(e.target.value)}
+                  {...register("carYear", { required: t("cereOferta.requiredCarYear") })}
                   placeholder="Ex: 2018"
-                  className="w-full p-4 pl-12 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-                  required
+                  className={`${inputBase} ${errors.carYear ? inputError : inputNormal}`}
                 />
+                {errors.carYear && (
+                  <p className="text-xs text-red-500 mt-1">{errors.carYear.message}</p>
+                )}
               </div>
             </div>
           </div>
@@ -253,13 +265,14 @@ export function CereOfertaForm() {
                 {t("cereOferta.description")} *
               </label>
               <textarea
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
+                {...register("description", { required: t("cereOferta.requiredDescription") })}
                 rows={4}
                 placeholder={t("cereOferta.descriptionPlaceholder")}
-                className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 transition-all resize-none"
-                required
+                className={`w-full p-4 bg-slate-50 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 transition-all resize-none border ${errors.description ? "border-red-500" : inputNormal}`}
               />
+              {errors.description && (
+                <p className="text-xs text-red-500 mt-1">{errors.description.message}</p>
+              )}
             </div>
             <div className="space-y-2">
               <label className="text-sm font-bold text-slate-700">

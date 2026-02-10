@@ -67,7 +67,16 @@
     "attachPhoto": "Atașează poză",
     "submitRequest": "Trimite cererea",
     "successMessage": "Cererea a fost primită. Veți fi contactat.",
-    "bookingWindow": "Poți programa cu maximum 30 zile în avans."
+    "bookingWindow": "Poți programa cu maximum 30 zile în avans.",
+    "requiredName": "Numele este obligatoriu",
+    "requiredPhone": "Telefonul este obligatoriu",
+    "requiredEmail": "Email-ul este obligatoriu",
+    "requiredCarMake": "Marca este obligatorie",
+    "requiredCarModel": "Modelul este obligatoriu",
+    "requiredCarYear": "Anul este obligatoriu",
+    "requiredDescription": "Descrierea este obligatorie",
+    "requiredDate": "Data este obligatorie",
+    "requiredTime": "Ora este obligatorie"
   },
   "cereOferta": {
     "title": "Cerere ofertă",
@@ -81,7 +90,16 @@
     "descriptionPlaceholder": "Descrie ce servicii ai nevoie sau ce ofertă cauți...",
     "attachPhoto": "Atașează poză",
     "submitRequest": "Trimite cererea de ofertă",
-    "successMessage": "Cererea a fost primită. Veți fi contactat."
+    "successMessage": "Cererea a fost primită. Veți fi contactat.",
+    "successToast": "Cerere de ofertă trimisă cu succes!",
+    "invalidEmail": "Adresă de email invalidă",
+    "requiredName": "Numele este obligatoriu",
+    "requiredEmail": "Email-ul este obligatoriu",
+    "requiredPhone": "Telefonul este obligatoriu",
+    "requiredCarMake": "Marca este obligatorie",
+    "requiredCarModel": "Modelul este obligatoriu",
+    "requiredCarYear": "Anul este obligatoriu",
+    "requiredDescription": "Descrierea este obligatorie"
   },
   "contact": {
     "title": "Contact",
@@ -102,6 +120,9 @@
     "registerNow": "Înregistrează-te acum",
     "repeatPassword": "Repetă parola",
     "passwordMismatch": "Parolele nu coincid.",
+    "requiredName": "Numele este obligatoriu",
+    "requiredEmail": "Email-ul este obligatoriu",
+    "requiredPassword": "Parola este obligatorie",
     "appointmentHistory": "Istoric Programări",
     "invoices": "Facturi și Plăți",
     "myCars": "Mașinile Mele",
@@ -152,6 +173,10 @@
   "errors": {
     "network": "Eroare de rețea. Încearcă din nou.",
     "featureDisabled": "Această funcționalitate este dezactivată.",
-    "validation": "Completează toate câmpurile obligatorii."
+    "validation": "Completează toate câmpurile obligatorii.",
+    "completeThisField": "Completează acest câmp.",
+    "submitError": "Nu am putut trimite cererea. Încearcă din nou.",
+    "invalidCredentials": "Email sau parolă incorectă.",
+    "emailIncludeAt": "Include '@' în adresa de email."
   }
 }
