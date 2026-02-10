@@ -98,15 +98,16 @@ export function BookingForm({ tabs }: BookingFormProps) {
 
   const onSubmit = async (data: BookingFormValues) => {
     setLoading(true);
+    const simpleCarSection = activeTab === "tyre" || activeTab === "carWash";
     try {
       const result = await post<unknown>("/appointment-requests", {
         name: data.name.trim(),
         phone: data.phone.trim(),
         email: data.email.trim(),
         carMake: data.carMake.trim(),
-        carModel: data.carModel.trim(),
-        carYear: data.carYear.trim(),
-        description: data.description.trim(),
+        carModel: simpleCarSection ? "" : data.carModel.trim(),
+        carYear: simpleCarSection ? "" : data.carYear.trim(),
+        description: simpleCarSection ? "" : data.description.trim(),
         date: data.date,
         time: data.time,
         bookingType: activeTab,
@@ -184,68 +185,87 @@ export function BookingForm({ tabs }: BookingFormProps) {
           <h3 className="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2">
             <Car size={20} className="text-blue-600" /> {t("programare.carDetails")}
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {activeTab === "tyre" || activeTab === "carWash" ? (
             <div className="space-y-2">
               <label className="text-sm font-bold text-slate-700">
-                {t("programare.carMake")} *
+                {t("programare.car")} *
               </label>
               <input
                 type="text"
-                {...register("carMake", { required: t("programare.requiredCarMake") })}
-                placeholder="Ex: BMW"
+                {...register("carMake", { required: t("programare.requiredCar") })}
+                placeholder="Ex: Dacia Sandero"
                 className={`${inputBase} ${errors.carMake ? inputError : inputNormal}`}
               />
               {errors.carMake && (
                 <p className="text-xs text-red-500 mt-1">{errors.carMake.message}</p>
               )}
             </div>
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-slate-700">
-                {t("programare.carModel")} *
-              </label>
-              <input
-                type="text"
-                {...register("carModel", { required: t("programare.requiredCarModel") })}
-                placeholder="Ex: Seria 3"
-                className={`${inputBase} ${errors.carModel ? inputError : inputNormal}`}
-              />
-              {errors.carModel && (
-                <p className="text-xs text-red-500 mt-1">{errors.carModel.message}</p>
-              )}
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-slate-700">
-                {t("programare.carYear")} *
-              </label>
-              <input
-                type="text"
-                {...register("carYear", { required: t("programare.requiredCarYear") })}
-                placeholder="Ex: 2020"
-                className={`${inputBase} ${errors.carYear ? inputError : inputNormal}`}
-              />
-              {errors.carYear && (
-                <p className="text-xs text-red-500 mt-1">{errors.carYear.message}</p>
-              )}
-            </div>
-          </div>
-          <div className="mt-6 space-y-2">
-            <label className="text-sm font-bold text-slate-700">
-              {t("programare.carProblem")} *
-            </label>
-            <textarea
-              {...register("description", { required: t("programare.requiredDescription") })}
-              rows={3}
-              placeholder={t("programare.carProblemPlaceholder")}
-              className={`${inputBase} resize-none ${errors.description ? inputError : inputNormal}`}
-            />
-            {errors.description && (
-              <p className="text-xs text-red-500 mt-1">{errors.description.message}</p>
-            )}
-          </div>
+          ) : (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-slate-700">
+                    {t("programare.carMake")} *
+                  </label>
+                  <input
+                    type="text"
+                    {...register("carMake", { required: t("programare.requiredCarMake") })}
+                    placeholder="Ex: BMW"
+                    className={`${inputBase} ${errors.carMake ? inputError : inputNormal}`}
+                  />
+                  {errors.carMake && (
+                    <p className="text-xs text-red-500 mt-1">{errors.carMake.message}</p>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-slate-700">
+                    {t("programare.carModel")} *
+                  </label>
+                  <input
+                    type="text"
+                    {...register("carModel", { required: t("programare.requiredCarModel") })}
+                    placeholder="Ex: Seria 3"
+                    className={`${inputBase} ${errors.carModel ? inputError : inputNormal}`}
+                  />
+                  {errors.carModel && (
+                    <p className="text-xs text-red-500 mt-1">{errors.carModel.message}</p>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-slate-700">
+                    {t("programare.carYear")} *
+                  </label>
+                  <input
+                    type="text"
+                    {...register("carYear", { required: t("programare.requiredCarYear") })}
+                    placeholder="Ex: 2020"
+                    className={`${inputBase} ${errors.carYear ? inputError : inputNormal}`}
+                  />
+                  {errors.carYear && (
+                    <p className="text-xs text-red-500 mt-1">{errors.carYear.message}</p>
+                  )}
+                </div>
+              </div>
+              <div className="mt-6 space-y-2">
+                <label className="text-sm font-bold text-slate-700">
+                  {t("programare.carProblem")} *
+                </label>
+                <textarea
+                  {...register("description", { required: t("programare.requiredDescription") })}
+                  rows={3}
+                  placeholder={t("programare.carProblemPlaceholder")}
+                  className={`${inputBase} resize-none ${errors.description ? inputError : inputNormal}`}
+                />
+                {errors.description && (
+                  <p className="text-xs text-red-500 mt-1">{errors.description.message}</p>
+                )}
+              </div>
+            </>
+          )}
           {optionalList.length > 0 && (
             <div className="mt-6 space-y-2">
               <label className="text-sm font-bold text-slate-700">
-                {t("programare.optionalServices")}
+                {activeTab === "tyre" || activeTab === "carWash" ? t("programare.services") : t("programare.optionalServices")}
               </label>
               <div className="flex flex-wrap gap-3">
                 {optionalList.map((item) => (
