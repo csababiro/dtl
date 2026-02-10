@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import {
   User,
@@ -32,6 +32,11 @@ const inputBase =
 const inputNormal = "border-slate-200";
 const inputError = "border-red-500";
 
+const CUSTOMER_NAME_KEY = "dtl_customer_name";
+const CUSTOMER_EMAIL_KEY = "dtl_customer_email";
+const CUSTOMER_PHONE_KEY = "dtl_customer_phone";
+const CUSTOMER_SESSION_KEY = "dtl_customer_session";
+
 export function CereOfertaForm() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -41,11 +46,32 @@ export function CereOfertaForm() {
     register,
     handleSubmit,
     setError,
-    formState: { errors },
     reset,
+    getValues,
+    formState: { errors },
   } = useForm<CereOfertaFormValues>({
     mode: "onChange",
   });
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (sessionStorage.getItem(CUSTOMER_SESSION_KEY) !== "true") return;
+    const name = sessionStorage.getItem(CUSTOMER_NAME_KEY) ?? "";
+    const email = sessionStorage.getItem(CUSTOMER_EMAIL_KEY) ?? "";
+    const phone = sessionStorage.getItem(CUSTOMER_PHONE_KEY) ?? "";
+    if (name || email || phone) {
+      reset({
+        name,
+        email,
+        phone,
+        carMake: getValues("carMake") || "",
+        carModel: getValues("carModel") || "",
+        carYear: getValues("carYear") || "",
+        description: getValues("description") || "",
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- run once on mount to prepopulate from session
+  }, []);
 
   const onSubmit = async (data: CereOfertaFormValues) => {
     setLoading(true);
