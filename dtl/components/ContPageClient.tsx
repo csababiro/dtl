@@ -12,6 +12,8 @@ import {
   Package,
   Clock,
   CheckCircle,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import { t } from "@/lib/i18n";
 
@@ -28,7 +30,12 @@ export function ContPageClient() {
   const [registerName, setRegisterName] = useState("");
   const [registerEmail, setRegisterEmail] = useState("");
   const [registerPassword, setRegisterPassword] = useState("");
+  const [registerPasswordRepeat, setRegisterPasswordRepeat] = useState("");
   const [registerPromo, setRegisterPromo] = useState(false);
+  const [showLoginPassword, setShowLoginPassword] = useState(false);
+  const [showRegisterPassword, setShowRegisterPassword] = useState(false);
+  const [showRegisterPasswordRepeat, setShowRegisterPasswordRepeat] = useState(false);
+  const [registerError, setRegisterError] = useState<string | null>(null);
 
   useEffect(() => {
     const stored = typeof window !== "undefined" ? sessionStorage.getItem(STORAGE_KEY) : null;
@@ -43,6 +50,11 @@ export function ContPageClient() {
 
   function handleRegister(e: React.FormEvent) {
     e.preventDefault();
+    setRegisterError(null);
+    if (registerPassword !== registerPasswordRepeat) {
+      setRegisterError(t("cont.passwordMismatch"));
+      return;
+    }
     if (typeof window !== "undefined") sessionStorage.setItem(STORAGE_KEY, "true");
     setIsLoggedIn(true);
   }
@@ -241,7 +253,6 @@ export function ContPageClient() {
 
   const benefits = [
     t("cont.benefitRepairs"),
-    t("cont.benefitInvoices"),
     t("cont.benefitBooking"),
     t("cont.benefitPromo"),
   ];
@@ -316,14 +327,24 @@ export function ContPageClient() {
                   {t("cont.forgotPassword")}
                 </button>
               </label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500"
-                required
-              />
+              <div className="relative">
+                <input
+                  type={showLoginPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="w-full p-4 pr-12 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowLoginPassword((v) => !v)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-slate-400 hover:text-slate-600 rounded-lg min-h-[44px] min-w-[44px] flex items-center justify-center"
+                  aria-label={showLoginPassword ? "Ascunde parola" : "Arată parola"}
+                >
+                  {showLoginPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+              </div>
             </div>
             <label className="flex items-center gap-3 cursor-pointer group">
               <input
@@ -345,6 +366,11 @@ export function ContPageClient() {
           </form>
         ) : (
           <form onSubmit={handleRegister} className="space-y-6">
+            {registerError && (
+              <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl px-4 py-3">
+                {registerError}
+              </p>
+            )}
             <div className="space-y-2">
               <label className="text-sm font-bold text-slate-700">
                 {t("programare.name")}
@@ -375,14 +401,47 @@ export function ContPageClient() {
               <label className="text-sm font-bold text-slate-700">
                 {t("admin.password")}
               </label>
-              <input
-                type="password"
-                value={registerPassword}
-                onChange={(e) => setRegisterPassword(e.target.value)}
-                placeholder="••••••••"
-                className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500"
-                required
-              />
+              <div className="relative">
+                <input
+                  type={showRegisterPassword ? "text" : "password"}
+                  value={registerPassword}
+                  onChange={(e) => setRegisterPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="w-full p-4 pr-12 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowRegisterPassword((v) => !v)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-slate-400 hover:text-slate-600 rounded-lg min-h-[44px] min-w-[44px] flex items-center justify-center"
+                  aria-label={showRegisterPassword ? "Ascunde parola" : "Arată parola"}
+                >
+                  {showRegisterPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-bold text-slate-700">
+                {t("cont.repeatPassword")}
+              </label>
+              <div className="relative">
+                <input
+                  type={showRegisterPasswordRepeat ? "text" : "password"}
+                  value={registerPasswordRepeat}
+                  onChange={(e) => setRegisterPasswordRepeat(e.target.value)}
+                  placeholder="••••••••"
+                  className="w-full p-4 pr-12 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowRegisterPasswordRepeat((v) => !v)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-slate-400 hover:text-slate-600 rounded-lg min-h-[44px] min-w-[44px] flex items-center justify-center"
+                  aria-label={showRegisterPasswordRepeat ? "Ascunde parola" : "Arată parola"}
+                >
+                  {showRegisterPasswordRepeat ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+              </div>
             </div>
             <label className="flex items-center gap-3 cursor-pointer group">
               <input
