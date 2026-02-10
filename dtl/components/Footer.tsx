@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Phone, Mail, MapPin } from "lucide-react";
 import { t } from "@/lib/i18n";
+import { getMapsUrl } from "@/lib/maps";
 
 interface FooterProps {
   phone?: string | null;
@@ -94,7 +95,14 @@ export function Footer({
             {address && (
               <li className="flex items-start gap-3">
                 <MapPin size={18} className="text-blue-500 mt-1 shrink-0" />
-                <span>{address}</span>
+                <a
+                  href={getMapsUrl(address)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-blue-400 transition-colors"
+                >
+                  {address}
+                </a>
               </li>
             )}
           </ul>

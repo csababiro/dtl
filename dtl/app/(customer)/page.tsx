@@ -11,6 +11,7 @@ import {
 import { getFeatureFlags } from "@/lib/feature-flags";
 import { getBusinessSettings } from "@/lib/settings";
 import { t } from "@/lib/i18n";
+import { getMapsUrl } from "@/lib/maps";
 import { Map } from "@/components/Map";
 import { ImageWithFallback } from "@/components/ImageWithFallback";
 import { isAnyBookingEnabled, isModuleEnabled } from "@/lib/feature-flags";
@@ -259,7 +260,14 @@ export default async function HomePage() {
                   />
                   <div>
                     <h4 className="font-bold text-slate-900">Adresă</h4>
-                    <p className="text-slate-600">{settings.address}</p>
+                    <a
+                      href={getMapsUrl(settings.address)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-slate-600 hover:text-blue-600 transition-colors"
+                    >
+                      {settings.address}
+                    </a>
                   </div>
                 </div>
               )}
@@ -324,9 +332,14 @@ export default async function HomePage() {
                     Google Maps integrat aici
                   </p>
                   {settings.address && (
-                    <p className="text-slate-500 text-sm mt-2">
+                    <a
+                      href={getMapsUrl(settings.address)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-slate-500 text-sm mt-2 hover:text-blue-600 transition-colors block"
+                    >
                       {settings.address}
-                    </p>
+                    </a>
                   )}
                 </div>
               </div>

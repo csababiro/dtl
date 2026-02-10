@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { getBusinessSettings } from "@/lib/settings";
 import { t } from "@/lib/i18n";
+import { getMapsUrl } from "@/lib/maps";
 
 function formatHoursShort(hours: Record<string, string> | undefined): string {
   if (!hours) return "L-V: 08:00 - 18:00";
@@ -115,9 +116,18 @@ export default async function ContactPage() {
               </div>
               <div>
                 <h4 className="text-xl font-bold mb-2">Locația noastră</h4>
-                <p className="text-slate-400 leading-relaxed">
-                  {settings.address ?? "—"}
-                </p>
+                {settings.address ? (
+                  <a
+                    href={getMapsUrl(settings.address)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-slate-400 leading-relaxed hover:text-white transition-colors"
+                  >
+                    {settings.address}
+                  </a>
+                ) : (
+                  <p className="text-slate-400 leading-relaxed">—</p>
+                )}
               </div>
             </div>
             <div className="aspect-video w-full bg-slate-800 rounded-2xl flex items-center justify-center overflow-hidden">

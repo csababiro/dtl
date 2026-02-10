@@ -1,4 +1,5 @@
 import { Phone, Mail } from "lucide-react";
+import { getMapsUrl } from "@/lib/maps";
 
 interface ContactStripProps {
   phone?: string | null;
@@ -42,7 +43,14 @@ export function ContactStrip({
       </div>
       <div className="hidden sm:flex items-center gap-4">
         {address ? (
-          <span className="opacity-70">{address}</span>
+          <a
+            href={getMapsUrl(address)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="opacity-70 hover:opacity-100 hover:underline min-h-[44px] items-center flex"
+          >
+            {address}
+          </a>
         ) : null}
       </div>
     </div>
