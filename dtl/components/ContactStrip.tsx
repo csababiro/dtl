@@ -1,9 +1,4 @@
-import { Phone, Mail, MessageCircle } from "lucide-react";
-import { t } from "@/lib/i18n";
-
-function digitsOnly(s: string): string {
-  return s.replace(/\D/g, "");
-}
+import { Phone, Mail } from "lucide-react";
 
 interface ContactStripProps {
   phone?: string | null;
@@ -16,7 +11,6 @@ interface ContactStripProps {
 export function ContactStrip({
   phone,
   email,
-  whatsapp,
   address,
   dark = false,
 }: ContactStripProps) {
@@ -46,18 +40,7 @@ export function ContactStrip({
           </a>
         ) : null}
       </div>
-      <div className="flex flex-wrap items-center gap-4">
-        {whatsapp ? (
-          <a
-            href={`https://wa.me/${digitsOnly(whatsapp)}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-2 hover:opacity-80 transition-opacity min-h-[44px] items-center"
-          >
-            <MessageCircle size={16} className="text-green-400" />
-            <span>{t("contact.whatsapp")}</span>
-          </a>
-        ) : null}
+      <div className="hidden sm:flex items-center gap-4">
         {address ? (
           <span className="opacity-70">{address}</span>
         ) : null}

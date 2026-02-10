@@ -1,6 +1,6 @@
 # Figma Design Prompt: DTL – All Screens for Car Service Web App
 
-Create a complete set of UI screens for a **Romanian, mobile-first car service web app** (Next.js). One design system; two areas: **customer-facing** and **admin**. All copy in **Romanian**. **Site owner data** (business name, address, phone, hours) for contact strip, map, and footer: use **`dtl-company-info.md`** as reference (e.g. DTL service-vulcanizare-spalatorie, Strada Principală 446, Sîntandrei, +40 744 927 038, Mon–Fri 8–17, Sat 8–13:30, Sun closed).
+Create a complete set of UI screens for a **Romanian, mobile-first car service web app** (Next.js). One design system; two areas: **customer-facing** and **admin**. All copy in **Romanian**. **Site owner data** (business name, address, phone, hours) for contact strip, map, and footer: use **`dtl-company-info.md`** as reference (e.g. DTL service-vulcanizare-spalatorie, Strada Principală 446, Sântandrei, +40 744 927 038, Mon–Fri 8–17, Sat 8–13:30, Sun closed).
 
 **Implementation reference:** The canonical design and layout reference for building the app is the **`figma-src/`** folder (React app with `app/pages/`, `app/components/`, `app/components/ui/`). Use this prompt to generate or refine Figma designs; implementation in Next.js should align with both this prompt and the structure/copy in `figma-src/`.
 

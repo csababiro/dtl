@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Phone, Mail, MapPin, MessageCircle } from "lucide-react";
+import { Phone, Mail, MapPin } from "lucide-react";
 import { t } from "@/lib/i18n";
 
 interface FooterProps {
@@ -22,7 +22,6 @@ function formatHours(hours: Record<string, string> | null | undefined): string {
 export function Footer({
   phone,
   email,
-  whatsapp,
   address,
   description,
   hours,
@@ -89,19 +88,6 @@ export function Footer({
                 <Mail size={18} className="text-blue-500 shrink-0" />
                 <a href={`mailto:${email}`} className="hover:text-blue-400">
                   {email}
-                </a>
-              </li>
-            )}
-            {whatsapp && (
-              <li className="flex items-center gap-3">
-                <MessageCircle size={18} className="text-green-500 shrink-0" />
-                <a
-                  href={`https://wa.me/${whatsapp.replace(/\D/g, "")}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:text-green-400"
-                >
-                  {t("contact.whatsapp")}
                 </a>
               </li>
             )}

@@ -16,7 +16,7 @@ Use this data for business settings, contact strip, map, and operating hours in 
 
 | Field   | Value            |
 |--------|------------------|
-| **Address** | Strada Principală 446, 417515 Sîntandrei, Romania |
+| **Address** | Strada Principală 446, 417515 Sântandrei, Romania |
 | **Phone**   | +40 744 927 038   |
 | **Email**   | *(add if you have one)* |
 | **WhatsApp**| *(optional – can use same phone)* |
@@ -47,7 +47,7 @@ Use this object as default business settings or to seed the backend.
 {
   "name": "DTL service-vulcanizare-spalatorie",
   "description": "Auto repair shop in Sântandrei, Romania",
-  "address": "Strada Principală 446, 417515 Sîntandrei, Romania",
+  "address": "Strada Principală 446, 417515 Sântandrei, Romania",
   "phone": "+40 744 927 038",
   "email": "",
   "whatsapp": "",
@@ -67,7 +67,7 @@ Use this object as default business settings or to seed the backend.
 
 ## For maps
 
-- **Address for Google Maps:** Strada Principală 446, 417515 Sîntandrei, Romania  
-- **Place:** Sântandrei (Sîntandrei), Romania
+- **Address for Google Maps:** Strada Principală 446, 417515 Sântandrei, Romania  
+- **Place:** Sântandrei (Sântandrei), Romania
 
 Use this address in the Map component and in “Get directions” links.
