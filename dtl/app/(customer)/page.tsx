@@ -82,7 +82,7 @@ export default async function HomePage() {
     },
     {
       title: t("home.serviceCarWash"),
-      desc: "Spălare profesională, detailing interior și tratamente nanotehnologice.",
+      desc: "Spălare profesională, detailing interior și cosmetizare.",
       icon: Clock,
       img: SERVICE_WASH_IMG,
       show: showCarWash,
@@ -203,7 +203,7 @@ export default async function HomePage() {
               {[
                 {
                   t: "Piese de origine",
-                  d: "Folosim doar piese omologate și oferim garanție extinsă pentru orice lucrare.",
+                  d: "Folosim doar piese omologate și oferim garanție pentru orice lucrare.",
                 },
                 {
                   t: "Transparență totală",
@@ -235,9 +235,9 @@ export default async function HomePage() {
               />
             </div>
             <div className="absolute -bottom-10 -left-10 bg-blue-600 text-white p-10 rounded-3xl shadow-2xl hidden lg:block">
-              <p className="text-5xl font-black mb-2">15+</p>
+              <p className="text-5xl font-black mb-2">Experiență</p>
               <p className="text-lg font-bold opacity-80 uppercase tracking-widest">
-                Ani de experiență
+                și dedicare
               </p>
             </div>
           </div>

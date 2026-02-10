@@ -1,6 +1,6 @@
 {
   "name": "DTL service-vulcanizare-spalatorie",
-  "description": "Auto repair shop in Sântandrei, Romania",
+  "description": "Service auto în Sântandrei, România",
   "address": "Strada Principală 446, 417515 Sântandrei, Romania",
   "phone": "+40 744 927 038",
   "email": "",
@@ -12,6 +12,6 @@
     "thursday": "08:00–17:00",
     "friday": "08:00–17:00",
     "saturday": "08:00–13:30",
-    "sunday": "closed"
+    "sunday": "închis"
   }
 }
