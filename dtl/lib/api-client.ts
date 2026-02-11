@@ -7,8 +7,10 @@ export type ApiError = {
 
 function getBaseUrl(): string {
   const url = process.env.NEXT_PUBLIC_API_URL;
-  if (url == null || url === "") return "";
-  return url.replace(/\/$/, "");
+  if (url != null && url !== "") return url.replace(/\/$/, "");
+  // Same-origin fallback: use this app's /api (so form works without external backend)
+  if (typeof window !== "undefined") return window.location.origin + "/api";
+  return (process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000").replace(/\/$/, "") + "/api";
 }
 
 export async function get<T>(path: string): Promise<{ data: T } | { error: ApiError }> {

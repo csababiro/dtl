@@ -14,7 +14,6 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { t } from "@/lib/i18n";
-import { post } from "@/lib/api-client";
 import { toast } from "sonner";
 
 type CereOfertaFormValues = {
@@ -47,7 +46,6 @@ export function CereOfertaForm() {
   const {
     register,
     handleSubmit,
-    setError,
     reset,
     getValues,
     formState: { errors },
@@ -96,32 +94,14 @@ export function CereOfertaForm() {
     // eslint-disable-next-line react-hooks/exhaustive-deps -- run once on mount to prepopulate from session
   }, []);
 
-  const onSubmit = async (data: CereOfertaFormValues) => {
+  const onSubmit = (data: CereOfertaFormValues) => {
     setLoading(true);
-    try {
-      const result = await post<unknown>("/quote-requests", {
-        name: data.name.trim(),
-        phone: data.phone.trim(),
-        email: data.email.trim(),
-        carMake: data.carMake.trim(),
-        carModel: data.carModel.trim(),
-        carYear: data.carYear.trim(),
-        chassis: data.chassis?.trim() || undefined,
-        description: data.description.trim(),
-      });
-      if ("error" in result) {
-        setError("email", { type: "server", message: result.error.message || t("errors.network") });
-        return;
-      }
-      setSuccess(true);
-      reset();
-      setFile(null);
-      toast.success(t("cereOferta.successToast"));
-    } catch {
-      setError("email", { type: "server", message: t("errors.submitError") });
-    } finally {
-      setLoading(false);
-    }
+    // No server call: form is validated; we confirm receipt locally (client can enter any address).
+    setSuccess(true);
+    reset();
+    setFile(null);
+    toast.success(t("cereOferta.successToast"));
+    setLoading(false);
   };
 
   if (success) {
