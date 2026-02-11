@@ -14,6 +14,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { t } from "@/lib/i18n";
+import { phoneRegisterOptions, withPhoneFilter } from "@/lib/phone-validation";
 import { toast } from "sonner";
 
 type CereOfertaFormValues = {
@@ -207,20 +208,9 @@ export function CereOfertaForm() {
                   type="tel"
                   placeholder="07xx xxx xxx"
                   className={`${inputBase} ${errors.phone ? inputError : inputNormal}`}
-                  {...((): ReturnType<typeof register> => {
-                    const { ref, onChange, ...rest } = register("phone", {
-                      required: t("cereOferta.requiredPhone"),
-                      pattern: { value: /^[\d\s\-+]*$/, message: t("errors.phoneDigitsOnly") },
-                    });
-                    return {
-                      ...rest,
-                      ref,
-                      onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
-                        e.target.value = e.target.value.replace(/[^\d\s\-+]/g, "");
-                        onChange(e);
-                      },
-                    };
-                  })()}
+                  {...withPhoneFilter(
+                    register("phone", phoneRegisterOptions(t("cereOferta.requiredPhone"), t("errors.phoneDigitsOnly")))
+                  )}
                 />
               </div>
               {errors.phone && (

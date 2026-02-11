@@ -13,6 +13,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { t } from "@/lib/i18n";
+import { phoneRegisterOptions, withPhoneFilter } from "@/lib/phone-validation";
 import { post } from "@/lib/api-client";
 
 const TIME_SLOTS = [
@@ -412,20 +413,9 @@ export function BookingForm({ tabs }: BookingFormProps) {
                   type="tel"
                   placeholder="07xx xxx xxx"
                   className={`${inputBasePl} ${errors.phone ? inputError : inputNormal}`}
-                  {...((): ReturnType<typeof register> => {
-                    const { ref, onChange, ...rest } = register("phone", {
-                      required: t("programare.requiredPhone"),
-                      pattern: { value: /^[\d\s\-+]*$/, message: t("errors.phoneDigitsOnly") },
-                    });
-                    return {
-                      ...rest,
-                      ref,
-                      onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
-                        e.target.value = e.target.value.replace(/[^\d\s\-+]/g, "");
-                        onChange(e);
-                      },
-                    };
-                  })()}
+                  {...withPhoneFilter(
+                    register("phone", phoneRegisterOptions(t("programare.requiredPhone"), t("errors.phoneDigitsOnly")))
+                  )}
                 />
               </div>
               {errors.phone && (
