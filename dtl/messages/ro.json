@@ -104,7 +104,9 @@
     "requiredCarMake": "Marca este obligatorie",
     "requiredCarModel": "Modelul este obligatoriu",
     "requiredCarYear": "Anul este obligatoriu",
-    "requiredDescription": "Descrierea este obligatorie"
+    "requiredDescription": "Descrierea este obligatorie",
+    "requiredChassis": "Șasiul este obligatoriu",
+    "chassisFormat": "Șasiul poate conține doar litere mari (A-Z), cifre și liniuță"
   },
   "contact": {
     "title": "Contact",
@@ -189,6 +191,7 @@
     "completeThisField": "Completează acest câmp.",
     "submitError": "Nu am putut trimite cererea. Încearcă din nou.",
     "invalidCredentials": "Email sau parolă incorectă.",
-    "emailIncludeAt": "Include '@' în adresa de email."
+    "emailIncludeAt": "Include '@' în adresa de email.",
+    "phoneDigitsOnly": "Telefonul poate conține doar cifre, spații, liniuță și +."
   }
 }

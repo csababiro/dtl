@@ -542,7 +542,7 @@ export function ContPageClient() {
                       <input
                         type="tel"
                         value={userPhone || ""}
-                        onChange={(e) => setUserPhone(e.target.value)}
+                        onChange={(e) => setUserPhone(e.target.value.replace(/[^\d\s\-+]/g, ""))}
                         placeholder="07xx xxx xxx"
                         className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500"
                       />
@@ -751,9 +751,22 @@ export function ContPageClient() {
               </label>
               <input
                 type="tel"
-                {...registerForm.register("phone")}
                 placeholder="07xx xxx xxx"
                 className={`${inputBase} ${registerForm.formState.errors.phone ? inputError : inputNormal}`}
+                {...((): ReturnType<typeof registerForm.register> => {
+                  const { ref, onChange, ...rest } = registerForm.register("phone", {
+                    required: t("programare.requiredPhone"),
+                    pattern: { value: /^[\d\s\-+]*$/, message: t("errors.phoneDigitsOnly") },
+                  });
+                  return {
+                    ...rest,
+                    ref,
+                    onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
+                      e.target.value = e.target.value.replace(/[^\d\s\-+]/g, "");
+                      onChange(e);
+                    },
+                  };
+                })()}
               />
               {registerForm.formState.errors.phone && (
                 <p className="text-xs text-red-500 mt-1">{registerForm.formState.errors.phone.message}</p>

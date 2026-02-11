@@ -205,9 +205,22 @@ export function CereOfertaForm() {
                 />
                 <input
                   type="tel"
-                  {...register("phone", { required: t("cereOferta.requiredPhone") })}
                   placeholder="07xx xxx xxx"
                   className={`${inputBase} ${errors.phone ? inputError : inputNormal}`}
+                  {...((): ReturnType<typeof register> => {
+                    const { ref, onChange, ...rest } = register("phone", {
+                      required: t("cereOferta.requiredPhone"),
+                      pattern: { value: /^[\d\s\-+]*$/, message: t("errors.phoneDigitsOnly") },
+                    });
+                    return {
+                      ...rest,
+                      ref,
+                      onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
+                        e.target.value = e.target.value.replace(/[^\d\s\-+]/g, "");
+                        onChange(e);
+                      },
+                    };
+                  })()}
                 />
               </div>
               {errors.phone && (
@@ -292,14 +305,30 @@ export function CereOfertaForm() {
           <div className="space-y-6">
             <div className="space-y-2">
               <label className="text-sm font-bold text-slate-700">
-                {t("cereOferta.chassis")}
+                {t("cereOferta.chassis")} *
               </label>
               <input
                 type="text"
-                {...register("chassis")}
                 placeholder={t("cereOferta.chassisPlaceholder")}
-                className={`w-full p-4 bg-slate-50 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 transition-all border ${inputNormal}`}
+                className={`w-full p-4 bg-slate-50 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 transition-all border ${errors.chassis ? inputError : inputNormal}`}
+                {...((): ReturnType<typeof register> => {
+                  const { ref, onChange, ...rest } = register("chassis", {
+                    required: t("cereOferta.requiredChassis"),
+                    pattern: { value: /^[A-Z0-9\-]*$/, message: t("cereOferta.chassisFormat") },
+                  });
+                  return {
+                    ...rest,
+                    ref,
+                    onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
+                      e.target.value = e.target.value.toUpperCase().replace(/[^A-Z0-9\-]/g, "");
+                      onChange(e);
+                    },
+                  };
+                })()}
               />
+              {errors.chassis && (
+                <p className="text-xs text-red-500 mt-1">{errors.chassis.message}</p>
+              )}
             </div>
             <div className="space-y-2">
               <label className="text-sm font-bold text-slate-700">

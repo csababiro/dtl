@@ -410,9 +410,22 @@ export function BookingForm({ tabs }: BookingFormProps) {
                 <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                 <input
                   type="tel"
-                  {...register("phone", { required: t("programare.requiredPhone") })}
                   placeholder="07xx xxx xxx"
                   className={`${inputBasePl} ${errors.phone ? inputError : inputNormal}`}
+                  {...((): ReturnType<typeof register> => {
+                    const { ref, onChange, ...rest } = register("phone", {
+                      required: t("programare.requiredPhone"),
+                      pattern: { value: /^[\d\s\-+]*$/, message: t("errors.phoneDigitsOnly") },
+                    });
+                    return {
+                      ...rest,
+                      ref,
+                      onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
+                        e.target.value = e.target.value.replace(/[^\d\s\-+]/g, "");
+                        onChange(e);
+                      },
+                    };
+                  })()}
                 />
               </div>
               {errors.phone && (
