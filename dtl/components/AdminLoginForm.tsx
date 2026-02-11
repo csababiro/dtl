@@ -54,7 +54,9 @@ export function AdminLoginForm() {
         </label>
         <input
           id="email"
-          type="email"
+          type="text"
+          inputMode="email"
+          autoComplete="email"
           {...register("email", {
           required: t("errors.completeThisField"),
           validate: (v) =>

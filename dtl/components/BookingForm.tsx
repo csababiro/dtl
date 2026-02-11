@@ -429,7 +429,9 @@ export function BookingForm({ tabs }: BookingFormProps) {
               <div className="relative">
                 <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                 <input
-                  type="email"
+                  type="text"
+                  inputMode="email"
+                  autoComplete="email"
                   {...register("email", {
                     required: t("programare.requiredEmail"),
                     validate: (v) =>

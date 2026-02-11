@@ -647,7 +647,9 @@ export function ContPageClient() {
                 {t("admin.email")}
               </label>
               <input
-                type="email"
+                type="text"
+                inputMode="email"
+                autoComplete="email"
                 {...loginForm.register("email", {
                 required: t("cont.requiredEmail"),
                 validate: (v) =>
@@ -729,7 +731,9 @@ export function ContPageClient() {
                 {t("admin.email")}
               </label>
               <input
-                type="email"
+                type="text"
+                inputMode="email"
+                autoComplete="email"
                 {...registerForm.register("email", {
                   required: t("cont.requiredEmail"),
                   validate: (v) =>

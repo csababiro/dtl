@@ -177,7 +177,9 @@ export function CereOfertaForm() {
                   size={18}
                 />
                 <input
-                  type="email"
+                  type="text"
+                  inputMode="email"
+                  autoComplete="email"
                   {...register("email", {
                     required: t("cereOferta.requiredEmail"),
                     validate: (v) =>
