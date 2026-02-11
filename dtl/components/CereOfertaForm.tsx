@@ -14,7 +14,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { t } from "@/lib/i18n";
-import { phoneRegisterOptions, withPhoneFilter } from "@/lib/phone-validation";
+import { phoneRegisterOptions, withPhoneFilter, withYearFilter, YEAR_PATTERN, validateYearRange } from "@/lib/phone-validation";
 import { toast } from "sonner";
 
 type CereOfertaFormValues = {
@@ -278,9 +278,18 @@ export function CereOfertaForm() {
                 />
                 <input
                   type="text"
-                  {...register("carYear", { required: t("cereOferta.requiredCarYear") })}
                   placeholder="Ex: 2018"
                   className={`${inputBase} ${errors.carYear ? inputError : inputNormal}`}
+                  {...withYearFilter(
+                    register("carYear", {
+                      required: t("cereOferta.requiredCarYear"),
+                      pattern: { value: YEAR_PATTERN, message: t("errors.carYearDigitsOnly") },
+                      validate: (v) => {
+                        const key = validateYearRange(v);
+                        return key ? t("errors." + key) : true;
+                      },
+                    })
+                  )}
                 />
               </div>
               {errors.carYear && (

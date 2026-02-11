@@ -18,7 +18,7 @@ import {
   EyeOff,
 } from "lucide-react";
 import { t } from "@/lib/i18n";
-import { phoneFilter, phoneRegisterOptions, withPhoneFilter } from "@/lib/phone-validation";
+import { phoneFilter, phoneRegisterOptions, withPhoneFilter, yearFilter, validateYearRange } from "@/lib/phone-validation";
 
 const STORAGE_KEY = "dtl_customer_session";
 const NAME_STORAGE_KEY = "dtl_customer_name";
@@ -58,6 +58,7 @@ export function ContPageClient() {
   const [newCarYear, setNewCarYear] = useState("");
   const [newCarChassis, setNewCarChassis] = useState("");
   const [newCarPhoto, setNewCarPhoto] = useState<File | null>(null);
+  const [newCarYearError, setNewCarYearError] = useState<string | null>(null);
   const [selectedAppointmentId, setSelectedAppointmentId] = useState<string | null>(null);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
@@ -131,6 +132,14 @@ export function ContPageClient() {
     const make = newCarMake.trim();
     const model = newCarModel.trim();
     const year = newCarYear.trim();
+    if (year) {
+      const key = validateYearRange(year);
+      if (key) {
+        setNewCarYearError(t("errors." + key));
+        return;
+      }
+    }
+    setNewCarYearError(null);
     if (!make && !model && !year) return;
     const next: UserCar[] = [...userCars, {
       id: String(Date.now()),
@@ -428,10 +437,16 @@ export function ContPageClient() {
                         <input
                           type="text"
                           value={newCarYear}
-                          onChange={(e) => setNewCarYear(e.target.value)}
+                          onChange={(e) => {
+                            setNewCarYear(yearFilter(e.target.value));
+                            setNewCarYearError(null);
+                          }}
                           placeholder="Ex: 2020"
-                          className={`${inputBase} ${inputNormal}`}
+                          className={`${inputBase} ${newCarYearError ? "border-red-500" : inputNormal}`}
                         />
+                        {newCarYearError && (
+                          <p className="text-xs text-red-500 mt-1">{newCarYearError}</p>
+                        )}
                       </div>
                     </div>
                     <div className="space-y-2 mb-4">
@@ -469,7 +484,7 @@ export function ContPageClient() {
                       </button>
                       <button
                         type="button"
-                        onClick={() => { setShowAddCarForm(false); setNewCarMake(""); setNewCarModel(""); setNewCarYear(""); setNewCarChassis(""); setNewCarPhoto(null); }}
+                        onClick={() => { setShowAddCarForm(false); setNewCarMake(""); setNewCarModel(""); setNewCarYear(""); setNewCarChassis(""); setNewCarPhoto(null); setNewCarYearError(null); }}
                         className="px-6 py-3 bg-slate-100 text-slate-700 font-bold rounded-xl hover:bg-slate-200 transition-colors"
                       >
                         {t("common.cancel")}

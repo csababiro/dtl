@@ -33,3 +33,37 @@ export function withPhoneFilter<T extends { ref: unknown; onChange: (e: { target
     },
   } as T;
 }
+
+/** Car year: up to 4 digits only. */
+export const YEAR_PATTERN = /^\d{0,4}$/;
+
+export function yearFilter(value: string): string {
+  return value.replace(/\D/g, "").slice(0, 4);
+}
+
+const MIN_YEAR = 1980;
+
+export function getCurrentYear(): number {
+  return new Date().getFullYear();
+}
+
+/** Returns error message if year is not in [1980, currentYear], else undefined. */
+export function validateYearRange(yearStr: string): string | undefined {
+  if (!yearStr.trim()) return undefined;
+  const y = parseInt(yearStr.trim(), 10);
+  if (Number.isNaN(y) || y < MIN_YEAR || y > getCurrentYear()) return "carYearRange";
+  return undefined;
+}
+
+export function withYearFilter<T extends { ref: unknown; onChange: (e: { target: { value: string } }) => void }>(
+  registered: T
+): T {
+  const { onChange, ...rest } = registered;
+  return {
+    ...rest,
+    onChange: (e: { target: { value: string } }) => {
+      e.target.value = yearFilter(e.target.value);
+      onChange(e);
+    },
+  } as T;
+}

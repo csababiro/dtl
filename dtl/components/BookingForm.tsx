@@ -13,7 +13,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { t } from "@/lib/i18n";
-import { phoneRegisterOptions, withPhoneFilter } from "@/lib/phone-validation";
+import { phoneRegisterOptions, withPhoneFilter, withYearFilter, YEAR_PATTERN, validateYearRange } from "@/lib/phone-validation";
 
 const TIME_SLOTS = [
   "08:00", "09:00", "10:00", "11:00", "12:00",
@@ -262,9 +262,18 @@ export function BookingForm({ tabs }: BookingFormProps) {
                   </label>
                   <input
                     type="text"
-                    {...register("carYear", { required: t("programare.requiredCarYear") })}
                     placeholder="Ex: 2020"
                     className={`${inputBase} ${errors.carYear ? inputError : inputNormal}`}
+                    {...withYearFilter(
+                      register("carYear", {
+                        required: t("programare.requiredCarYear"),
+                        pattern: { value: YEAR_PATTERN, message: t("errors.carYearDigitsOnly") },
+                        validate: (v) => {
+                          const key = validateYearRange(v);
+                          return key ? t("errors." + key) : true;
+                        },
+                      })
+                    )}
                   />
                   {errors.carYear && (
                     <p className="text-xs text-red-500 mt-1">{errors.carYear.message}</p>

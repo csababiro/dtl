@@ -192,6 +192,8 @@
     "submitError": "Nu am putut trimite cererea. Încearcă din nou.",
     "invalidCredentials": "Email sau parolă incorectă.",
     "emailIncludeAt": "Include '@' în adresa de email.",
-    "phoneDigitsOnly": "Telefonul poate conține doar cifre, spații, liniuță și +."
+    "phoneDigitsOnly": "Telefonul poate conține doar cifre, spații, liniuță și +.",
+    "carYearDigitsOnly": "Anul poate conține doar cifre.",
+    "carYearRange": "Anul trebuie să fie între 1980 și anul curent."
   }
 }
