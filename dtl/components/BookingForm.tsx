@@ -14,6 +14,13 @@ import {
 } from "lucide-react";
 import { t } from "@/lib/i18n";
 import { phoneRegisterOptions, withPhoneFilter, withYearFilter, YEAR_PATTERN, validateYearRange } from "@/lib/phone-validation";
+import {
+  NAME_MAX,
+  EMAIL_MAX,
+  PHONE_MAX,
+  CAR_MAKE_MODEL_MAX,
+  DESCRIPTION_MAX,
+} from "@/lib/field-limits";
 
 const TIME_SLOTS = [
   "08:00", "09:00", "10:00", "11:00", "12:00",
@@ -219,6 +226,7 @@ export function BookingForm({ tabs }: BookingFormProps) {
                 type="text"
                 {...register("carMake", { required: t("programare.requiredCar") })}
                 placeholder="Ex: Dacia Sandero"
+                maxLength={CAR_MAKE_MODEL_MAX}
                 className={`${inputBase} ${errors.carMake ? inputError : inputNormal}`}
               />
               {errors.carMake && (
@@ -236,6 +244,7 @@ export function BookingForm({ tabs }: BookingFormProps) {
                     type="text"
                     {...register("carMake", { required: t("programare.requiredCarMake") })}
                     placeholder="Ex: BMW"
+                    maxLength={CAR_MAKE_MODEL_MAX}
                     className={`${inputBase} ${errors.carMake ? inputError : inputNormal}`}
                   />
                   {errors.carMake && (
@@ -250,6 +259,7 @@ export function BookingForm({ tabs }: BookingFormProps) {
                     type="text"
                     {...register("carModel", { required: t("programare.requiredCarModel") })}
                     placeholder="Ex: Seria 3"
+                    maxLength={CAR_MAKE_MODEL_MAX}
                     className={`${inputBase} ${errors.carModel ? inputError : inputNormal}`}
                   />
                   {errors.carModel && (
@@ -287,6 +297,7 @@ export function BookingForm({ tabs }: BookingFormProps) {
                 <textarea
                   {...register("description", { required: t("programare.requiredDescription") })}
                   rows={3}
+                  maxLength={DESCRIPTION_MAX}
                   placeholder={t("programare.carProblemPlaceholder")}
                   className={`${inputBase} resize-none ${errors.description ? inputError : inputNormal}`}
                 />
@@ -382,6 +393,7 @@ export function BookingForm({ tabs }: BookingFormProps) {
                   type="text"
                   {...register("name", { required: t("programare.requiredName") })}
                   placeholder="Ion Popescu"
+                  maxLength={NAME_MAX}
                   className={`${inputBasePl} ${errors.name ? inputError : inputNormal}`}
                 />
               </div>
@@ -398,6 +410,7 @@ export function BookingForm({ tabs }: BookingFormProps) {
                 <input
                   type="tel"
                   placeholder="07xx xxx xxx"
+                  maxLength={PHONE_MAX}
                   className={`${inputBasePl} ${errors.phone ? inputError : inputNormal}`}
                   {...withPhoneFilter(
                     register("phone", phoneRegisterOptions(t("programare.requiredPhone"), t("errors.phoneDigitsOnly")))
@@ -428,6 +441,7 @@ export function BookingForm({ tabs }: BookingFormProps) {
                     },
                   })}
                   placeholder="ion.popescu@exemplu.ro"
+                  maxLength={EMAIL_MAX}
                   className={`${inputBasePl} ${errors.email ? inputError : inputNormal}`}
                 />
               </div>

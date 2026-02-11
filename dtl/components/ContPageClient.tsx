@@ -19,6 +19,14 @@ import {
 } from "lucide-react";
 import { t } from "@/lib/i18n";
 import { phoneFilter, phoneRegisterOptions, withPhoneFilter, yearFilter, validateYearRange } from "@/lib/phone-validation";
+import {
+  NAME_MAX,
+  EMAIL_MAX,
+  PHONE_MAX,
+  CAR_MAKE_MODEL_MAX,
+  CHASSIS_MAX,
+  PASSWORD_MAX,
+} from "@/lib/field-limits";
 
 const STORAGE_KEY = "dtl_customer_session";
 const NAME_STORAGE_KEY = "dtl_customer_name";
@@ -413,8 +421,9 @@ export function ContPageClient() {
                         <input
                           type="text"
                           value={newCarMake}
-                          onChange={(e) => setNewCarMake(e.target.value)}
+                          onChange={(e) => setNewCarMake(e.target.value.slice(0, CAR_MAKE_MODEL_MAX))}
                           placeholder="Ex: BMW"
+                          maxLength={CAR_MAKE_MODEL_MAX}
                           className={`${inputBase} ${inputNormal}`}
                         />
                       </div>
@@ -425,8 +434,9 @@ export function ContPageClient() {
                         <input
                           type="text"
                           value={newCarModel}
-                          onChange={(e) => setNewCarModel(e.target.value)}
+                          onChange={(e) => setNewCarModel(e.target.value.slice(0, CAR_MAKE_MODEL_MAX))}
                           placeholder="Ex: Seria 3"
+                          maxLength={CAR_MAKE_MODEL_MAX}
                           className={`${inputBase} ${inputNormal}`}
                         />
                       </div>
@@ -456,8 +466,9 @@ export function ContPageClient() {
                       <input
                         type="text"
                         value={newCarChassis}
-                        onChange={(e) => setNewCarChassis(e.target.value)}
+                        onChange={(e) => setNewCarChassis(e.target.value.slice(0, CHASSIS_MAX))}
                         placeholder="WBAxxxxxxxxxxxxxx"
+                        maxLength={CHASSIS_MAX}
                         className={`${inputBase} ${inputNormal}`}
                       />
                     </div>
@@ -534,8 +545,9 @@ export function ContPageClient() {
                       <input
                         type="text"
                         value={userName || ""}
-                        onChange={(e) => setUserName(e.target.value)}
+                        onChange={(e) => setUserName(e.target.value.slice(0, NAME_MAX))}
                         placeholder="Ion Popescu"
+                        maxLength={NAME_MAX}
                         className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500"
                       />
                     </div>
@@ -546,8 +558,9 @@ export function ContPageClient() {
                       <input
                         type="email"
                         value={email || ""}
-                        onChange={(e) => setEmail(e.target.value)}
+                        onChange={(e) => setEmail(e.target.value.slice(0, EMAIL_MAX))}
                         placeholder="ion@exemplu.ro"
+                        maxLength={EMAIL_MAX}
                         className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500"
                       />
                     </div>
@@ -558,8 +571,9 @@ export function ContPageClient() {
                       <input
                         type="tel"
                         value={userPhone || ""}
-                        onChange={(e) => setUserPhone(phoneFilter(e.target.value))}
+                        onChange={(e) => setUserPhone(phoneFilter(e.target.value).slice(0, PHONE_MAX))}
                         placeholder="07xx xxx xxx"
+                        maxLength={PHONE_MAX}
                         className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500"
                       />
                     </div>
@@ -671,6 +685,7 @@ export function ContPageClient() {
                   !v || v.includes("@") ? true : t("errors.emailIncludeAt"),
               })}
                 placeholder="ion@exemplu.ro"
+                maxLength={EMAIL_MAX}
                 className={`${inputBase} ${loginForm.formState.errors.email ? inputError : inputNormal}`}
               />
               {loginForm.formState.errors.email && (
@@ -692,6 +707,7 @@ export function ContPageClient() {
                   type={showLoginPassword ? "text" : "password"}
                   {...loginForm.register("password", { required: t("cont.requiredPassword") })}
                   placeholder="••••••••"
+                  maxLength={PASSWORD_MAX}
                   className={`${inputBasePr} ${loginForm.formState.errors.password ? inputError : inputNormal}`}
                 />
                 <button
@@ -735,6 +751,7 @@ export function ContPageClient() {
                 type="text"
                 {...registerForm.register("name", { required: t("cont.requiredName") })}
                 placeholder="Ion Popescu"
+                maxLength={NAME_MAX}
                 className={`${inputBase} ${registerForm.formState.errors.name ? inputError : inputNormal}`}
               />
               {registerForm.formState.errors.name && (
@@ -759,6 +776,7 @@ export function ContPageClient() {
                   },
                 })}
                 placeholder="ion@exemplu.ro"
+                maxLength={EMAIL_MAX}
                 className={`${inputBase} ${registerForm.formState.errors.email ? inputError : inputNormal}`}
               />
               {registerForm.formState.errors.email && (
@@ -772,6 +790,7 @@ export function ContPageClient() {
               <input
                 type="tel"
                 placeholder="07xx xxx xxx"
+                maxLength={PHONE_MAX}
                 className={`${inputBase} ${registerForm.formState.errors.phone ? inputError : inputNormal}`}
                 {...withPhoneFilter(
                   registerForm.register("phone", phoneRegisterOptions(t("programare.requiredPhone"), t("errors.phoneDigitsOnly")))
@@ -790,6 +809,7 @@ export function ContPageClient() {
                   type={showRegisterPassword ? "text" : "password"}
                   {...registerForm.register("password", { required: t("cont.requiredPassword") })}
                   placeholder="••••••••"
+                  maxLength={PASSWORD_MAX}
                   className={`${inputBasePr} ${registerForm.formState.errors.password ? inputError : inputNormal}`}
                 />
                 <button
@@ -817,6 +837,7 @@ export function ContPageClient() {
                     validate: (v) => v === registerForm.watch("password") ? true : t("cont.passwordMismatch"),
                   })}
                   placeholder="••••••••"
+                  maxLength={PASSWORD_MAX}
                   className={`${inputBasePr} ${registerForm.formState.errors.repeatPassword ? inputError : inputNormal}`}
                 />
                 <button

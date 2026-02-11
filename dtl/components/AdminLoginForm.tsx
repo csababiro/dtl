@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { t } from "@/lib/i18n";
+import { EMAIL_MAX, PASSWORD_MAX } from "@/lib/field-limits";
 
 const ADMIN_SESSION_COOKIE = "dtl_admin_session";
 const COOKIE_MAX_AGE_DAYS = 1;
@@ -62,6 +63,7 @@ export function AdminLoginForm() {
           validate: (v) =>
             !v || v.includes("@") ? true : t("errors.emailIncludeAt"),
         })}
+          maxLength={EMAIL_MAX}
           className={`${inputBase} ${errors.email ? inputError : inputNormal}`}
         />
         {errors.email && (
@@ -79,6 +81,7 @@ export function AdminLoginForm() {
           id="password"
           type="password"
           {...register("password", { required: t("errors.completeThisField") })}
+          maxLength={PASSWORD_MAX}
           className={`${inputBase} ${errors.password ? inputError : inputNormal}`}
         />
         {errors.password && (

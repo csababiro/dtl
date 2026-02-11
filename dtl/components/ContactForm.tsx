@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Send } from "lucide-react";
+import { NAME_MAX, EMAIL_MAX, PHONE_MAX, MESSAGE_MAX } from "@/lib/field-limits";
 
 const NAME_KEY = "dtl_customer_name";
 const EMAIL_KEY = "dtl_customer_email";
@@ -36,9 +37,10 @@ export function ContactForm() {
         <input
           type="text"
           value={name}
-          onChange={(e) => setName(e.target.value)}
+          onChange={(e) => setName(e.target.value.slice(0, NAME_MAX))}
           className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500"
           placeholder="Ion Popescu"
+          maxLength={NAME_MAX}
         />
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -47,9 +49,10 @@ export function ContactForm() {
           <input
             type="email"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) => setEmail(e.target.value.slice(0, EMAIL_MAX))}
             className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500"
             placeholder="ion@exemplu.ro"
+            maxLength={EMAIL_MAX}
           />
         </div>
         <div className="space-y-2">
@@ -70,9 +73,10 @@ export function ContactForm() {
         <textarea
           rows={5}
           value={message}
-          onChange={(e) => setMessage(e.target.value)}
+          onChange={(e) => setMessage(e.target.value.slice(0, MESSAGE_MAX))}
           className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 resize-none"
           placeholder="Cum te putem ajuta?"
+          maxLength={MESSAGE_MAX}
         />
       </div>
       <button

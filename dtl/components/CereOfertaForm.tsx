@@ -15,6 +15,14 @@ import {
 } from "lucide-react";
 import { t } from "@/lib/i18n";
 import { phoneRegisterOptions, withPhoneFilter, withYearFilter, YEAR_PATTERN, validateYearRange } from "@/lib/phone-validation";
+import {
+  NAME_MAX,
+  EMAIL_MAX,
+  PHONE_MAX,
+  CAR_MAKE_MODEL_MAX,
+  DESCRIPTION_MAX,
+  CHASSIS_MAX,
+} from "@/lib/field-limits";
 import { toast } from "sonner";
 
 type CereOfertaFormValues = {
@@ -160,6 +168,7 @@ export function CereOfertaForm() {
                   type="text"
                   {...register("name", { required: t("cereOferta.requiredName") })}
                   placeholder="Ex: Popescu Ion"
+                  maxLength={NAME_MAX}
                   className={`${inputBase} ${errors.name ? inputError : inputNormal}`}
                 />
               </div>
@@ -190,6 +199,7 @@ export function CereOfertaForm() {
                     },
                   })}
                   placeholder="Ex: ion@exemplu.ro"
+                  maxLength={EMAIL_MAX}
                   className={`${inputBase} ${errors.email ? inputError : inputNormal}`}
                 />
               </div>
@@ -209,6 +219,7 @@ export function CereOfertaForm() {
                 <input
                   type="tel"
                   placeholder="07xx xxx xxx"
+                  maxLength={PHONE_MAX}
                   className={`${inputBase} ${errors.phone ? inputError : inputNormal}`}
                   {...withPhoneFilter(
                     register("phone", phoneRegisterOptions(t("cereOferta.requiredPhone"), t("errors.phoneDigitsOnly")))
@@ -240,6 +251,7 @@ export function CereOfertaForm() {
                   type="text"
                   {...register("carMake", { required: t("cereOferta.requiredCarMake") })}
                   placeholder="Ex: BMW"
+                  maxLength={CAR_MAKE_MODEL_MAX}
                   className={`${inputBase} ${errors.carMake ? inputError : inputNormal}`}
                 />
               </div>
@@ -260,6 +272,7 @@ export function CereOfertaForm() {
                   type="text"
                   {...register("carModel", { required: t("cereOferta.requiredCarModel") })}
                   placeholder="Ex: Seria 3"
+                  maxLength={CAR_MAKE_MODEL_MAX}
                   className={`${inputBase} ${errors.carModel ? inputError : inputNormal}`}
                 />
               </div>
@@ -311,6 +324,7 @@ export function CereOfertaForm() {
               <input
                 type="text"
                 placeholder={t("cereOferta.chassisPlaceholder")}
+                maxLength={CHASSIS_MAX}
                 className={`w-full p-4 bg-slate-50 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 transition-all border ${errors.chassis ? inputError : inputNormal}`}
                 {...((): ReturnType<typeof register> => {
                   const { ref, onChange, ...rest } = register("chassis", {
@@ -338,6 +352,7 @@ export function CereOfertaForm() {
               <textarea
                 {...register("description", { required: t("cereOferta.requiredDescription") })}
                 rows={4}
+                maxLength={DESCRIPTION_MAX}
                 placeholder={t("cereOferta.descriptionPlaceholder")}
                 className={`w-full p-4 bg-slate-50 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 transition-all resize-none border ${errors.description ? "border-red-500" : inputNormal}`}
               />
