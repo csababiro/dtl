@@ -28,7 +28,7 @@ const CARS_STORAGE_KEY = "dtl_customer_cars";
 type Tab = "signIn" | "signUp";
 type DashboardSection = "appointments" | "invoices" | "cars" | "settings";
 
-type UserCar = { id: string; carMake: string; carModel: string; carYear: string };
+type UserCar = { id: string; carMake: string; carModel: string; carYear: string; chassis?: string; photoFileName?: string };
 
 type LoginFormValues = { email: string; password: string };
 type RegisterFormValues = { name: string; email: string; phone: string; password: string; repeatPassword: string };
@@ -55,7 +55,10 @@ export function ContPageClient() {
   const [newCarMake, setNewCarMake] = useState("");
   const [newCarModel, setNewCarModel] = useState("");
   const [newCarYear, setNewCarYear] = useState("");
+  const [newCarChassis, setNewCarChassis] = useState("");
+  const [newCarPhoto, setNewCarPhoto] = useState<File | null>(null);
   const [selectedAppointmentId, setSelectedAppointmentId] = useState<string | null>(null);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   const loginForm = useForm<LoginFormValues>({ mode: "onChange" });
   const registerForm = useForm<RegisterFormValues>({
@@ -75,11 +78,14 @@ export function ContPageClient() {
       const cars = sessionStorage.getItem(CARS_STORAGE_KEY);
       if (cars) {
         const parsed = JSON.parse(cars) as (UserCar | { id: string; name: string })[];
-        const normalized: UserCar[] = parsed.map((c) =>
-          "carMake" in c
-            ? c
-            : { id: c.id, carMake: c.name, carModel: "-", carYear: "-" }
-        );
+        const normalized: UserCar[] = parsed.map((c) => {
+          if ("carMake" in c) {
+            const u = c as UserCar;
+            return { id: u.id, carMake: u.carMake, carModel: u.carModel, carYear: u.carYear, chassis: u.chassis, photoFileName: u.photoFileName };
+          }
+          const leg = c as { id: string; name: string };
+          return { id: leg.id, carMake: leg.name, carModel: "-", carYear: "-", chassis: undefined, photoFileName: undefined };
+        });
         setUserCars(normalized);
       }
     } catch {
@@ -130,11 +136,15 @@ export function ContPageClient() {
       carMake: make || "-",
       carModel: model || "-",
       carYear: year || "-",
+      chassis: newCarChassis.trim() || undefined,
+      photoFileName: newCarPhoto?.name,
     }];
     setUserCars(next);
     setNewCarMake("");
     setNewCarModel("");
     setNewCarYear("");
+    setNewCarChassis("");
+    setNewCarPhoto(null);
     setShowAddCarForm(false);
     if (typeof window !== "undefined") sessionStorage.setItem(CARS_STORAGE_KEY, JSON.stringify(next));
   }
@@ -148,10 +158,12 @@ export function ContPageClient() {
   function handleLogout() {
     if (typeof window !== "undefined") sessionStorage.removeItem(STORAGE_KEY);
     setIsLoggedIn(false);
+    setShowLogoutConfirm(false);
   }
 
   if (isLoggedIn) {
     return (
+      <>
       <div className="max-w-7xl mx-auto px-4 py-16">
         <div className="flex flex-col md:flex-row gap-12">
           <aside className="w-full md:w-72 shrink-0">
@@ -192,7 +204,7 @@ export function ContPageClient() {
                 ))}
                 <button
                   type="button"
-                  onClick={handleLogout}
+                  onClick={() => setShowLogoutConfirm(true)}
                   className="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-red-500 hover:bg-red-50 transition-all mt-4"
                 >
                   <LogOut size={20} />
@@ -362,9 +374,11 @@ export function ContPageClient() {
                         key={car.id}
                         className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between gap-4"
                       >
-                        <span className="font-medium text-slate-900">
-                          {[car.carMake, car.carModel, car.carYear].filter((x) => x && x !== "-").join(" • ") || car.carMake}
-                        </span>
+                        <div className="font-medium text-slate-900">
+                          <div>{[car.carMake, car.carModel, car.carYear].filter((x) => x && x !== "-").join(" • ") || car.carMake}</div>
+                          {car.chassis ? <div className="text-sm text-slate-500 mt-0.5">{t("cont.chassis")}: {car.chassis}</div> : null}
+                          {car.photoFileName ? <div className="text-sm text-slate-500">{t("cont.photoOptional")}: {car.photoFileName}</div> : null}
+                        </div>
                         <button
                           type="button"
                           onClick={() => handleRemoveCar(car.id)}
@@ -419,6 +433,30 @@ export function ContPageClient() {
                         />
                       </div>
                     </div>
+                    <div className="space-y-2 mb-4">
+                      <label className="block text-sm font-bold text-slate-700">
+                        {t("cont.chassis")}
+                      </label>
+                      <input
+                        type="text"
+                        value={newCarChassis}
+                        onChange={(e) => setNewCarChassis(e.target.value)}
+                        placeholder="WBAxxxxxxxxxxxxxx"
+                        className={`${inputBase} ${inputNormal}`}
+                      />
+                    </div>
+                    <div className="space-y-2 mb-4">
+                      <label className="block text-sm font-bold text-slate-700">
+                        {t("cont.photoOptional")}
+                      </label>
+                      <input
+                        type="file"
+                        accept="image/*,.pdf"
+                        onChange={(e) => setNewCarPhoto(e.target.files?.[0] ?? null)}
+                        className="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:bg-slate-100 file:text-slate-700"
+                      />
+                      {newCarPhoto ? <span className="text-xs text-slate-500">{newCarPhoto.name}</span> : null}
+                    </div>
                     <div className="flex gap-3">
                       <button
                         type="button"
@@ -430,7 +468,7 @@ export function ContPageClient() {
                       </button>
                       <button
                         type="button"
-                        onClick={() => { setShowAddCarForm(false); setNewCarMake(""); setNewCarModel(""); setNewCarYear(""); }}
+                        onClick={() => { setShowAddCarForm(false); setNewCarMake(""); setNewCarModel(""); setNewCarYear(""); setNewCarChassis(""); setNewCarPhoto(null); }}
                         className="px-6 py-3 bg-slate-100 text-slate-700 font-bold rounded-xl hover:bg-slate-200 transition-colors"
                       >
                         {t("common.cancel")}
@@ -523,6 +561,30 @@ export function ContPageClient() {
           </div>
         </div>
       </div>
+      {showLogoutConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" aria-modal="true" role="dialog">
+          <div className="bg-white rounded-2xl shadow-xl max-w-sm w-full p-6 text-center">
+            <p className="text-slate-800 font-bold mb-6">{t("cont.logoutConfirm")}</p>
+            <div className="flex gap-3 justify-center">
+              <button
+                type="button"
+                onClick={() => setShowLogoutConfirm(false)}
+                className="px-5 py-2.5 rounded-xl font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors"
+              >
+                {t("common.cancel")}
+              </button>
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="px-5 py-2.5 rounded-xl font-bold text-white bg-red-600 hover:bg-red-700 transition-colors"
+              >
+                {t("cont.logout")}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
     );
   }
 

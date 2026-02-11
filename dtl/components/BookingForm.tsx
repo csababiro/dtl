@@ -79,6 +79,7 @@ const CUSTOMER_NAME_KEY = "dtl_customer_name";
 const CUSTOMER_EMAIL_KEY = "dtl_customer_email";
 const CUSTOMER_PHONE_KEY = "dtl_customer_phone";
 const CUSTOMER_SESSION_KEY = "dtl_customer_session";
+const CARS_STORAGE_KEY = "dtl_customer_cars";
 
 export function BookingForm({ tabs }: BookingFormProps) {
   const [activeTab, setActiveTab] = useState(tabs[0]?.id ?? "general");
@@ -101,14 +102,31 @@ export function BookingForm({ tabs }: BookingFormProps) {
     const name = sessionStorage.getItem(CUSTOMER_NAME_KEY) ?? "";
     const email = sessionStorage.getItem(CUSTOMER_EMAIL_KEY) ?? "";
     const phone = sessionStorage.getItem(CUSTOMER_PHONE_KEY) ?? "";
-    if (name || email || phone) {
+    let carMake = "";
+    let carModel = "";
+    let carYear = "";
+    try {
+      const cars = sessionStorage.getItem(CARS_STORAGE_KEY);
+      if (cars) {
+        const arr = JSON.parse(cars) as { carMake?: string; carModel?: string; carYear?: string }[];
+        const first = arr[0];
+        if (first) {
+          carMake = first.carMake ?? "";
+          carModel = first.carModel ?? "";
+          carYear = first.carYear ?? "";
+        }
+      }
+    } catch {
+      // ignore
+    }
+    if (name || email || phone || carMake || carModel || carYear) {
       reset({
         name,
         email,
         phone,
-        carMake: getValues("carMake") || "",
-        carModel: getValues("carModel") || "",
-        carYear: getValues("carYear") || "",
+        carMake: carMake || getValues("carMake") || "",
+        carModel: carModel || getValues("carModel") || "",
+        carYear: carYear || getValues("carYear") || "",
         description: getValues("description") || "",
         date: getValues("date") || "",
         time: getValues("time") || "",

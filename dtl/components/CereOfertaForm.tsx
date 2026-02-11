@@ -24,6 +24,7 @@ type CereOfertaFormValues = {
   carMake: string;
   carModel: string;
   carYear: string;
+  chassis: string;
   description: string;
 };
 
@@ -36,6 +37,7 @@ const CUSTOMER_NAME_KEY = "dtl_customer_name";
 const CUSTOMER_EMAIL_KEY = "dtl_customer_email";
 const CUSTOMER_PHONE_KEY = "dtl_customer_phone";
 const CUSTOMER_SESSION_KEY = "dtl_customer_session";
+const CARS_STORAGE_KEY = "dtl_customer_cars";
 
 export function CereOfertaForm() {
   const [loading, setLoading] = useState(false);
@@ -51,6 +53,7 @@ export function CereOfertaForm() {
     formState: { errors },
   } = useForm<CereOfertaFormValues>({
     mode: "onChange",
+    defaultValues: { chassis: "" },
   });
 
   useEffect(() => {
@@ -59,14 +62,34 @@ export function CereOfertaForm() {
     const name = sessionStorage.getItem(CUSTOMER_NAME_KEY) ?? "";
     const email = sessionStorage.getItem(CUSTOMER_EMAIL_KEY) ?? "";
     const phone = sessionStorage.getItem(CUSTOMER_PHONE_KEY) ?? "";
-    if (name || email || phone) {
+    let carMake = "";
+    let carModel = "";
+    let carYear = "";
+    let chassis = "";
+    try {
+      const cars = sessionStorage.getItem(CARS_STORAGE_KEY);
+      if (cars) {
+        const arr = JSON.parse(cars) as { carMake?: string; carModel?: string; carYear?: string; chassis?: string }[];
+        const first = arr[0];
+        if (first) {
+          carMake = first.carMake ?? "";
+          carModel = first.carModel ?? "";
+          carYear = first.carYear ?? "";
+          chassis = first.chassis ?? "";
+        }
+      }
+    } catch {
+      // ignore
+    }
+    if (name || email || phone || carMake || carModel || carYear || chassis) {
       reset({
         name,
         email,
         phone,
-        carMake: getValues("carMake") || "",
-        carModel: getValues("carModel") || "",
-        carYear: getValues("carYear") || "",
+        carMake: carMake || getValues("carMake") || "",
+        carModel: carModel || getValues("carModel") || "",
+        carYear: carYear || getValues("carYear") || "",
+        chassis: chassis || getValues("chassis") || "",
         description: getValues("description") || "",
       });
     }
@@ -83,6 +106,7 @@ export function CereOfertaForm() {
         carMake: data.carMake.trim(),
         carModel: data.carModel.trim(),
         carYear: data.carYear.trim(),
+        chassis: data.chassis?.trim() || undefined,
         description: data.description.trim(),
       });
       if ("error" in result) {
@@ -148,7 +172,7 @@ export function CereOfertaForm() {
               </label>
               <div className="relative">
                 <User
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
                   size={18}
                 />
                 <input
@@ -157,10 +181,10 @@ export function CereOfertaForm() {
                   placeholder="Ex: Popescu Ion"
                   className={`${inputBase} ${errors.name ? inputError : inputNormal}`}
                 />
-                {errors.name && (
-                  <p className="text-xs text-red-500 mt-1">{errors.name.message}</p>
-                )}
               </div>
+              {errors.name && (
+                <p className="text-xs text-red-500 mt-1">{errors.name.message}</p>
+              )}
             </div>
             <div className="space-y-2">
               <label className="text-sm font-bold text-slate-700">
@@ -168,7 +192,7 @@ export function CereOfertaForm() {
               </label>
               <div className="relative">
                 <Mail
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
                   size={18}
                 />
                 <input
@@ -185,10 +209,10 @@ export function CereOfertaForm() {
                   placeholder="Ex: ion@exemplu.ro"
                   className={`${inputBase} ${errors.email ? inputError : inputNormal}`}
                 />
-                {errors.email && (
-                  <p className="text-xs text-red-500 mt-1">{errors.email.message}</p>
-                )}
               </div>
+              {errors.email && (
+                <p className="text-xs text-red-500 mt-1">{errors.email.message}</p>
+              )}
             </div>
             <div className="space-y-2 md:col-span-2">
               <label className="text-sm font-bold text-slate-700">
@@ -196,7 +220,7 @@ export function CereOfertaForm() {
               </label>
               <div className="relative">
                 <Phone
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
                   size={18}
                 />
                 <input
@@ -205,10 +229,10 @@ export function CereOfertaForm() {
                   placeholder="07xx xxx xxx"
                   className={`${inputBase} ${errors.phone ? inputError : inputNormal}`}
                 />
-                {errors.phone && (
-                  <p className="text-xs text-red-500 mt-1">{errors.phone.message}</p>
-                )}
               </div>
+              {errors.phone && (
+                <p className="text-xs text-red-500 mt-1">{errors.phone.message}</p>
+              )}
             </div>
           </div>
         </div>
@@ -224,7 +248,7 @@ export function CereOfertaForm() {
               </label>
               <div className="relative">
                 <Car
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
                   size={18}
                 />
                 <input
@@ -233,10 +257,10 @@ export function CereOfertaForm() {
                   placeholder="Ex: BMW"
                   className={`${inputBase} ${errors.carMake ? inputError : inputNormal}`}
                 />
-                {errors.carMake && (
-                  <p className="text-xs text-red-500 mt-1">{errors.carMake.message}</p>
-                )}
               </div>
+              {errors.carMake && (
+                <p className="text-xs text-red-500 mt-1">{errors.carMake.message}</p>
+              )}
             </div>
             <div className="space-y-2">
               <label className="text-sm font-bold text-slate-700">
@@ -244,7 +268,7 @@ export function CereOfertaForm() {
               </label>
               <div className="relative">
                 <Car
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
                   size={18}
                 />
                 <input
@@ -253,10 +277,10 @@ export function CereOfertaForm() {
                   placeholder="Ex: Seria 3"
                   className={`${inputBase} ${errors.carModel ? inputError : inputNormal}`}
                 />
-                {errors.carModel && (
-                  <p className="text-xs text-red-500 mt-1">{errors.carModel.message}</p>
-                )}
               </div>
+              {errors.carModel && (
+                <p className="text-xs text-red-500 mt-1">{errors.carModel.message}</p>
+              )}
             </div>
             <div className="space-y-2">
               <label className="text-sm font-bold text-slate-700">
@@ -264,7 +288,7 @@ export function CereOfertaForm() {
               </label>
               <div className="relative">
                 <Car
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
                   size={18}
                 />
                 <input
@@ -273,10 +297,10 @@ export function CereOfertaForm() {
                   placeholder="Ex: 2018"
                   className={`${inputBase} ${errors.carYear ? inputError : inputNormal}`}
                 />
-                {errors.carYear && (
-                  <p className="text-xs text-red-500 mt-1">{errors.carYear.message}</p>
-                )}
               </div>
+              {errors.carYear && (
+                <p className="text-xs text-red-500 mt-1">{errors.carYear.message}</p>
+              )}
             </div>
           </div>
         </div>
@@ -286,6 +310,17 @@ export function CereOfertaForm() {
             <ClipboardList size={20} className="text-blue-600" /> Detalii ofertă
           </h3>
           <div className="space-y-6">
+            <div className="space-y-2">
+              <label className="text-sm font-bold text-slate-700">
+                {t("cereOferta.chassis")}
+              </label>
+              <input
+                type="text"
+                {...register("chassis")}
+                placeholder={t("cereOferta.chassisPlaceholder")}
+                className={`w-full p-4 bg-slate-50 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 transition-all border ${inputNormal}`}
+              />
+            </div>
             <div className="space-y-2">
               <label className="text-sm font-bold text-slate-700">
                 {t("cereOferta.description")} *

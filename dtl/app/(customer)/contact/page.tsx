@@ -1,12 +1,11 @@
-import Link from "next/link";
 import {
   Phone,
   Mail,
   MapPin,
   MessageCircle,
   Clock,
-  Send,
 } from "lucide-react";
+import { ContactForm } from "@/components/ContactForm";
 import { getBusinessSettings } from "@/lib/settings";
 import { t } from "@/lib/i18n";
 import { getMapsUrl } from "@/lib/maps";
@@ -147,52 +146,7 @@ export default async function ContactPage() {
             Dacă ai întrebări specifice, completează formularul de mai jos și îți
             vom răspunde în cel mai scurt timp.
           </p>
-          <form className="space-y-6">
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-slate-700">
-                Nume Complet
-              </label>
-              <input
-                type="text"
-                className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Ion Popescu"
-              />
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <label className="text-sm font-bold text-slate-700">Email</label>
-                <input
-                  type="email"
-                  className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="ion@exemplu.ro"
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-bold text-slate-700">
-                  Telefon
-                </label>
-                <input
-                  type="tel"
-                  className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="07xx xxx xxx"
-                />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-slate-700">Mesaj</label>
-              <textarea
-                rows={5}
-                className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 resize-none"
-                placeholder="Cum te putem ajuta?"
-              />
-            </div>
-            <button
-              type="button"
-              className="w-full bg-blue-600 text-white py-4 rounded-xl font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-600/20 flex items-center justify-center gap-2"
-            >
-              Trimite mesajul <Send size={20} />
-            </button>
-          </form>
+          <ContactForm />
         </div>
       </section>
     </div>
