@@ -216,7 +216,7 @@ export function AdminTestimonialsClient() {
         </div>
       )}
 
-      <ul className="space-y-1">
+      <ul className="space-y-4">
         {items.map((item) => (
           <li
             key={item.id}

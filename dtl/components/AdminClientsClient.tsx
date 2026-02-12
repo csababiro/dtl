@@ -74,7 +74,71 @@ export function AdminClientsClient({ clients }: AdminClientsClientProps) {
       </div>
 
       <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
+        {/* Mobile: cards by letter */}
+        <div className="md:hidden space-y-6 p-4">
+          {byLetter.length === 0 ? (
+            <p className="px-4 py-12 text-center text-slate-500">Niciun client găsit.</p>
+          ) : (
+            byLetter.map(({ letter, list }) => (
+              <div key={letter} className="space-y-4">
+                <p className="text-sm font-black text-slate-600 uppercase tracking-widest">
+                  {letter}
+                </p>
+                <div className="space-y-4">
+                  {list.map((client) => (
+                    <div
+                      key={client.id}
+                      className="rounded-xl border border-slate-200 p-4 space-y-3"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center shrink-0">
+                          <User size={20} className="text-blue-600" />
+                        </div>
+                        <span className="font-bold text-slate-900">{client.name}</span>
+                      </div>
+                      <div className="flex flex-col gap-1 text-sm">
+                        <a
+                          href={`mailto:${client.email}`}
+                          className="text-blue-600 hover:underline flex items-center gap-2"
+                        >
+                          <Mail size={14} />
+                          {client.email}
+                        </a>
+                        <a
+                          href={`tel:${client.phone.replace(/\s/g, "")}`}
+                          className="text-slate-600 hover:text-blue-600 flex items-center gap-2"
+                        >
+                          <Phone size={14} />
+                          {client.phone}
+                        </a>
+                      </div>
+                      {client.car ? (
+                        <p className="flex items-center gap-2 text-slate-700 text-sm">
+                          <Car size={16} className="text-slate-400 shrink-0" />
+                          {client.car}
+                        </p>
+                      ) : (
+                        <p className="text-slate-400 text-sm">—</p>
+                      )}
+                      <div className="flex items-center justify-between pt-2 border-t border-slate-100">
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-bold bg-slate-100 text-slate-700">
+                          <Calendar size={14} />
+                          {client.programariCount} programări
+                        </span>
+                        <span className="text-slate-600 text-sm">
+                          {formatDate(client.lastVisit)}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
+        {/* Desktop: table */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left">
             <thead className="bg-slate-50 border-b border-slate-100">
               <tr>

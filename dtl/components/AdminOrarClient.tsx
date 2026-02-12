@@ -69,9 +69,9 @@ export function AdminOrarClient() {
             return (
               <div
                 key={labelKey}
-                className="flex flex-wrap items-center gap-4 py-3 border-b border-slate-100 last:border-0"
+                className="md:flex md:flex-wrap md:items-center md:gap-4 md:py-3 md:border-b md:border-slate-100 md:last:border-0 rounded-xl border border-slate-200 md:border-0 p-4 md:p-0 space-y-4 md:space-y-0"
               >
-                <div className="w-28 shrink-0 font-medium text-slate-700">
+                <div className="w-full md:w-28 shrink-0 font-medium text-slate-700">
                   {t(labelKey)}
                 </div>
                 <label className="flex items-center gap-2 shrink-0">
@@ -88,9 +88,9 @@ export function AdminOrarClient() {
                   </span>
                 </label>
                 {!closed && (
-                  <>
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-3 md:contents">
                     <div className="flex items-center gap-2">
-                      <label className="text-sm text-slate-500 sr-only">
+                      <label className="text-sm text-slate-500 w-24 shrink-0">
                         {t("admin.workingHoursStart")}
                       </label>
                       <input
@@ -99,12 +99,12 @@ export function AdminOrarClient() {
                         onChange={(e) =>
                           setDay(index, { ...day, start: e.target.value, end })
                         }
-                        className="px-3 py-2 rounded-lg border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                        className="px-3 py-2 rounded-lg border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none min-h-[44px]"
                       />
                     </div>
-                    <span className="text-slate-400">–</span>
+                    <span className="text-slate-400 hidden sm:inline md:inline">–</span>
                     <div className="flex items-center gap-2">
-                      <label className="text-sm text-slate-500 sr-only">
+                      <label className="text-sm text-slate-500 w-24 shrink-0">
                         {t("admin.workingHoursEnd")}
                       </label>
                       <input
@@ -113,10 +113,10 @@ export function AdminOrarClient() {
                         onChange={(e) =>
                           setDay(index, { ...day, start, end: e.target.value })
                         }
-                        className="px-3 py-2 rounded-lg border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                        className="px-3 py-2 rounded-lg border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none min-h-[44px]"
                       />
                     </div>
-                  </>
+                  </div>
                 )}
               </div>
             );
@@ -125,7 +125,7 @@ export function AdminOrarClient() {
         <div className="flex items-center gap-4">
           <button
             type="submit"
-            className="px-6 py-3 rounded-xl font-bold bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+            className="px-6 py-3 rounded-xl font-bold bg-blue-600 text-white hover:bg-blue-700 transition-colors min-h-[44px]"
           >
             {t("common.save")}
           </button>

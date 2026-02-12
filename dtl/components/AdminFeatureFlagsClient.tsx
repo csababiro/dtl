@@ -189,7 +189,71 @@ export function AdminFeatureFlagsClient() {
 
       {activeTab === "func" && (
       <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden rounded-t-none">
-        <div className="overflow-x-auto">
+        {/* Mobile: cards */}
+        <div className="md:hidden space-y-4 p-4">
+          {FUNCTIONALITY_FLAG_KEYS.map((key) => {
+            const { superAdmin, admin } = toggles[key] ?? {
+              superAdmin: true,
+              admin: true,
+            };
+            const eff = effectiveFlag(superAdmin, admin);
+            const { labelKey, descKey } = flagMeta[key];
+            return (
+              <div
+                key={key}
+                className="p-4 rounded-xl border border-slate-200 space-y-4"
+              >
+                <div className="flex items-start gap-3">
+                  <span
+                    className={`mt-1.5 w-2 h-2 rounded-full shrink-0 ${
+                      eff ? "bg-green-500" : "bg-slate-300"
+                    }`}
+                    aria-hidden
+                  />
+                  <div className="min-w-0 flex-1">
+                    <p className="font-bold text-slate-900">{t(labelKey)}</p>
+                    <p className="text-sm text-slate-500 mt-0.5">{t(descKey)}</p>
+                  </div>
+                  <span
+                    className={`shrink-0 inline-flex items-center gap-1.5 text-sm font-bold ${
+                      eff ? "text-green-600" : "text-slate-400"
+                    }`}
+                  >
+                    {eff ? "ON" : "OFF"}
+                  </span>
+                </div>
+                <div className="flex flex-wrap items-center gap-4 pt-2 border-t border-slate-100">
+                  {MOCK_ADMIN_ROLE === "super_admin" && (
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-bold text-slate-500">
+                        {t("admin.superAdmin")}:
+                      </span>
+                      <Toggle
+                        on={superAdmin}
+                        onClick={() => setSuperAdmin(key, !superAdmin)}
+                        ariaLabel={`${t(labelKey)} ${t("admin.superAdmin")}`}
+                      />
+                    </div>
+                  )}
+                  {MOCK_ADMIN_ROLE === "admin" && (
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-bold text-slate-500">
+                        {t("admin.adminRole")}:
+                      </span>
+                      <Toggle
+                        on={admin}
+                        onClick={() => setAdmin(key, !admin)}
+                        ariaLabel={`${t(labelKey)} ${t("admin.adminRole")}`}
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+        {/* Desktop: table */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left">
             <thead className="bg-slate-50 border-b border-slate-100">
               <tr>
@@ -298,7 +362,71 @@ export function AdminFeatureFlagsClient() {
               {t("admin.pricesSectionDesc")}
             </p>
           </div>
-          <div className="overflow-x-auto">
+          {/* Mobile: cards */}
+          <div className="md:hidden space-y-4 p-4">
+            {PRICE_FLAG_KEYS.map((key) => {
+              const { superAdmin, admin } = toggles[key] ?? {
+                superAdmin: true,
+                admin: true,
+              };
+              const eff = effectiveFlag(superAdmin, admin);
+              const { labelKey, descKey } = flagMeta[key];
+              return (
+                <div
+                  key={key}
+                  className="p-4 rounded-xl border border-slate-200 space-y-4"
+                >
+                  <div className="flex items-start gap-3">
+                    <span
+                      className={`mt-1.5 w-2 h-2 rounded-full shrink-0 ${
+                        eff ? "bg-green-500" : "bg-slate-300"
+                      }`}
+                      aria-hidden
+                    />
+                    <div className="min-w-0 flex-1">
+                      <p className="font-bold text-slate-900">{t(labelKey)}</p>
+                      <p className="text-sm text-slate-500 mt-0.5">{t(descKey)}</p>
+                    </div>
+                    <span
+                      className={`shrink-0 inline-flex items-center gap-1.5 text-sm font-bold ${
+                        eff ? "text-green-600" : "text-slate-400"
+                      }`}
+                    >
+                      {eff ? "ON" : "OFF"}
+                    </span>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-4 pt-2 border-t border-slate-100">
+                    {MOCK_ADMIN_ROLE === "super_admin" && (
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-bold text-slate-500">
+                          {t("admin.superAdmin")}:
+                        </span>
+                        <Toggle
+                          on={superAdmin}
+                          onClick={() => setSuperAdmin(key, !superAdmin)}
+                          ariaLabel={`${t(labelKey)} ${t("admin.superAdmin")}`}
+                        />
+                      </div>
+                    )}
+                    {MOCK_ADMIN_ROLE === "admin" && (
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-bold text-slate-500">
+                          {t("admin.adminRole")}:
+                        </span>
+                        <Toggle
+                          on={admin}
+                          onClick={() => setAdmin(key, !admin)}
+                          ariaLabel={`${t(labelKey)} ${t("admin.adminRole")}`}
+                        />
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          {/* Desktop: table */}
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-left">
               <thead className="bg-slate-50 border-b border-slate-100">
                 <tr>

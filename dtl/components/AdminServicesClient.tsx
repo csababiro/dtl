@@ -57,7 +57,7 @@ export function AdminServicesClient() {
       </div>
 
       <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
-        <div className="p-6 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
+        <div className="p-6 bg-slate-50 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <h3 className="font-bold text-slate-700">
             {t("admin.servicesListFor")}: {t(TABS.find((t) => t.id === activeTab)!.labelKey)}
           </h3>
@@ -65,7 +65,44 @@ export function AdminServicesClient() {
             <CheckCircle2 size={14} className="text-green-500" /> Auto-update activ
           </div>
         </div>
-        <div className="overflow-x-auto">
+
+        {/* Mobile: cards */}
+        <div className="md:hidden space-y-4 p-4">
+          {items.map((s, i) => (
+            <div
+              key={i}
+              className="p-4 flex flex-col gap-3 rounded-xl border border-slate-200 bg-white"
+            >
+              <div className="flex items-start justify-between gap-3">
+                <span className="font-bold text-slate-900">{s.name}</span>
+                <span className="shrink-0 inline-flex items-center px-3 py-1 bg-blue-50 text-blue-700 rounded-lg font-black text-sm">
+                  {s.price}
+                </span>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  disabled
+                  title={t("admin.apiLater")}
+                  className="p-2 text-slate-300 cursor-not-allowed rounded-lg border border-slate-200"
+                >
+                  <Edit2 size={18} />
+                </button>
+                <button
+                  type="button"
+                  disabled
+                  title={t("admin.apiLater")}
+                  className="p-2 text-slate-300 cursor-not-allowed rounded-lg border border-slate-200"
+                >
+                  <Trash2 size={18} />
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Desktop: table */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left">
             <thead className="bg-white border-b border-slate-100">
               <tr>
