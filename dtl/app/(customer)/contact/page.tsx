@@ -9,6 +9,7 @@ import { ContactForm } from "@/components/ContactForm";
 import { getBusinessSettings } from "@/lib/settings";
 import { t } from "@/lib/i18n";
 import { getMapsUrl } from "@/lib/maps";
+import { InteractiveMap } from "@/components/InteractiveMap";
 
 function formatHoursShort(hours: Record<string, string> | undefined): string {
   if (!hours) return "L-V: 08:00 - 18:00";
@@ -129,12 +130,11 @@ export default async function ContactPage() {
                 )}
               </div>
             </div>
-            <div className="aspect-video w-full bg-slate-800 rounded-2xl flex items-center justify-center overflow-hidden">
-              <div className="text-center opacity-50">
-                <MapPin size={32} className="mx-auto mb-2" />
-                <p className="text-sm font-bold uppercase">Harta Google Maps</p>
-              </div>
-            </div>
+            <InteractiveMap
+              address={settings.address}
+              apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY}
+              className="aspect-video min-h-[280px]"
+            />
           </div>
         </div>
 

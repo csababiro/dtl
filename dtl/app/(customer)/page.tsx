@@ -12,7 +12,7 @@ import { getFeatureFlags } from "@/lib/feature-flags";
 import { getBusinessSettings } from "@/lib/settings";
 import { t } from "@/lib/i18n";
 import { getMapsUrl } from "@/lib/maps";
-import { Map } from "@/components/Map";
+import { InteractiveMap } from "@/components/InteractiveMap";
 import { ImageWithFallback } from "@/components/ImageWithFallback";
 import { isAnyBookingEnabled, isModuleEnabled } from "@/lib/feature-flags";
 
@@ -338,32 +338,11 @@ export default async function HomePage() {
             )}
           </div>
           <div className="lg:col-span-2">
-            <div className="w-full min-h-[400px] bg-slate-200 rounded-3xl overflow-hidden flex items-center justify-center">
-              <div className="w-full min-h-[400px] rounded-3xl bg-slate-300 flex items-center justify-center">
-                <div className="text-center p-8">
-                  <MapPin
-                    size={48}
-                    className="text-slate-400 mx-auto mb-4"
-                  />
-                  <p className="text-slate-500 font-bold">
-                    Harta interactivă
-                  </p>
-                  <p className="text-slate-400 text-sm">
-                    Google Maps integrat aici
-                  </p>
-                  {settings.address && (
-                    <a
-                      href={getMapsUrl(settings.address)}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-slate-500 text-sm mt-2 hover:text-blue-600 transition-colors block"
-                    >
-                      {settings.address}
-                    </a>
-                  )}
-                </div>
-              </div>
-            </div>
+            <InteractiveMap
+              address={settings.address}
+              apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY}
+              className="min-h-[400px]"
+            />
           </div>
         </div>
       </section>
