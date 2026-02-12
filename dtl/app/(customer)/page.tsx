@@ -65,13 +65,22 @@ export default async function HomePage() {
   const showTyre = isModuleEnabled(flags, "tyre");
   const showCarWash = isModuleEnabled(flags, "carWash");
 
-  const services = [
+  type ProgramareTab = "general" | "tyre" | "carWash";
+  const services: {
+    title: string;
+    desc: string;
+    icon: typeof Wrench;
+    img: string;
+    show: boolean;
+    programareTab: ProgramareTab;
+  }[] = [
     {
       title: t("home.serviceGeneral"),
       desc: "Revizii, frâne, suspensie, motor și diagnoză computerizată completă.",
       icon: Wrench,
       img: SERVICE_GENERAL_IMG,
       show: true,
+      programareTab: "general",
     },
     {
       title: t("home.serviceTyre"),
@@ -79,6 +88,7 @@ export default async function HomePage() {
       icon: Shield,
       img: SERVICE_TYRE_IMG,
       show: showTyre,
+      programareTab: "tyre",
     },
     {
       title: t("home.serviceCarWash"),
@@ -86,6 +96,7 @@ export default async function HomePage() {
       icon: Clock,
       img: SERVICE_WASH_IMG,
       show: showCarWash,
+      programareTab: "carWash",
     },
   ].filter((s) => s.show);
 
@@ -183,7 +194,7 @@ export default async function HomePage() {
                 <p className="text-slate-600 mb-6 leading-relaxed">{s.desc}</p>
                 {showBooking && (
                   <Link
-                    href="/programare"
+                    href={`/programare?tab=${s.programareTab}`}
                     className="font-bold text-blue-600 flex items-center gap-2"
                   >
                     Programează <ArrowRight size={16} />
