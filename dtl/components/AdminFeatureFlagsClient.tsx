@@ -25,6 +25,8 @@ const ADMIN_FLAG_KEYS: AdminFlagKey[] = [
   "showServicePrices",
   "showTyrePrices",
   "showCarWashPrices",
+  "gallery",
+  "testimonials",
 ];
 
 const defaultToggles: FeatureFlagToggles = {
@@ -36,6 +38,8 @@ const defaultToggles: FeatureFlagToggles = {
   showServicePrices: { superAdmin: true, admin: true },
   showTyrePrices: { superAdmin: true, admin: true },
   showCarWashPrices: { superAdmin: true, admin: true },
+  gallery: { superAdmin: true, admin: true },
+  testimonials: { superAdmin: true, admin: true },
 };
 
 const flagMeta: Record<
@@ -67,6 +71,14 @@ const flagMeta: Record<
   showCarWashPrices: {
     labelKey: "admin.flagShowCarWashPrices",
     descKey: "admin.flagShowCarWashPricesDesc",
+  },
+  gallery: {
+    labelKey: "admin.flagGallery",
+    descKey: "admin.flagGalleryDesc",
+  },
+  testimonials: {
+    labelKey: "admin.flagTestimonials",
+    descKey: "admin.flagTestimonialsDesc",
   },
 };
 

@@ -23,6 +23,7 @@ export default async function CustomerLayout({
       />
       <main>{children}</main>
       <Footer
+        flags={flags}
         phone={settings.phone}
         email={settings.email}
         whatsapp={settings.whatsapp}

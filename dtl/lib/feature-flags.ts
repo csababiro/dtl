@@ -22,6 +22,8 @@ export interface FeatureFlags {
   showServicePrices?: boolean;
   showTyreServicePrices?: boolean;
   showCarWashPrices?: boolean;
+  gallery?: boolean;
+  testimonials?: boolean;
 }
 
 /** Admin-only: per-role toggles. Effective = superAdmin && admin. */
@@ -33,7 +35,9 @@ export type AdminFlagKey =
   | "authentication"
   | "showServicePrices"
   | "showTyrePrices"
-  | "showCarWashPrices";
+  | "showCarWashPrices"
+  | "gallery"
+  | "testimonials";
 
 export interface FeatureFlagToggles {
   [key: string]: { superAdmin: boolean; admin: boolean };
@@ -65,6 +69,8 @@ const DEFAULT_FEATURE_FLAGS: FeatureFlags = {
   showServicePrices: true,
   showTyreServicePrices: true,
   showCarWashPrices: true,
+  gallery: true,
+  testimonials: true,
 };
 
 export async function getFeatureFlags(): Promise<FeatureFlags> {
@@ -146,4 +152,12 @@ export function isTyrePriceVisible(flags: FeatureFlags): boolean {
 
 export function isCarWashPriceVisible(flags: FeatureFlags): boolean {
   return flags.showCarWashPrices !== false;
+}
+
+export function isGalleryEnabled(flags: FeatureFlags): boolean {
+  return flags.gallery !== false;
+}
+
+export function isTestimonialsEnabled(flags: FeatureFlags): boolean {
+  return flags.testimonials !== false;
 }

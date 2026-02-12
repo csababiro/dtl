@@ -5,6 +5,8 @@
     "programare": "Programare",
     "cereOferta": "Cerere ofertă",
     "contact": "Contact",
+    "gallery": "Galerie",
+    "testimonials": "Testimoniale",
     "cont": "Cont",
     "login": "Autentificare",
     "logout": "Deconectare"
@@ -43,7 +45,9 @@
     "requestAppointment": "Solicită programare",
     "price": "Preț",
     "from": "de la",
-    "noServices": "Nu există servicii disponibile"
+    "noServices": "Nu există servicii disponibile",
+    "seeAllServices": "Vezi toate serviciile",
+    "allServicesTitle": "Toate serviciile"
   },
   "programare": {
     "title": "Programare",
@@ -108,6 +112,14 @@
     "requiredDescription": "Descrierea este obligatorie",
     "requiredChassis": "Șasiul este obligatoriu",
     "chassisFormat": "Șasiul poate conține doar litere mari (A-Z), cifre și liniuță"
+  },
+  "galerie": {
+    "title": "Galerie",
+    "subtitle": "Imagini din atelier și servicii."
+  },
+  "testimoniale": {
+    "title": "Testimoniale",
+    "subtitle": "Ce spun clienții despre noi."
   },
   "contact": {
     "title": "Contact",
@@ -223,7 +235,22 @@
     "flagShowCarWashPrices": "Afișare prețuri spălătorie",
     "flagShowCarWashPricesDesc": "Prețurile pentru spălătorie pe pagina Servicii.",
     "saveFlags": "Salvează modificările",
-    "saveFlagsDisabledHint": "Vom conecta la API ulterior."
+    "saveFlagsDisabledHint": "Vom conecta la API ulterior.",
+    "servicesManagement": "Gestiune Servicii",
+    "servicesManagementDesc": "Adaugă, editează sau șterge serviciile oferite și prețurile acestora.",
+    "servicesTabGeneral": "Servicii",
+    "servicesTabAnvelope": "Anvelope",
+    "servicesTabSpalatorie": "Spălătorie",
+    "serviceName": "Nume serviciu",
+    "priceDisplayed": "Preț afișat",
+    "actions": "Acțiuni",
+    "addService": "Adaugă serviciu",
+    "servicesListFor": "Listă servicii",
+    "apiLater": "API ulterior",
+    "flagGallery": "Galerie",
+    "flagGalleryDesc": "Nav și pagina /galerie.",
+    "flagTestimonials": "Testimoniale",
+    "flagTestimonialsDesc": "Nav și pagina /testimoniale."
   },
   "errors": {
     "network": "Eroare de rețea. Încearcă din nou.",

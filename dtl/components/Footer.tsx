@@ -2,8 +2,17 @@ import Link from "next/link";
 import { Phone, Mail, MapPin } from "lucide-react";
 import { t } from "@/lib/i18n";
 import { getMapsUrl } from "@/lib/maps";
+import type { FeatureFlags } from "@/lib/feature-flags";
+import {
+  isAnyBookingEnabled,
+  isRequestQuoteEnabled,
+  isAuthenticationEnabled,
+  isGalleryEnabled,
+  isTestimonialsEnabled,
+} from "@/lib/feature-flags";
 
 interface FooterProps {
+  flags: FeatureFlags;
   phone?: string | null;
   email?: string | null;
   whatsapp?: string | null;
@@ -21,6 +30,7 @@ function formatHours(hours: Record<string, string> | null | undefined): string {
 }
 
 export function Footer({
+  flags,
   phone,
   email,
   address,
@@ -28,6 +38,11 @@ export function Footer({
   hours,
 }: FooterProps) {
   const hoursText = formatHours(hours ?? undefined);
+  const showBooking = isAnyBookingEnabled(flags);
+  const showQuote = isRequestQuoteEnabled(flags);
+  const showGallery = isGalleryEnabled(flags);
+  const showTestimonials = isTestimonialsEnabled(flags);
+  const showAuth = isAuthenticationEnabled(flags);
 
   return (
     <footer className="bg-slate-950 text-slate-300 pt-16 pb-8">
@@ -60,16 +75,46 @@ export function Footer({
                 {t("nav.servicii")}
               </Link>
             </li>
-            <li>
-              <Link href="/programare" className="hover:text-blue-400 transition-colors">
-                {t("nav.programare")}
-              </Link>
-            </li>
+            {showBooking && (
+              <li>
+                <Link href="/programare" className="hover:text-blue-400 transition-colors">
+                  {t("nav.programare")}
+                </Link>
+              </li>
+            )}
+            {showQuote && (
+              <li>
+                <Link href="/cere-oferta" className="hover:text-blue-400 transition-colors">
+                  {t("nav.cereOferta")}
+                </Link>
+              </li>
+            )}
             <li>
               <Link href="/contact" className="hover:text-blue-400 transition-colors">
                 {t("nav.contact")}
               </Link>
             </li>
+            {showGallery && (
+              <li>
+                <Link href="/galerie" className="hover:text-blue-400 transition-colors">
+                  {t("nav.gallery")}
+                </Link>
+              </li>
+            )}
+            {showTestimonials && (
+              <li>
+                <Link href="/testimoniale" className="hover:text-blue-400 transition-colors">
+                  {t("nav.testimonials")}
+                </Link>
+              </li>
+            )}
+            {showAuth && (
+              <li>
+                <Link href="/cont" className="hover:text-blue-400 transition-colors">
+                  {t("cont.title")}
+                </Link>
+              </li>
+            )}
           </ul>
         </div>
 

@@ -11,6 +11,8 @@ import {
   isAnyBookingEnabled,
   isRequestQuoteEnabled,
   isAuthenticationEnabled,
+  isGalleryEnabled,
+  isTestimonialsEnabled,
 } from "@/lib/feature-flags";
 
 interface HeaderProps {
@@ -35,6 +37,8 @@ export function Header({
   const showBooking = isAnyBookingEnabled(flags);
   const showQuote = isRequestQuoteEnabled(flags);
   const showAuth = isAuthenticationEnabled(flags);
+  const showGallery = isGalleryEnabled(flags);
+  const showTestimonials = isTestimonialsEnabled(flags);
 
   const navLinks: { name: string; path: string; show: boolean }[] = [
     { name: t("nav.home"), path: "/", show: true },
@@ -42,6 +46,8 @@ export function Header({
     { name: t("nav.programare"), path: "/programare", show: showBooking },
     { name: t("nav.cereOferta"), path: "/cere-oferta", show: showQuote },
     { name: t("nav.contact"), path: "/contact", show: true },
+    { name: t("nav.gallery"), path: "/galerie", show: showGallery },
+    { name: t("nav.testimonials"), path: "/testimoniale", show: showTestimonials },
   ].filter((l) => l.show);
 
   const isActive = (path: string) => pathname === path;

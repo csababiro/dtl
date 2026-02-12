@@ -63,6 +63,8 @@ export interface BookingTab {
 
 interface BookingFormProps {
   tabs: BookingTab[];
+  /** Initial tab when opening from a link (e.g. ?tab=tyre). Must match a tab id. */
+  defaultTab?: string;
 }
 
 type BookingFormValues = {
@@ -88,8 +90,12 @@ const CUSTOMER_PHONE_KEY = "dtl_customer_phone";
 const CUSTOMER_SESSION_KEY = "dtl_customer_session";
 const CARS_STORAGE_KEY = "dtl_customer_cars";
 
-export function BookingForm({ tabs }: BookingFormProps) {
-  const [activeTab, setActiveTab] = useState(tabs[0]?.id ?? "general");
+export function BookingForm({ tabs, defaultTab }: BookingFormProps) {
+  const initialTab =
+    defaultTab && tabs.some((t) => t.id === defaultTab)
+      ? defaultTab
+      : tabs[0]?.id ?? "general";
+  const [activeTab, setActiveTab] = useState(initialTab);
   const [optionalServices, setOptionalServices] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);

@@ -7,7 +7,11 @@ import {
 import { t } from "@/lib/i18n";
 import Link from "next/link";
 
-export default async function ProgramarePage() {
+export default async function ProgramarePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ tab?: string }> | { tab?: string };
+}) {
   const flags = await getFeatureFlags();
   const showBooking = isAnyBookingEnabled(flags);
 
@@ -33,5 +37,13 @@ export default async function ProgramarePage() {
   if (isBookingEnabled(flags, "carWash"))
     tabs.push({ id: "carWash", label: t("programare.tabCarWash") });
 
-  return <BookingForm tabs={tabs} />;
+  const resolved =
+    typeof (searchParams as Promise<{ tab?: string }>).then === "function"
+      ? await (searchParams as Promise<{ tab?: string }>)
+      : (searchParams as { tab?: string });
+  const tabParam = resolved.tab;
+  const defaultTab =
+    tabParam && tabs.some((t) => t.id === tabParam) ? tabParam : undefined;
+
+  return <BookingForm tabs={tabs} defaultTab={defaultTab} />;
 }
