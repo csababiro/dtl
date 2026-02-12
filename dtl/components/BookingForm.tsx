@@ -21,6 +21,7 @@ import {
   CAR_MAKE_MODEL_MAX,
   DESCRIPTION_MAX,
 } from "@/lib/field-limits";
+import { CreateAccountPromptModal } from "@/components/CreateAccountPromptModal";
 
 const TIME_SLOTS = [
   "08:00", "09:00", "10:00", "11:00", "12:00",
@@ -99,6 +100,7 @@ export function BookingForm({ tabs, defaultTab }: BookingFormProps) {
   const [optionalServices, setOptionalServices] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [showCreateAccountPrompt, setShowCreateAccountPrompt] = useState(false);
 
   const {
     register,
@@ -160,31 +162,40 @@ export function BookingForm({ tabs, defaultTab }: BookingFormProps) {
     setLoading(true);
     // No server call: form is validated; confirm locally (avoids Failed to fetch when no backend).
     setSuccess(true);
+    setShowCreateAccountPrompt(true);
     setLoading(false);
   };
 
   if (success) {
     return (
-      <div className="min-h-[70vh] flex items-center justify-center p-4">
-        <div className="max-w-md w-full bg-white p-12 rounded-3xl shadow-2xl text-center border border-green-100">
-          <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-8">
-            <CheckCircle2 size={48} />
+      <>
+        <div className="min-h-[70vh] flex items-center justify-center p-4">
+          <div className="max-w-md w-full bg-white p-12 rounded-3xl shadow-2xl text-center border border-green-100">
+            <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-8">
+              <CheckCircle2 size={48} />
+            </div>
+            <h2 className="text-3xl font-black text-slate-900 mb-4">
+              Cerere trimisă!
+            </h2>
+            <p className="text-slate-600 mb-8 leading-relaxed">
+              {t("programare.successMessage")}
+            </p>
+            <button
+              type="button"
+              onClick={() => setSuccess(false)}
+              className="w-full bg-blue-600 text-white py-4 rounded-xl font-bold hover:bg-blue-700 transition-colors"
+            >
+              Fă o altă programare
+            </button>
           </div>
-          <h2 className="text-3xl font-black text-slate-900 mb-4">
-            Cerere trimisă!
-          </h2>
-          <p className="text-slate-600 mb-8 leading-relaxed">
-            {t("programare.successMessage")}
-          </p>
-          <button
-            type="button"
-            onClick={() => setSuccess(false)}
-            className="w-full bg-blue-600 text-white py-4 rounded-xl font-bold hover:bg-blue-700 transition-colors"
-          >
-            Fă o altă programare
-          </button>
         </div>
-      </div>
+        <CreateAccountPromptModal
+          open={showCreateAccountPrompt}
+          onClose={() => setShowCreateAccountPrompt(false)}
+          source="booking"
+          email={getValues("email")}
+        />
+      </>
     );
   }
 

@@ -6,6 +6,7 @@ import {
   Clock,
   ArrowUpRight,
   Calendar,
+  Eye,
 } from "lucide-react";
 import { t } from "@/lib/i18n";
 
@@ -33,6 +34,7 @@ const STAT_CARDS = [
   { labelKey: "admin.newClients", val: "12", trend: "+4%", up: true, icon: UsersIcon, color: "text-blue-600", bg: "bg-blue-100" },
   { labelKey: "admin.appointmentsCount", val: "28", trend: "+2%", up: true, icon: ClipboardCheck, color: "text-purple-600", bg: "bg-purple-100" },
   { labelKey: "admin.avgTime", val: "1.5h", trend: "+0%", up: true, icon: Clock, color: "text-amber-600", bg: "bg-amber-100" },
+  { labelKey: "admin.visitors24h", val: "—", trend: null, icon: Eye, color: "text-slate-600", bg: "bg-slate-100", noApi: true },
 ];
 
 export default function AdminDashboardPage() {
@@ -55,7 +57,7 @@ export default function AdminDashboardPage() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
         {STAT_CARDS.map((stat, i) => (
           <div
             key={i}
@@ -65,15 +67,22 @@ export default function AdminDashboardPage() {
               <div className={`p-3 rounded-2xl ${stat.bg} ${stat.color}`}>
                 <stat.icon size={24} />
               </div>
-              <div className="flex items-center gap-1 text-sm font-bold text-green-500">
-                <ArrowUpRight size={16} />
-                {stat.trend}
-              </div>
+              {stat.trend != null && (
+                <div className="flex items-center gap-1 text-sm font-bold text-green-500">
+                  <ArrowUpRight size={16} />
+                  {stat.trend}
+                </div>
+              )}
             </div>
             <h4 className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-1">
               {t(stat.labelKey)}
             </h4>
             <p className="text-3xl font-black text-slate-900">{stat.val}</p>
+            {"noApi" in stat && stat.noApi && (
+              <p className="text-xs text-slate-400 mt-2">
+                {t("admin.visitorsNoApi")}
+              </p>
+            )}
           </div>
         ))}
       </div>

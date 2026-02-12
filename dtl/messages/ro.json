@@ -25,7 +25,11 @@
     "previous": "Anterior",
     "search": "Caută",
     "yes": "Da",
-    "no": "Nu"
+    "no": "Nu",
+    "createAccountPromptTitle": "Creați un cont",
+    "createAccountPromptMessage": "Pentru programări și cereri ofertă mai rapide data viitoare, creați un cont. Veți putea salva mașinile și re programa în câteva click-uri.",
+    "createAccountCta": "Creează cont",
+    "createAccountLater": "Mai târziu"
   },
   "home": {
     "title": "DTL Service",
@@ -187,6 +191,8 @@
     "newClients": "Clienți Noi",
     "appointmentsCount": "Programări",
     "avgTime": "Timp Mediu",
+    "visitors24h": "Vizitatori (24h)",
+    "visitorsNoApi": "Conectare analytics ulterior",
     "revenueEvolution": "Evoluție Venituri",
     "recentAppointments": "Programări Noi",
     "viewAllAppointments": "Vezi toate programările",
@@ -202,6 +208,10 @@
     "testimonials": "Testimoniale",
     "galleryManagement": "Galerie",
     "galleryManagementDesc": "Imagini afișate în secțiunea Galerie pe site.",
+    "addImage": "Adaugă imagine",
+    "imageTitle": "Titlu",
+    "imageCaption": "Descriere",
+    "imageUrl": "URL imagine",
     "testimonialsManagement": "Testimoniale",
     "testimonialsManagementDesc": "Recenzii și testimoniale afișate pe site.",
     "contactSectionTitle": "Date de contact",
@@ -278,7 +288,15 @@
     "flagGallery": "Galerie",
     "flagGalleryDesc": "Nav și pagina /galerie.",
     "flagTestimonials": "Testimoniale",
-    "flagTestimonialsDesc": "Nav și pagina /testimoniale."
+    "flagTestimonialsDesc": "Nav și pagina /testimoniale.",
+    "addTestimonial": "Adaugă testimonial",
+    "editTestimonial": "Editează",
+    "testimonialAuthor": "Autor",
+    "testimonialRole": "Rol (opțional)",
+    "testimonialText": "Text",
+    "testimonialRating": "Rating (1-5)",
+    "testimonialVisible": "Vizibil pe site",
+    "testimonialHidden": "Ascuns"
   },
   "errors": {
     "network": "Eroare de rețea. Încearcă din nou.",
