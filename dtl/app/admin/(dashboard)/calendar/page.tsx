@@ -1,9 +1,11 @@
 import { t } from "@/lib/i18n";
+import { getAppointments } from "@/lib/appointments-store";
 import { AdminCalendarClient } from "@/components/AdminCalendarClient";
 import { Calendar as CalendarIcon } from "lucide-react";
 import Link from "next/link";
 
 export default function AdminCalendarPage() {
+  const appointments = getAppointments();
   return (
     <div className="space-y-8">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -12,7 +14,7 @@ export default function AdminCalendarPage() {
             {t("admin.calendar")}
           </h1>
           <p className="text-slate-500 mt-1">
-            Calendar (react-big-calendar) – programări dummy, fără API.
+            Calendar (react-big-calendar) – confirmă programări din Listă programări.
           </p>
         </div>
         <Link
@@ -30,7 +32,7 @@ export default function AdminCalendarPage() {
           </div>
           <span className="font-bold text-slate-800">Lună / Săptămână / Zi</span>
         </div>
-        <AdminCalendarClient />
+        <AdminCalendarClient appointments={appointments} />
       </div>
     </div>
   );

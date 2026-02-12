@@ -22,6 +22,7 @@ const DUMMY_QUOTES: QuoteRequest[] = [
   {
     id: "qr-dummy-1",
     createdAt: "2025-02-01T10:00:00.000Z",
+    status: "pending",
     name: "Maria Popescu",
     phone: "0722111222",
     email: "maria.popescu@email.ro",
@@ -156,12 +157,21 @@ export function nextQuoteRequestId(): string {
   return "qr-" + Date.now() + "-" + Math.random().toString(36).slice(2, 9);
 }
 
-export function addQuoteRequest(item: Omit<QuoteRequest, "id" | "createdAt">): QuoteRequest {
+export function addQuoteRequest(item: Omit<QuoteRequest, "id" | "createdAt" | "status">): QuoteRequest {
   const full: QuoteRequest = {
     ...item,
     id: nextQuoteRequestId(),
     createdAt: new Date().toISOString(),
+    status: "pending",
   };
   store.push(full);
   return full;
+}
+
+/** Set status for a quote request (e.g. "pending" | "prepared"). */
+export function setQuoteRequestStatus(id: string, status: string): QuoteRequest | null {
+  const item = store.find((q) => q.id === id);
+  if (!item) return null;
+  item.status = status;
+  return item;
 }

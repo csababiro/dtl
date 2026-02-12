@@ -1,9 +1,11 @@
 import { t } from "@/lib/i18n";
-import { DUMMY_APPOINTMENTS } from "@/lib/dummy-appointments";
+import { getAppointments } from "@/lib/appointments-store";
 import { AdminAppointmentsClient } from "@/components/AdminAppointmentsClient";
 import Link from "next/link";
+import { approveAppointment } from "./actions";
 
 export default function AdminAppointmentsPage() {
+  const appointments = getAppointments();
   return (
     <div className="space-y-8">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -12,7 +14,7 @@ export default function AdminAppointmentsPage() {
             {t("admin.appointments")}
           </h1>
           <p className="text-slate-500 mt-1">
-            Programări viitoare și istoric (date dummy, fără API).
+            Programări viitoare și istoric. Confirmă programările din „În așteptare”.
           </p>
         </div>
         <Link
@@ -24,8 +26,9 @@ export default function AdminAppointmentsPage() {
       </div>
 
       <AdminAppointmentsClient
-        appointments={DUMMY_APPOINTMENTS}
+        appointments={appointments}
         referenceToday="11 Feb 2025"
+        onApprove={approveAppointment}
       />
     </div>
   );

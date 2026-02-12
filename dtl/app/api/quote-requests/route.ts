@@ -30,6 +30,7 @@ export async function POST(request: Request) {
     const item: QuoteRequest = {
       id: nextQuoteRequestId(),
       createdAt: new Date().toISOString(),
+      status: "pending",
       name: String(name ?? "").trim(),
       phone: String(phone ?? "").trim(),
       email: String(email ?? "").trim(),
