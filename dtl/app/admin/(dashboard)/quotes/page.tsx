@@ -9,13 +9,15 @@ export default function AdminQuotesPage() {
   const items = getQuoteRequests();
 
   return (
-    <div>
-      <h1 className="text-2xl font-bold text-slate-900 mb-4">
-        {t("admin.quotes")}
-      </h1>
-      <p className="text-slate-500 mb-4">
-        Marchează cererile ca „Pregătit pentru client” după ce oferta e pregătită.
-      </p>
+    <div className="space-y-8">
+      <div>
+        <h1 className="text-3xl font-black text-slate-900">
+          {t("admin.quotes")}
+        </h1>
+        <p className="text-slate-500 mt-1">
+          Marchează cererile ca „Pregătit pentru client” după ce oferta e pregătită.
+        </p>
+      </div>
       <AdminQuotesClient items={items} onMarkPrepared={markQuotePrepared} />
     </div>
   );

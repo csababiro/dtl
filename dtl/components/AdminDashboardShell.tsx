@@ -17,7 +17,7 @@ export function AdminDashboardShell({
         mobileOpen={sidebarOpen}
         onMobileClose={() => setSidebarOpen(false)}
       />
-      {/* Mobile top bar with menu button */}
+      {/* Mobile: top bar with menu and title */}
       <div className="lg:hidden fixed top-0 left-0 right-0 h-14 bg-slate-900 text-white z-[80] flex items-center px-4 gap-3 shadow-md">
         <button
           type="button"
@@ -29,9 +29,12 @@ export function AdminDashboardShell({
         </button>
         <span className="font-semibold text-lg">DTL Admin</span>
       </div>
-      <main className="w-full min-h-screen pt-14 lg:pt-0 lg:pl-64 p-4 md:p-8">
-        {children}
-      </main>
+      {/* Content area: on desktop (lg) use margin-left so it never goes under the fixed sidebar */}
+      <div className="pt-14 lg:pt-0 lg:ml-64 min-h-screen">
+        <main className="w-full min-h-screen p-4 md:p-8 lg:px-10 lg:py-8 xl:px-12 xl:py-10">
+          {children}
+        </main>
+      </div>
     </div>
   );
 }
