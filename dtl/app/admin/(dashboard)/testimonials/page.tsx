@@ -13,8 +13,8 @@ export default function AdminTestimonialsPage() {
         </p>
       </div>
 
-      <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
-        <div className="p-6">
+      <div className="md:bg-white md:rounded-3xl md:border md:border-slate-100 md:shadow-sm overflow-hidden">
+        <div className="p-2 sm:p-4 md:p-6">
           <AdminTestimonialsClient />
         </div>
       </div>

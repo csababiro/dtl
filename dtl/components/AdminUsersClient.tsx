@@ -26,30 +26,30 @@ interface AdminUsersClientProps {
 
 export function AdminUsersClient({ users }: AdminUsersClientProps) {
   return (
-    <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
-      {/* Mobile: cards */}
-      <div className="md:hidden divide-y divide-slate-100">
+    <div className="md:bg-white md:rounded-3xl md:border md:border-slate-100 md:shadow-sm overflow-hidden">
+      {/* Mobile: separate cards with space (no outer card), larger to fill space */}
+      <div className="md:hidden space-y-4 p-2 sm:p-4">
         {users.map((user) => (
           <div
             key={user.id}
-            className="p-4 rounded-xl border-b border-slate-100 last:border-0 space-y-3"
+            className="p-5 sm:p-6 rounded-2xl border border-slate-200 bg-white shadow-sm space-y-4"
           >
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center shrink-0">
-                <User size={20} className="text-slate-600" />
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center shrink-0">
+                <User size={24} className="text-slate-600" />
               </div>
-              <span className="font-bold text-slate-900">{user.name}</span>
+              <span className="font-bold text-slate-900 text-lg">{user.name}</span>
             </div>
             <a
               href={`mailto:${user.email}`}
-              className="text-blue-600 hover:underline flex items-center gap-2 text-sm"
+              className="text-blue-600 hover:underline flex items-center gap-2 text-base"
             >
-              <Mail size={16} />
+              <Mail size={18} />
               {user.email}
             </a>
             <div className="flex flex-wrap gap-2">
               <span
-                className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold ${
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-bold ${
                   user.role === "Super Admin"
                     ? "bg-purple-100 text-purple-700"
                     : user.role === "Admin"
@@ -57,11 +57,11 @@ export function AdminUsersClient({ users }: AdminUsersClientProps) {
                       : "bg-slate-100 text-slate-700"
                 }`}
               >
-                <Shield size={14} />
+                <Shield size={16} />
                 {user.role}
               </span>
               <span
-                className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${
+                className={`px-3 py-1.5 rounded-full text-sm font-bold uppercase tracking-wider ${
                   user.active
                     ? "bg-green-100 text-green-700"
                     : "bg-slate-100 text-slate-500"
@@ -70,7 +70,7 @@ export function AdminUsersClient({ users }: AdminUsersClientProps) {
                 {user.active ? "Activ" : "Inactiv"}
               </span>
             </div>
-            <p className="text-slate-600 text-sm pt-1 border-t border-slate-100">
+            <p className="text-slate-600 text-sm pt-3 border-t border-slate-100">
               Ultima autentificare: {formatDate(user.lastLogin)}
             </p>
           </div>

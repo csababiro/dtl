@@ -47,8 +47,8 @@ export function AdminOrarClient() {
   };
 
   return (
-    <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
-      <div className="p-6 border-b border-slate-100 flex items-center gap-3">
+    <div className="md:bg-white md:rounded-3xl md:border md:border-slate-100 md:shadow-sm overflow-hidden">
+      <div className="p-4 md:p-6 border-b border-slate-100 flex items-center gap-3">
         <div className="p-2 bg-blue-100 text-blue-600 rounded-xl">
           <Clock size={24} />
         </div>
@@ -59,7 +59,7 @@ export function AdminOrarClient() {
           </p>
         </div>
       </div>
-      <form onSubmit={handleSubmit} className="p-6 space-y-6">
+      <form onSubmit={handleSubmit} className="p-4 md:p-6 space-y-6">
         <div className="space-y-4">
           {DAY_KEYS.map((labelKey, index) => {
             const day = schedule.days[index];

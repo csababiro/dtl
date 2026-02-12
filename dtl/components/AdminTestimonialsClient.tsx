@@ -220,7 +220,7 @@ export function AdminTestimonialsClient() {
         {items.map((item) => (
           <li
             key={item.id}
-            className="p-6 hover:bg-slate-50/50 transition-colors group rounded-xl"
+            className="p-6 rounded-xl border border-slate-200 bg-white hover:bg-slate-50/50 transition-colors group"
           >
             <div className="flex gap-4">
               <div className="p-2 bg-blue-100 text-blue-600 rounded-xl shrink-0 h-fit">
