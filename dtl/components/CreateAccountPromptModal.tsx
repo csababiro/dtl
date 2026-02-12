@@ -10,11 +10,15 @@ import {
   type InterestSource,
 } from "@/lib/create-account-interest";
 
+const SIGNUP_PREFILL_KEY = "dtl_signup_prefill";
+
 export interface CreateAccountPromptModalProps {
   open: boolean;
   onClose: () => void;
   source: InterestSource;
   email?: string;
+  name?: string;
+  phone?: string;
 }
 
 export function CreateAccountPromptModal({
@@ -22,6 +26,8 @@ export function CreateAccountPromptModal({
   onClose,
   source,
   email,
+  name,
+  phone,
 }: CreateAccountPromptModalProps) {
   useEffect(() => {
     if (open) {
@@ -33,6 +39,20 @@ export function CreateAccountPromptModal({
 
   const handleCreateAccount = () => {
     recordCreateAccountResponse(source, "create_account", email);
+    if (typeof window !== "undefined" && (name ?? email ?? phone)) {
+      try {
+        sessionStorage.setItem(
+          SIGNUP_PREFILL_KEY,
+          JSON.stringify({
+            name: name?.trim() || "",
+            email: email?.trim() || "",
+            phone: phone?.trim() || "",
+          })
+        );
+      } catch {
+        /* ignore */
+      }
+    }
     onClose();
   };
 
@@ -77,7 +97,7 @@ export function CreateAccountPromptModal({
           </p>
           <div className="flex flex-col sm:flex-row gap-3 w-full">
             <Link
-              href="/cont"
+              href="/cont?tab=signUp"
               onClick={handleCreateAccount}
               className="flex-1 inline-flex items-center justify-center gap-2 px-6 py-4 rounded-xl font-bold bg-blue-600 text-white hover:bg-blue-700 transition-colors"
             >

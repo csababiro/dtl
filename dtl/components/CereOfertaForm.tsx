@@ -53,6 +53,8 @@ export function CereOfertaForm() {
   const [success, setSuccess] = useState(false);
   const [showCreateAccountPrompt, setShowCreateAccountPrompt] = useState(false);
   const [successEmail, setSuccessEmail] = useState<string | undefined>();
+  const [successName, setSuccessName] = useState<string | undefined>();
+  const [successPhone, setSuccessPhone] = useState<string | undefined>();
   const [file, setFile] = useState<File | null>(null);
 
   const {
@@ -109,6 +111,8 @@ export function CereOfertaForm() {
   const onSubmit = (data: CereOfertaFormValues) => {
     setLoading(true);
     setSuccessEmail(data.email?.trim() || undefined);
+    setSuccessName(data.name?.trim() || undefined);
+    setSuccessPhone(data.phone?.trim() || undefined);
     setSuccess(true);
     setShowCreateAccountPrompt(true);
     reset();
@@ -145,6 +149,8 @@ export function CereOfertaForm() {
           onClose={() => setShowCreateAccountPrompt(false)}
           source="quote"
           email={successEmail}
+          name={successName}
+          phone={successPhone}
         />
       </>
     );

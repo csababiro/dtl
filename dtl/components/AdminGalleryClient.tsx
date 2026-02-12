@@ -6,18 +6,6 @@ import { getGalleryItems, addGalleryItem, removeGalleryItem } from "@/lib/galler
 import type { GalleryItem } from "@/lib/dummy-gallery";
 import { t } from "@/lib/i18n";
 
-function formatDate(iso: string): string {
-  try {
-    return new Date(iso).toLocaleDateString("ro-RO", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-    });
-  } catch {
-    return iso;
-  }
-}
-
 const DEFAULT_PLACEHOLDER = "https://placehold.co/800x500/e2e8f0/64748b?text=Imagine";
 
 export function AdminGalleryClient() {
@@ -151,15 +139,6 @@ export function AdminGalleryClient() {
                   <Trash2 size={18} />
                 </button>
               </div>
-            </div>
-            <div className="p-4">
-              <h3 className="font-bold text-slate-900">{item.title}</h3>
-              {item.caption && (
-                <p className="text-sm text-slate-500 mt-1">{item.caption}</p>
-              )}
-              <p className="text-xs text-slate-400 mt-2">
-                {formatDate(item.createdAt)} · #{item.order}
-              </p>
             </div>
           </li>
         ))}

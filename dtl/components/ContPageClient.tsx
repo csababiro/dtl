@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import {
   User,
@@ -33,6 +34,7 @@ const NAME_STORAGE_KEY = "dtl_customer_name";
 const EMAIL_STORAGE_KEY = "dtl_customer_email";
 const PHONE_STORAGE_KEY = "dtl_customer_phone";
 const CARS_STORAGE_KEY = "dtl_customer_cars";
+const SIGNUP_PREFILL_KEY = "dtl_signup_prefill";
 
 type Tab = "signIn" | "signUp";
 type DashboardSection = "appointments" | "invoices" | "cars" | "settings";
@@ -48,6 +50,7 @@ const inputNormal = "border-slate-200";
 const inputError = "border-red-500";
 
 export function ContPageClient() {
+  const searchParams = useSearchParams();
   const [tab, setTab] = useState<Tab>("signIn");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [email, setEmail] = useState("");
@@ -76,6 +79,10 @@ export function ContPageClient() {
   });
 
   useEffect(() => {
+    if (searchParams.get("tab") === "signUp") setTab("signUp");
+  }, [searchParams]);
+
+  useEffect(() => {
     if (typeof window === "undefined") return;
     if (sessionStorage.getItem(STORAGE_KEY) === "true") setIsLoggedIn(true);
     const name = sessionStorage.getItem(NAME_STORAGE_KEY);
@@ -102,6 +109,27 @@ export function ContPageClient() {
       // ignore
     }
   }, []);
+
+  useEffect(() => {
+    if (tab !== "signUp") return;
+    try {
+      const raw = sessionStorage.getItem(SIGNUP_PREFILL_KEY);
+      if (!raw) return;
+      const prefill = JSON.parse(raw) as { name?: string; email?: string; phone?: string };
+      sessionStorage.removeItem(SIGNUP_PREFILL_KEY);
+      if (prefill && (prefill.name || prefill.email || prefill.phone)) {
+        registerForm.reset({
+          name: prefill.name ?? registerForm.getValues("name") ?? "",
+          email: prefill.email ?? registerForm.getValues("email") ?? "",
+          phone: prefill.phone ?? registerForm.getValues("phone") ?? "",
+          password: "",
+          repeatPassword: "",
+        });
+      }
+    } catch {
+      // ignore
+    }
+  }, [tab]);
 
   function onLoginSubmit(data: LoginFormValues) {
     if (typeof window !== "undefined") {

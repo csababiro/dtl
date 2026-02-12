@@ -1,0 +1,2 @@
+1. Prepopulated create account popup when programari or cerere oferta
+2. 

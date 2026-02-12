@@ -216,11 +216,11 @@ export function AdminTestimonialsClient() {
         </div>
       )}
 
-      <ul className="divide-y divide-slate-100">
+      <ul className="space-y-1">
         {items.map((item) => (
           <li
             key={item.id}
-            className="p-6 hover:bg-slate-50/50 transition-colors group"
+            className="p-6 hover:bg-slate-50/50 transition-colors group rounded-xl"
           >
             <div className="flex gap-4">
               <div className="p-2 bg-blue-100 text-blue-600 rounded-xl shrink-0 h-fit">
