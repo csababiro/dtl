@@ -157,41 +157,48 @@ export function AdminFeatureFlagsClient() {
         </div>
       </div>
 
-      {/* Tabs */}
-      <div className="border-b border-slate-200">
-        <nav className="flex gap-1" aria-label={t("admin.featureFlags")}>
-          <button
-            type="button"
-            onClick={() => setActiveTab("func")}
-            aria-selected={activeTab === "func"}
-            className={`px-5 py-3 font-bold rounded-t-xl transition-colors ${
-              activeTab === "func"
-                ? "bg-white border border-b-0 border-slate-200 text-slate-900 -mb-px"
-                : "text-slate-500 hover:text-slate-700 hover:bg-slate-50"
-            }`}
-          >
-            {t("admin.featureFlagsTab")}
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveTab("prices")}
-            aria-selected={activeTab === "prices"}
-            className={`px-5 py-3 font-bold rounded-t-xl transition-colors ${
-              activeTab === "prices"
-                ? "bg-white border border-b-0 border-slate-200 text-slate-900 -mb-px"
-                : "text-slate-500 hover:text-slate-700 hover:bg-slate-50"
-            }`}
-          >
-            {t("admin.pricesTab")}
-          </button>
-        </nav>
-      </div>
+      {/* Tabs + content: no gap so content sits under tabs (fixes mobile gap) */}
+      <div>
+        <div className="border-b border-slate-200">
+          <nav className="flex gap-1" aria-label={t("admin.featureFlags")}>
+            <button
+              type="button"
+              onClick={() => setActiveTab("func")}
+              aria-selected={activeTab === "func"}
+              className={`px-5 py-3 font-bold rounded-t-xl transition-colors ${
+                activeTab === "func"
+                  ? "bg-white border border-b-0 border-slate-200 text-slate-900 -mb-px"
+                  : "text-slate-500 hover:text-slate-700 hover:bg-slate-50"
+              }`}
+            >
+              {t("admin.featureFlagsTab")}
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab("prices")}
+              aria-selected={activeTab === "prices"}
+              className={`px-5 py-3 font-bold rounded-t-xl transition-colors ${
+                activeTab === "prices"
+                  ? "bg-white border border-b-0 border-slate-200 text-slate-900 -mb-px"
+                  : "text-slate-500 hover:text-slate-700 hover:bg-slate-50"
+              }`}
+            >
+              {t("admin.pricesTab")}
+            </button>
+          </nav>
+        </div>
 
-      {activeTab === "func" && (
-      <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden rounded-t-none">
+        <p className="text-slate-500 text-sm mt-0 px-4 py-3 bg-white md:bg-transparent md:mt-3 md:px-1 md:py-0">
+          {activeTab === "func"
+            ? t("admin.featureFlagsTabDesc")
+            : t("admin.pricesSectionDesc")}
+        </p>
+
+        {activeTab === "func" && (
+      <div className="bg-white rounded-3xl border border-slate-100 border-t-0 md:border-t shadow-none md:shadow-sm overflow-hidden rounded-t-none mt-0 md:mt-4">
         {/* Mobile: cards */}
-        <div className="md:hidden space-y-4 p-4">
-          {FUNCTIONALITY_FLAG_KEYS.map((key) => {
+        <div className="md:hidden space-y-4 pt-0 p-4 pb-4 [&>*:first-child]:border-t-0 [&>*:first-child]:rounded-t-none [&>*:first-child]:mt-0">
+          {FUNCTIONALITY_FLAG_KEYS.map((key, index) => {
             const { superAdmin, admin } = toggles[key] ?? {
               superAdmin: true,
               admin: true,
@@ -201,7 +208,7 @@ export function AdminFeatureFlagsClient() {
             return (
               <div
                 key={key}
-                className="p-4 rounded-xl border border-slate-200 space-y-4"
+                className={`p-4 rounded-xl border border-slate-200 space-y-4 ${index === 0 ? "!border-t-0 rounded-t-none" : ""}`}
               >
                 <div className="flex items-start gap-3">
                   <span
@@ -258,7 +265,7 @@ export function AdminFeatureFlagsClient() {
             <thead className="bg-slate-50 border-b border-slate-100">
               <tr>
                 <th className="px-8 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">
-                  Funcționalitate
+                  {t("admin.featureColumn")}
                 </th>
                 {MOCK_ADMIN_ROLE === "super_admin" && (
                   <th className="px-8 py-4 text-xs font-black text-slate-400 uppercase tracking-widest text-center w-32">
@@ -353,18 +360,10 @@ export function AdminFeatureFlagsClient() {
       )}
 
       {activeTab === "prices" && (
-        <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden rounded-t-none">
-          <div className="p-6 border-b border-slate-100">
-            <h2 className="text-xl font-bold text-slate-900">
-              {t("admin.pricesSectionTitle")}
-            </h2>
-            <p className="text-slate-500 text-sm mt-1">
-              {t("admin.pricesSectionDesc")}
-            </p>
-          </div>
+        <div className="bg-white rounded-3xl border border-slate-100 border-t-0 md:border-t shadow-none md:shadow-sm overflow-hidden rounded-t-none mt-0 md:mt-4">
           {/* Mobile: cards */}
-          <div className="md:hidden space-y-4 p-4">
-            {PRICE_FLAG_KEYS.map((key) => {
+          <div className="md:hidden space-y-4 pt-0 p-4 pb-4 [&>*:first-child]:border-t-0 [&>*:first-child]:rounded-t-none [&>*:first-child]:mt-0">
+            {PRICE_FLAG_KEYS.map((key, index) => {
               const { superAdmin, admin } = toggles[key] ?? {
                 superAdmin: true,
                 admin: true,
@@ -374,7 +373,7 @@ export function AdminFeatureFlagsClient() {
               return (
                 <div
                   key={key}
-                  className="p-4 rounded-xl border border-slate-200 space-y-4"
+                  className={`p-4 rounded-xl border border-slate-200 space-y-4 ${index === 0 ? "!border-t-0 rounded-t-none" : ""}`}
                 >
                   <div className="flex items-start gap-3">
                     <span
@@ -431,7 +430,7 @@ export function AdminFeatureFlagsClient() {
               <thead className="bg-slate-50 border-b border-slate-100">
                 <tr>
                   <th className="px-8 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">
-                    Funcționalitate
+                    {t("admin.featureColumn")}
                   </th>
                   {MOCK_ADMIN_ROLE === "super_admin" && (
                     <th className="px-8 py-4 text-xs font-black text-slate-400 uppercase tracking-widest text-center w-32">
@@ -524,6 +523,8 @@ export function AdminFeatureFlagsClient() {
           </div>
         </div>
       )}
+
+      </div>
 
       <div className="flex justify-end gap-4">
         <button
