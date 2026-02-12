@@ -25,6 +25,7 @@ import {
 } from "@/lib/field-limits";
 import { toast } from "sonner";
 import { CreateAccountPromptModal } from "@/components/CreateAccountPromptModal";
+import { notifyOnQuoteSuccess } from "@/lib/push-notify";
 
 type CereOfertaFormValues = {
   name: string;
@@ -119,6 +120,7 @@ export function CereOfertaForm() {
     setFile(null);
     toast.success(t("cereOferta.successToast"));
     setLoading(false);
+    notifyOnQuoteSuccess({ name: data.name?.trim() ?? "" });
   };
 
   if (success) {

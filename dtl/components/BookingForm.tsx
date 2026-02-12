@@ -22,6 +22,7 @@ import {
   DESCRIPTION_MAX,
 } from "@/lib/field-limits";
 import { CreateAccountPromptModal } from "@/components/CreateAccountPromptModal";
+import { notifyOnBookingSuccess } from "@/lib/push-notify";
 
 const TIME_SLOTS = [
   "08:00", "09:00", "10:00", "11:00", "12:00",
@@ -160,10 +161,10 @@ export function BookingForm({ tabs, defaultTab }: BookingFormProps) {
 
   const onSubmit = (data: BookingFormValues) => {
     setLoading(true);
-    // No server call: form is validated; confirm locally (avoids Failed to fetch when no backend).
     setSuccess(true);
     setShowCreateAccountPrompt(true);
     setLoading(false);
+    notifyOnBookingSuccess({ name: data.name, date: data.date, time: data.time });
   };
 
   if (success) {
