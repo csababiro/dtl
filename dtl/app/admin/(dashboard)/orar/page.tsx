@@ -1,19 +1,18 @@
+import { AdminOrarClient } from "@/components/AdminOrarClient";
 import { t } from "@/lib/i18n";
-import { AdminContactClient } from "@/components/AdminContactClient";
 
-export default function AdminSettingsPage() {
+export default function AdminOrarPage() {
   return (
     <div className="space-y-8">
       <div>
         <h1 className="text-3xl font-black text-slate-900">
-          {t("admin.settings")}
+          {t("admin.orar")}
         </h1>
         <p className="text-slate-500 mt-1">
-          Setări generale și date de contact.
+          {t("admin.orarDescription")}
         </p>
       </div>
-
-      <AdminContactClient />
+      <AdminOrarClient />
     </div>
   );
 }

@@ -2,23 +2,48 @@
 
 import { useState, useEffect } from "react";
 import { Clock } from "lucide-react";
-import { getWorkingHours, setWorkingHours } from "@/lib/working-hours";
-import type { WorkingHoursRange } from "@/lib/working-hours";
+import {
+  getWorkingHoursSchedule,
+  setWorkingHoursSchedule,
+} from "@/lib/working-hours";
+import type { WorkingHoursSchedule, DaySchedule } from "@/lib/working-hours";
 import { t } from "@/lib/i18n";
 
+const DAY_KEYS = [
+  "admin.dayMon",
+  "admin.dayTue",
+  "admin.dayWed",
+  "admin.dayThu",
+  "admin.dayFri",
+  "admin.daySat",
+] as const;
+
+function isClosed(d: DaySchedule): d is { closed: true } {
+  return "closed" in d && d.closed === true;
+}
+
 export function AdminOrarClient() {
-  const [range, setRange] = useState<WorkingHoursRange>({ start: "08:00", end: "17:00" });
+  const [schedule, setSchedule] = useState<WorkingHoursSchedule>(() =>
+    getWorkingHoursSchedule()
+  );
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
-    setRange(getWorkingHours());
+    setSchedule(getWorkingHoursSchedule());
   }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setWorkingHours(range);
+    setWorkingHoursSchedule(schedule);
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
+  };
+
+  const setDay = (index: number, daySchedule: DaySchedule) => {
+    setSchedule((prev) => ({
+      ...prev,
+      days: prev.days.map((d, i) => (i === index ? daySchedule : d)) as WorkingHoursSchedule["days"],
+    }));
   };
 
   return (
@@ -29,33 +54,73 @@ export function AdminOrarClient() {
         </div>
         <div>
           <h2 className="text-xl font-bold text-slate-900">{t("admin.orar")}</h2>
-          <p className="text-sm text-slate-500">{t("admin.orarDescription")}</p>
+          <p className="text-sm text-slate-500">
+            {t("admin.orarDescription")}
+          </p>
         </div>
       </div>
       <form onSubmit={handleSubmit} className="p-6 space-y-6">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-          <div>
-            <label className="block text-sm font-bold text-slate-700 mb-2">
-              {t("admin.workingHoursStart")}
-            </label>
-            <input
-              type="time"
-              value={range.start}
-              onChange={(e) => setRange((r) => ({ ...r, start: e.target.value }))}
-              className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-bold text-slate-700 mb-2">
-              {t("admin.workingHoursEnd")}
-            </label>
-            <input
-              type="time"
-              value={range.end}
-              onChange={(e) => setRange((r) => ({ ...r, end: e.target.value }))}
-              className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-            />
-          </div>
+        <div className="space-y-4">
+          {DAY_KEYS.map((labelKey, index) => {
+            const day = schedule.days[index];
+            const closed = isClosed(day);
+            const start = closed ? "08:00" : day.start;
+            const end = closed ? "17:00" : day.end;
+            return (
+              <div
+                key={labelKey}
+                className="flex flex-wrap items-center gap-4 py-3 border-b border-slate-100 last:border-0"
+              >
+                <div className="w-28 shrink-0 font-medium text-slate-700">
+                  {t(labelKey)}
+                </div>
+                <label className="flex items-center gap-2 shrink-0">
+                  <input
+                    type="checkbox"
+                    checked={closed}
+                    onChange={(e) =>
+                      setDay(index, e.target.checked ? { closed: true } : { start: "08:00", end: "17:00" })
+                    }
+                    className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                  />
+                  <span className="text-sm text-slate-600">
+                    {t("admin.orarClosed")}
+                  </span>
+                </label>
+                {!closed && (
+                  <>
+                    <div className="flex items-center gap-2">
+                      <label className="text-sm text-slate-500 sr-only">
+                        {t("admin.workingHoursStart")}
+                      </label>
+                      <input
+                        type="time"
+                        value={start}
+                        onChange={(e) =>
+                          setDay(index, { ...day, start: e.target.value, end })
+                        }
+                        className="px-3 py-2 rounded-lg border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                      />
+                    </div>
+                    <span className="text-slate-400">–</span>
+                    <div className="flex items-center gap-2">
+                      <label className="text-sm text-slate-500 sr-only">
+                        {t("admin.workingHoursEnd")}
+                      </label>
+                      <input
+                        type="time"
+                        value={end}
+                        onChange={(e) =>
+                          setDay(index, { ...day, start, end: e.target.value })
+                        }
+                        className="px-3 py-2 rounded-lg border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                      />
+                    </div>
+                  </>
+                )}
+              </div>
+            );
+          })}
         </div>
         <div className="flex items-center gap-4">
           <button

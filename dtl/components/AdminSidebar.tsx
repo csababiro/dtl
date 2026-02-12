@@ -14,6 +14,9 @@ import {
   UsersRound,
   LogOut,
   ChevronRight,
+  Image as ImageIcon,
+  MessageCircle,
+  Clock,
 } from "lucide-react";
 import { t } from "@/lib/i18n";
 
@@ -26,6 +29,9 @@ const menuItems: { nameKey: string; icon: React.ComponentType<{ size?: number }>
   { nameKey: "admin.clients", icon: UsersRound, path: "/admin/clients" },
   { nameKey: "admin.users", icon: Users, path: "/admin/users" },
   { nameKey: "admin.featureFlags", icon: Flag, path: "/admin/feature-flags" },
+  { nameKey: "admin.gallery", icon: ImageIcon, path: "/admin/gallery" },
+  { nameKey: "admin.testimonials", icon: MessageCircle, path: "/admin/testimonials" },
+  { nameKey: "admin.orar", icon: Clock, path: "/admin/orar" },
   { nameKey: "admin.settings", icon: Settings, path: "/admin/settings" },
 ];
 
