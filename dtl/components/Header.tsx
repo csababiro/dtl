@@ -10,6 +10,7 @@ import type { FeatureFlags } from "@/lib/feature-flags";
 import {
   isAnyBookingEnabled,
   isRequestQuoteEnabled,
+  isAuthenticationEnabled,
 } from "@/lib/feature-flags";
 
 interface HeaderProps {
@@ -33,6 +34,7 @@ export function Header({
   const pathname = usePathname();
   const showBooking = isAnyBookingEnabled(flags);
   const showQuote = isRequestQuoteEnabled(flags);
+  const showAuth = isAuthenticationEnabled(flags);
 
   const navLinks: { name: string; path: string; show: boolean }[] = [
     { name: t("nav.home"), path: "/", show: true },
@@ -87,16 +89,18 @@ export function Header({
                 {link.name}
               </Link>
             ))}
-            <Link
-              href="/cont"
-              className={`p-2 rounded-full border border-slate-200 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center ${
-                isActive("/cont")
-                  ? "bg-blue-50 text-blue-600 border-blue-200"
-                  : "text-slate-600 hover:bg-slate-50"
-              }`}
-            >
-              <User size={20} />
-            </Link>
+            {showAuth && (
+              <Link
+                href="/cont"
+                className={`p-2 rounded-full border border-slate-200 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center ${
+                  isActive("/cont")
+                    ? "bg-blue-50 text-blue-600 border-blue-200"
+                    : "text-slate-600 hover:bg-slate-50"
+                }`}
+              >
+                <User size={20} />
+              </Link>
+            )}
             {showBooking && (
               <Link
                 href="/programare"
@@ -134,15 +138,17 @@ export function Header({
                   {link.name}
                 </Link>
               ))}
-              <Link
-                href="/cont"
-                onClick={() => setIsOpen(false)}
-                className={`text-lg font-medium px-4 py-2 rounded-lg ${
-                  isActive("/cont") ? "bg-blue-50 text-blue-600" : "text-slate-700"
-                }`}
-              >
-                {t("cont.title")}
-              </Link>
+              {showAuth && (
+                <Link
+                  href="/cont"
+                  onClick={() => setIsOpen(false)}
+                  className={`text-lg font-medium px-4 py-2 rounded-lg ${
+                    isActive("/cont") ? "bg-blue-50 text-blue-600" : "text-slate-700"
+                  }`}
+                >
+                  {t("cont.title")}
+                </Link>
+              )}
               {showBooking && (
                 <Link
                   href="/programare"

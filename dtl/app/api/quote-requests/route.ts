@@ -17,9 +17,9 @@ export interface QuoteRequest {
 
 // In-memory store for development when no external API is set (resets on server restart)
 const store: QuoteRequest[] =
-  typeof globalThis !== "undefined" && (globalThis as { __quoteRequests?: QuoteRequest[] }).__quoteRequests
-    ? (globalThis as { __quoteRequests: QuoteRequest[] }).__quoteRequests
-    : ((globalThis as { __quoteRequests: QuoteRequest[] }).__quoteRequests = []);
+  typeof globalThis !== "undefined" && (globalThis as unknown as { __quoteRequests?: QuoteRequest[] }).__quoteRequests
+    ? (globalThis as unknown as { __quoteRequests: QuoteRequest[] }).__quoteRequests
+    : ((globalThis as unknown as { __quoteRequests: QuoteRequest[] }).__quoteRequests = []);
 
 function nextId(): string {
   return "qr-" + Date.now() + "-" + Math.random().toString(36).slice(2, 9);

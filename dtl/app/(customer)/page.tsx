@@ -89,6 +89,12 @@ export default async function HomePage() {
     },
   ].filter((s) => s.show);
 
+  const heroSubtitleParts = [t("home.serviceGeneral")];
+  if (showTyre) heroSubtitleParts.push(t("home.serviceTyre"));
+  if (showCarWash) heroSubtitleParts.push(t("home.serviceCarWash"));
+  const heroSubtitle =
+    heroSubtitleParts.join(", ") + t("home.heroSubtitleSuffix");
+
   return (
     <div className="flex flex-col">
       {/* Hero Section */}
@@ -110,7 +116,7 @@ export default async function HomePage() {
               </span>
             </h1>
             <p className="text-xl text-slate-300 mb-10 leading-relaxed">
-              {t("home.heroSubtitle")}
+              {heroSubtitle}
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               {showBooking && (

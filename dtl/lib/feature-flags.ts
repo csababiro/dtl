@@ -9,6 +9,7 @@ export interface FeatureFlags {
   carWashBooking?: boolean;
   partsOrdering?: boolean;
   cardInstallmentPayment?: boolean;
+  authentication?: boolean;
   tyreServiceVisible?: boolean;
   carWashVisible?: boolean;
   requestQuoteVisible?: boolean;
@@ -17,6 +18,23 @@ export interface FeatureFlags {
   carWashBookingVisible?: boolean;
   partsOrderingVisible?: boolean;
   cardInstallmentPaymentVisible?: boolean;
+  authenticationVisible?: boolean;
+}
+
+/** Admin-only: per-role toggles. Effective = superAdmin && admin. */
+export type AdminFlagKey =
+  | "tyre"
+  | "carWash"
+  | "requestQuote"
+  | "programare"
+  | "authentication";
+
+export interface FeatureFlagToggles {
+  [key: string]: { superAdmin: boolean; admin: boolean };
+}
+
+export function effectiveFlag(superAdmin: boolean, admin: boolean): boolean {
+  return superAdmin && admin;
 }
 
 const DEFAULT_FEATURE_FLAGS: FeatureFlags = {
@@ -28,6 +46,7 @@ const DEFAULT_FEATURE_FLAGS: FeatureFlags = {
   carWashBooking: true,
   partsOrdering: true,
   cardInstallmentPayment: true,
+  authentication: true,
   tyreServiceVisible: true,
   carWashVisible: true,
   requestQuoteVisible: true,
@@ -36,6 +55,7 @@ const DEFAULT_FEATURE_FLAGS: FeatureFlags = {
   carWashBookingVisible: true,
   partsOrderingVisible: true,
   cardInstallmentPaymentVisible: true,
+  authenticationVisible: true,
 };
 
 export async function getFeatureFlags(): Promise<FeatureFlags> {
@@ -98,5 +118,11 @@ export function isCardInstallmentEnabled(flags: FeatureFlags): boolean {
   return (
     flags.cardInstallmentPayment !== false &&
     flags.cardInstallmentPaymentVisible !== false
+  );
+}
+
+export function isAuthenticationEnabled(flags: FeatureFlags): boolean {
+  return (
+    flags.authentication !== false && flags.authenticationVisible !== false
   );
 }
