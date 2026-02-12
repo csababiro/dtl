@@ -73,9 +73,9 @@ export function AdminClientsClient({ clients }: AdminClientsClientProps) {
         </span>
       </div>
 
-      <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
-        {/* Mobile: cards by letter */}
-        <div className="md:hidden space-y-6 p-4">
+      <div className="md:bg-white md:rounded-3xl md:border md:border-slate-100 md:shadow-sm overflow-hidden">
+        {/* Mobile: cards by letter (no outer card, wider cards) */}
+        <div className="md:hidden space-y-6 p-2 sm:p-4">
           {byLetter.length === 0 ? (
             <p className="px-4 py-12 text-center text-slate-500">Niciun client găsit.</p>
           ) : (
@@ -88,7 +88,7 @@ export function AdminClientsClient({ clients }: AdminClientsClientProps) {
                   {list.map((client) => (
                     <div
                       key={client.id}
-                      className="rounded-xl border border-slate-200 p-4 space-y-3"
+                      className="rounded-xl border border-slate-200 bg-white shadow-sm p-4 space-y-3"
                     >
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center shrink-0">
