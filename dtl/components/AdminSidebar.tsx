@@ -17,6 +17,7 @@ import {
   Image as ImageIcon,
   MessageCircle,
   Clock,
+  X,
 } from "lucide-react";
 import { t } from "@/lib/i18n";
 
@@ -35,15 +36,35 @@ const menuItems: { nameKey: string; icon: React.ComponentType<{ size?: number }>
   { nameKey: "admin.settings", icon: Settings, path: "/admin/settings" },
 ];
 
-export function AdminSidebar() {
+interface AdminSidebarProps {
+  mobileOpen?: boolean;
+  onMobileClose?: () => void;
+}
+
+export function AdminSidebar({ mobileOpen = false, onMobileClose }: AdminSidebarProps) {
   const pathname = usePathname();
 
   const isActive = (path: string) =>
     path === "/admin" ? pathname === "/admin" : pathname.startsWith(path);
 
   return (
-    <aside className="w-64 bg-slate-900 text-slate-400 h-screen flex flex-col fixed left-0 top-0 z-50">
-      <div className="p-6 flex items-center gap-3">
+    <>
+      {/* Mobile overlay */}
+      {onMobileClose && (
+        <div
+          aria-hidden
+          className={`lg:hidden fixed inset-0 bg-black/50 z-[90] transition-opacity ${
+            mobileOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+          }`}
+          onClick={onMobileClose}
+        />
+      )}
+      <aside
+        className={`w-64 bg-slate-900 text-slate-400 h-screen flex flex-col fixed left-0 top-0 z-[100] transition-transform duration-200 ease-out ${
+          mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+        }`}
+      >
+      <div className="p-4 lg:p-6 flex items-center justify-between lg:justify-start gap-3">
         <div className="bg-blue-600 p-2 rounded-lg">
           <Wrench size={24} className="text-white" />
         </div>
@@ -51,6 +72,16 @@ export function AdminSidebar() {
           <h1 className="text-white font-black text-xl leading-none">DTL</h1>
           <p className="text-[10px] uppercase tracking-widest font-bold">Admin Panel</p>
         </div>
+        {onMobileClose && (
+          <button
+            type="button"
+            onClick={onMobileClose}
+            className="lg:hidden ml-auto p-2 text-slate-400 hover:text-white rounded-lg min-h-[44px] min-w-[44px] flex items-center justify-center"
+            aria-label={t("admin.closeMenu")}
+          >
+            <X size={24} />
+          </button>
+        )}
       </div>
 
       <nav className="flex-1 px-4 py-6 overflow-y-auto">
@@ -59,6 +90,7 @@ export function AdminSidebar() {
             <li key={item.path}>
               <Link
                 href={item.path}
+                onClick={onMobileClose}
                 className={`flex items-center justify-between px-4 py-3 rounded-xl transition-all group ${
                   isActive(item.path)
                     ? "bg-blue-600 text-white shadow-lg shadow-blue-900/20"
@@ -90,6 +122,7 @@ export function AdminSidebar() {
         </div>
         <Link
           href="/admin/logout"
+          onClick={onMobileClose}
           className="flex items-center gap-3 px-4 py-3 w-full text-slate-400 hover:text-red-400 transition-colors"
         >
           <LogOut size={20} />
@@ -97,5 +130,6 @@ export function AdminSidebar() {
         </Link>
       </div>
     </aside>
+    </>
   );
 }

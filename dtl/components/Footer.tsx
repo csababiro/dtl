@@ -64,53 +64,53 @@ export function Footer({
 
         <div>
           <h4 className="text-white font-bold mb-6">Link-uri utile</h4>
-          <ul className="space-y-4">
+          <ul className="space-y-1">
             <li>
-              <Link href="/" className="hover:text-blue-400 transition-colors">
+              <Link href="/" className="inline-block py-3 hover:text-blue-400 transition-colors min-h-[44px] leading-tight flex items-center">
                 {t("nav.home")}
               </Link>
             </li>
             <li>
-              <Link href="/servicii" className="hover:text-blue-400 transition-colors">
+              <Link href="/servicii" className="inline-block py-3 hover:text-blue-400 transition-colors min-h-[44px] leading-tight flex items-center">
                 {t("nav.servicii")}
               </Link>
             </li>
             {showBooking && (
               <li>
-                <Link href="/programare" className="hover:text-blue-400 transition-colors">
+                <Link href="/programare" className="inline-block py-3 hover:text-blue-400 transition-colors min-h-[44px] leading-tight flex items-center">
                   {t("nav.programare")}
                 </Link>
               </li>
             )}
             {showQuote && (
               <li>
-                <Link href="/cere-oferta" className="hover:text-blue-400 transition-colors">
+                <Link href="/cere-oferta" className="inline-block py-3 hover:text-blue-400 transition-colors min-h-[44px] leading-tight flex items-center">
                   {t("nav.cereOferta")}
                 </Link>
               </li>
             )}
             <li>
-              <Link href="/contact" className="hover:text-blue-400 transition-colors">
+              <Link href="/contact" className="inline-block py-3 hover:text-blue-400 transition-colors min-h-[44px] leading-tight flex items-center">
                 {t("nav.contact")}
               </Link>
             </li>
             {showGallery && (
               <li>
-                <Link href="/galerie" className="hover:text-blue-400 transition-colors">
+                <Link href="/galerie" className="inline-block py-3 hover:text-blue-400 transition-colors min-h-[44px] leading-tight flex items-center">
                   {t("nav.gallery")}
                 </Link>
               </li>
             )}
             {showTestimonials && (
               <li>
-                <Link href="/testimoniale" className="hover:text-blue-400 transition-colors">
+                <Link href="/testimoniale" className="inline-block py-3 hover:text-blue-400 transition-colors min-h-[44px] leading-tight flex items-center">
                   {t("nav.testimonials")}
                 </Link>
               </li>
             )}
             {showAuth && (
               <li>
-                <Link href="/cont" className="hover:text-blue-400 transition-colors">
+                <Link href="/cont" className="inline-block py-3 hover:text-blue-400 transition-colors min-h-[44px] leading-tight flex items-center">
                   {t("cont.title")}
                 </Link>
               </li>

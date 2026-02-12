@@ -21,7 +21,7 @@ export default async function CustomerLayout({
         whatsapp={settings.whatsapp}
         address={settings.address}
       />
-      <main>{children}</main>
+      <main className="relative z-0">{children}</main>
       <Footer
         flags={flags}
         phone={settings.phone}

@@ -351,20 +351,20 @@ export function ContPageClient() {
                 <h2 className="text-2xl font-black text-slate-900">
                   {t("cont.invoices")}
                 </h2>
-                <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
-                  <table className="w-full text-left">
+                <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden overflow-x-auto">
+                  <table className="w-full text-left min-w-[320px]">
                     <thead className="bg-slate-50 border-b border-slate-100">
                       <tr>
-                        <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">
+                        <th className="px-4 sm:px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">
                           Nr. Factură
                         </th>
-                        <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">
+                        <th className="px-4 sm:px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">
                           Dată
                         </th>
-                        <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest text-right">
+                        <th className="px-4 sm:px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest text-right">
                           Sumă
                         </th>
-                        <th className="px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">
+                        <th className="px-4 sm:px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">
                           Status
                         </th>
                       </tr>
@@ -388,14 +388,14 @@ export function ContPageClient() {
                           key={i}
                           className="hover:bg-slate-50/50 transition-colors cursor-pointer"
                         >
-                          <td className="px-6 py-4 font-bold text-slate-900">
+                          <td className="px-4 sm:px-6 py-4 font-bold text-slate-900">
                             {f.nr}
                           </td>
-                          <td className="px-6 py-4 text-slate-500">{f.date}</td>
-                          <td className="px-6 py-4 text-right font-black text-blue-600">
+                          <td className="px-4 sm:px-6 py-4 text-slate-500">{f.date}</td>
+                          <td className="px-4 sm:px-6 py-4 text-right font-black text-blue-600">
                             {f.amount}
                           </td>
-                          <td className="px-6 py-4">
+                          <td className="px-4 sm:px-6 py-4">
                             <span className="inline-flex items-center gap-1.5 text-green-600 font-bold text-sm">
                               <CheckCircle size={14} /> {f.status}
                             </span>

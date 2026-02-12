@@ -112,7 +112,7 @@ export default async function HomePage() {
   return (
     <div className="flex flex-col">
       {/* Hero Section */}
-      <section className="relative h-[600px] flex items-center overflow-hidden">
+      <section className="relative min-h-[360px] h-[70vh] sm:h-[500px] lg:h-[600px] flex items-center overflow-hidden">
         <div className="absolute inset-0 z-0">
           <ImageWithFallback
             src={HERO_IMAGE}

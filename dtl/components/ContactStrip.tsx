@@ -21,7 +21,7 @@ export function ContactStrip({
         dark ? "bg-slate-900 text-white" : "bg-blue-600 text-white"
       }`}
     >
-      <div className="flex items-center gap-6">
+      <div className="flex flex-wrap items-center gap-3 sm:gap-6">
         {phone ? (
           <a
             href={`tel:${phone}`}

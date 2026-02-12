@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useLayoutEffect, useCallback } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, X, User } from "lucide-react";
@@ -33,7 +34,17 @@ export function Header({
   address,
 }: HeaderProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [menuTop, setMenuTop] = useState(0);
+  const headerRef = useRef<HTMLElement>(null);
   const pathname = usePathname();
+
+  const closeMenu = useCallback(() => setIsOpen(false), []);
+
+  useLayoutEffect(() => {
+    if (!isOpen || typeof document === "undefined") return;
+    const height = headerRef.current?.getBoundingClientRect().bottom ?? 0;
+    setMenuTop(height);
+  }, [isOpen]);
   const showBooking = isAnyBookingEnabled(flags);
   const showQuote = isRequestQuoteEnabled(flags);
   const showAuth = isAuthenticationEnabled(flags);
@@ -52,15 +63,70 @@ export function Header({
 
   const isActive = (path: string) => pathname === path;
 
+  const mobileMenuContent = isOpen && menuTop > 0 && typeof document !== "undefined" && (
+    createPortal(
+      <>
+        <div
+          className="md:hidden fixed inset-0 bg-black/40 z-[200]"
+          style={{ top: menuTop }}
+          aria-hidden
+          onClick={closeMenu}
+        />
+        <div
+          className="md:hidden fixed left-0 right-0 w-full bg-white border-b border-slate-200 shadow-xl z-[210] overflow-y-auto"
+          style={{ top: menuTop, maxHeight: `calc(100vh - ${menuTop}px)` }}
+        >
+          <div className="flex flex-col p-4 gap-4">
+            {navLinks.map((link) => (
+              <Link
+                key={link.path}
+                href={link.path}
+                onClick={closeMenu}
+                className={`text-lg font-medium px-4 py-3 rounded-lg ${
+                  isActive(link.path)
+                    ? "bg-blue-50 text-blue-600"
+                    : "text-slate-700"
+                }`}
+              >
+                {link.name}
+              </Link>
+            ))}
+            {showAuth && (
+              <Link
+                href="/cont"
+                onClick={closeMenu}
+                className={`text-lg font-medium px-4 py-3 rounded-lg ${
+                  isActive("/cont") ? "bg-blue-50 text-blue-600" : "text-slate-700"
+                }`}
+              >
+                {t("cont.title")}
+              </Link>
+            )}
+            {showBooking && (
+              <Link
+                href="/programare"
+                onClick={closeMenu}
+                className="bg-blue-600 text-white px-4 py-4 rounded-lg font-bold text-center"
+              >
+                {t("home.ctaRezerva")}
+              </Link>
+            )}
+          </div>
+        </div>
+      </>,
+      document.body
+    )
+  );
+
   return (
-    <header className="w-full flex flex-col z-50">
+    <header ref={headerRef} className="w-full flex flex-col z-[100]">
       <ContactStrip
         phone={phone}
         email={email}
         whatsapp={whatsapp}
         address={address}
       />
-      <nav className="bg-white border-b border-slate-200 sticky top-0">
+      <nav className="relative bg-white border-b border-slate-200 sticky top-0 overflow-visible">
         <div className="max-w-7xl mx-auto px-4 h-20 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
             {logoUrl ? (
@@ -126,48 +192,8 @@ export function Header({
             {isOpen ? <X size={28} /> : <Menu size={28} />}
           </button>
         </div>
-
-        {isOpen && (
-          <div className="md:hidden absolute top-full left-0 w-full bg-white border-b border-slate-200 shadow-xl">
-            <div className="flex flex-col p-4 gap-4">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.path}
-                  href={link.path}
-                  onClick={() => setIsOpen(false)}
-                  className={`text-lg font-medium px-4 py-2 rounded-lg ${
-                    isActive(link.path)
-                      ? "bg-blue-50 text-blue-600"
-                      : "text-slate-700"
-                  }`}
-                >
-                  {link.name}
-                </Link>
-              ))}
-              {showAuth && (
-                <Link
-                  href="/cont"
-                  onClick={() => setIsOpen(false)}
-                  className={`text-lg font-medium px-4 py-2 rounded-lg ${
-                    isActive("/cont") ? "bg-blue-50 text-blue-600" : "text-slate-700"
-                  }`}
-                >
-                  {t("cont.title")}
-                </Link>
-              )}
-              {showBooking && (
-                <Link
-                  href="/programare"
-                  onClick={() => setIsOpen(false)}
-                  className="bg-blue-600 text-white px-4 py-4 rounded-lg font-bold text-center"
-                >
-                  {t("home.ctaRezerva")}
-                </Link>
-              )}
-            </div>
-          </div>
-        )}
       </nav>
+      {mobileMenuContent}
     </header>
   );
 }
