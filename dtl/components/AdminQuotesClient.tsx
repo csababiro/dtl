@@ -2,6 +2,7 @@
 
 import { useFormStatus } from "react-dom";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { t } from "@/lib/i18n";
 import type { QuoteRequest } from "@/lib/quote-requests-store";
 
@@ -16,11 +17,6 @@ function formatDate(iso: string): string {
   } catch {
     return iso;
   }
-}
-
-function truncate(s: string, max: number): string {
-  if (s.length <= max) return s;
-  return s.slice(0, max) + "…";
 }
 
 function MarkPreparedButton() {
@@ -42,22 +38,25 @@ interface AdminQuotesClientProps {
 }
 
 export function AdminQuotesClient({ items, onMarkPrepared }: AdminQuotesClientProps) {
+  const router = useRouter();
+
   return (
     <>
-      {/* Mobile: cards */}
+      {/* Mobile: cards - click card to open details */}
       <div className="md:hidden space-y-4">
         {items.length === 0 ? (
           <p className="py-8 text-center text-slate-500">{t("admin.noData")}</p>
         ) : (
           items.map((item) => (
-            <div
+            <Link
               key={item.id}
-              className="bg-white rounded-xl border border-slate-200 shadow-sm p-4 space-y-3"
+              href={`/admin/quotes/${item.id}`}
+              className="block bg-white rounded-xl border border-slate-200 shadow-sm p-4 space-y-3 hover:bg-slate-50/50 transition-colors"
             >
               <div className="flex items-start justify-between gap-2">
                 <span className="font-bold text-slate-900">{item.name}</span>
                 <span
-                  className={`shrink-0 px-3 py-1 rounded-full text-xs font-bold ${
+                  className={`shrink-0 px-3 py-1 rounded-full text-xs font-bold text-center ${
                     (item.status ?? "pending") === "prepared"
                       ? "bg-green-100 text-green-700"
                       : "bg-amber-100 text-amber-700"
@@ -70,47 +69,60 @@ export function AdminQuotesClient({ items, onMarkPrepared }: AdminQuotesClientPr
               </div>
               <p className="text-sm text-slate-500">{formatDate(item.createdAt)}</p>
               <div className="text-sm text-slate-700">
-                <a href={`tel:${item.phone}`} className="text-blue-600 hover:underline">
+                <a
+                  href={`tel:${item.phone}`}
+                  className="text-blue-600 hover:underline"
+                  onClick={(e) => e.stopPropagation()}
+                >
                   {item.phone}
                 </a>
                 <br />
-                <a href={`mailto:${item.email}`} className="text-blue-600 hover:underline">
+                <a
+                  href={`mailto:${item.email}`}
+                  className="text-blue-600 hover:underline"
+                  onClick={(e) => e.stopPropagation()}
+                >
                   {item.email}
                 </a>
               </div>
               <p className="text-sm text-slate-600">
                 {item.carMake} {item.carModel} {item.carYear}
               </p>
-              <p className="text-sm text-slate-600">{truncate(item.description, 120)}</p>
-              <div className="flex flex-wrap gap-2 pt-2 border-t border-slate-100">
+              <div
+                className="flex flex-nowrap items-center gap-2 pt-2 border-t border-slate-100"
+                onClick={(e) => e.stopPropagation()}
+              >
                 {(item.status ?? "pending") !== "prepared" && (
-                  <form action={onMarkPrepared} className="inline">
+                  <form action={onMarkPrepared} className="inline shrink-0" onClick={(e) => e.stopPropagation()}>
                     <input type="hidden" name="id" value={item.id} />
                     <MarkPreparedButton />
                   </form>
                 )}
-                <Link
+                <a
                   href={`tel:${item.phone}`}
-                  className="text-blue-600 hover:underline text-sm font-medium"
+                  className="text-blue-600 hover:underline text-sm font-medium shrink-0 whitespace-nowrap"
+                  onClick={(e) => e.stopPropagation()}
                 >
                   Sună
-                </Link>
-                <Link
+                </a>
+                <a
                   href={`sms:${item.phone}`}
-                  className="text-blue-600 hover:underline text-sm font-medium"
+                  className="text-blue-600 hover:underline text-sm font-medium shrink-0 whitespace-nowrap"
+                  onClick={(e) => e.stopPropagation()}
                 >
                   SMS
-                </Link>
-                <Link
+                </a>
+                <a
                   href={`https://wa.me/${item.phone.replace(/\D/g, "")}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-blue-600 hover:underline text-sm font-medium"
+                  className="text-blue-600 hover:underline text-sm font-medium shrink-0 whitespace-nowrap"
+                  onClick={(e) => e.stopPropagation()}
                 >
                   WhatsApp
-                </Link>
+                </a>
               </div>
-            </div>
+            </Link>
           ))
         )}
       </div>
@@ -124,21 +136,24 @@ export function AdminQuotesClient({ items, onMarkPrepared }: AdminQuotesClientPr
               <th className="px-4 py-2">Client</th>
               <th className="px-4 py-2">Contact</th>
               <th className="px-4 py-2">Mașină</th>
-              <th className="px-4 py-2">Descriere</th>
-              <th className="px-4 py-2">Status</th>
+              <th className="px-4 py-2 text-center">Status</th>
               <th className="px-4 py-2">Acțiuni</th>
             </tr>
           </thead>
           <tbody>
             {items.length === 0 ? (
               <tr>
-                <td colSpan={7} className="px-4 py-8 text-center text-slate-500">
+                <td colSpan={6} className="px-4 py-8 text-center text-slate-500">
                   {t("admin.noData")}
                 </td>
               </tr>
             ) : (
               items.map((item) => (
-                <tr key={item.id} className="border-t border-slate-200">
+                <tr
+                  key={item.id}
+                  className="border-t border-slate-200 cursor-pointer hover:bg-slate-50/50 transition-colors"
+                  onClick={() => router.push(`/admin/quotes/${item.id}`)}
+                >
                   <td className="px-4 py-2">{formatDate(item.createdAt)}</td>
                   <td className="px-4 py-2">{item.name}</td>
                   <td className="px-4 py-2">
@@ -148,12 +163,9 @@ export function AdminQuotesClient({ items, onMarkPrepared }: AdminQuotesClientPr
                   <td className="px-4 py-2">
                     {item.carMake} {item.carModel} {item.carYear}
                   </td>
-                  <td className="px-4 py-2 max-w-[200px]">
-                    {truncate(item.description, 80)}
-                  </td>
-                  <td className="px-4 py-2">
+                  <td className="px-4 py-2 text-center">
                     <span
-                      className={`inline-block px-3 py-1 rounded-full text-xs font-bold ${
+                      className={`inline-block px-3 py-1 rounded-full text-xs font-bold text-center ${
                         (item.status ?? "pending") === "prepared"
                           ? "bg-green-100 text-green-700"
                           : "bg-amber-100 text-amber-700"
@@ -164,8 +176,8 @@ export function AdminQuotesClient({ items, onMarkPrepared }: AdminQuotesClientPr
                         : t("admin.pending")}
                     </span>
                   </td>
-                  <td className="px-4 py-2">
-                    <div className="flex gap-2 flex-wrap items-center">
+                  <td className="px-4 py-2" onClick={(e) => e.stopPropagation()}>
+                    <div className="flex gap-2 flex-nowrap items-center">
                       {(item.status ?? "pending") !== "prepared" && (
                         <form action={onMarkPrepared} className="inline">
                           <input type="hidden" name="id" value={item.id} />
@@ -174,14 +186,14 @@ export function AdminQuotesClient({ items, onMarkPrepared }: AdminQuotesClientPr
                       )}
                       <Link
                         href={`tel:${item.phone}`}
-                        className="text-blue-600 hover:underline min-h-[44px] min-w-[44px] inline-flex items-center"
+                        className="text-blue-600 hover:underline min-h-[44px] min-w-[44px] inline-flex items-center shrink-0"
                         aria-label={t("admin.contactCustomer")}
                       >
                         Sună
                       </Link>
                       <Link
                         href={`sms:${item.phone}`}
-                        className="text-blue-600 hover:underline min-h-[44px] min-w-[44px] inline-flex items-center"
+                        className="text-blue-600 hover:underline min-h-[44px] min-w-[44px] inline-flex items-center shrink-0"
                       >
                         SMS
                       </Link>
@@ -189,7 +201,7 @@ export function AdminQuotesClient({ items, onMarkPrepared }: AdminQuotesClientPr
                         href={`https://wa.me/${item.phone.replace(/\D/g, "")}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-blue-600 hover:underline min-h-[44px] min-w-[44px] inline-flex items-center"
+                        className="text-blue-600 hover:underline min-h-[44px] min-w-[44px] inline-flex items-center shrink-0 whitespace-nowrap"
                       >
                         WhatsApp
                       </Link>

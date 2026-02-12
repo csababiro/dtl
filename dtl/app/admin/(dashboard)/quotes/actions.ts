@@ -9,6 +9,7 @@ export async function markQuotePrepared(_prev: unknown, formData: FormData) {
   const updated = setQuoteRequestStatus(id, "prepared");
   if (updated) {
     revalidatePath("/admin/quotes");
+    revalidatePath(`/admin/quotes/${id}`);
   }
   return { ok: !!updated };
 }

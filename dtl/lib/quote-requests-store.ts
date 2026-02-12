@@ -149,6 +149,13 @@ export function getQuoteRequests(): QuoteRequest[] {
   return [...store];
 }
 
+/** Get a single quote request by id. Returns null if not found. */
+export function getQuoteRequestById(id: string): QuoteRequest | null {
+  seedDummyIfEmpty();
+  const item = store.find((q) => q.id === id);
+  return item ?? null;
+}
+
 export function getQuoteRequestsStore(): QuoteRequest[] {
   return store;
 }
