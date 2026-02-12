@@ -24,7 +24,7 @@ export const AdminSidebar = () => {
     { name: "Servicii", icon: Wrench, path: "/admin/services" },
     { name: "Conținut", icon: ImageIcon, path: "/admin/content" },
     { name: "Utilizatori", icon: Users, path: "/admin/users" },
-    { name: "Feature flags", icon: Flag, path: "/admin/feature-flags" },
+    { name: "Funcționalități", icon: Flag, path: "/admin/feature-flags" },
     { name: "Setări", icon: Settings, path: "/admin/settings" },
   ];
 

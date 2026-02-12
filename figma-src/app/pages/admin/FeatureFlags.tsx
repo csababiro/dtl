@@ -61,7 +61,7 @@ const FeatureFlags = () => {
     <div className="max-w-4xl space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-black text-slate-900">Feature Flags</h1>
+          <h1 className="text-3xl font-black text-slate-900">Funcționalități</h1>
           <p className="text-slate-500">Controlați vizibilitatea modulelor pentru staff și clienți.</p>
         </div>
         <div className="bg-amber-100 text-amber-700 p-4 rounded-2xl flex items-start gap-3 max-w-sm">

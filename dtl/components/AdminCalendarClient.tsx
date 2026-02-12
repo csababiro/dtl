@@ -1,11 +1,12 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Calendar, dateFnsLocalizer } from "react-big-calendar";
+import { Calendar, dateFnsLocalizer, type View } from "react-big-calendar";
 import { format, parse, startOfWeek, getDay, addHours } from "date-fns";
 import { enUS } from "date-fns/locale";
 import { DUMMY_APPOINTMENTS } from "@/lib/dummy-appointments";
 import type { DummyAppointmentType } from "@/lib/dummy-appointments";
+import { getMinMaxForDay } from "@/lib/working-hours";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 
 const locales = { "ro-RO": enUS };
@@ -67,6 +68,8 @@ function dummyToEvents(): CalendarEvent[] {
 
 export function AdminCalendarClient() {
   const [filter, setFilter] = useState<CalendarFilter>("all");
+  const [view, setView] = useState<View>("month");
+  const [date, setDate] = useState(() => new Date(2025, 1, 1));
   const allEvents = useMemo(() => dummyToEvents(), []);
   const events = useMemo(
     () =>
@@ -82,6 +85,8 @@ export function AdminCalendarClient() {
       borderLeft: `4px solid ${TYPE_COLORS[event.tip]}`,
     },
   });
+
+  const { min, max } = useMemo(() => getMinMaxForDay(date), [date]);
 
   return (
     <div className="space-y-4">
@@ -127,9 +132,14 @@ export function AdminCalendarClient() {
           endAccessor="end"
           titleAccessor="title"
           culture="ro-RO"
-          defaultView="month"
+          view={view}
+          onView={setView}
+          date={date}
+          onNavigate={setDate}
           defaultDate={new Date(2025, 1, 1)}
           views={["month", "week", "day"]}
+          min={min}
+          max={max}
           popup
           eventPropGetter={eventStyleGetter}
           messages={{

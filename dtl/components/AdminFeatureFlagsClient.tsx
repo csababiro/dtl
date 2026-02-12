@@ -29,6 +29,16 @@ const ADMIN_FLAG_KEYS: AdminFlagKey[] = [
   "testimonials",
 ];
 
+const PRICE_FLAG_KEYS: AdminFlagKey[] = [
+  "showServicePrices",
+  "showTyrePrices",
+  "showCarWashPrices",
+];
+
+const FUNCTIONALITY_FLAG_KEYS = ADMIN_FLAG_KEYS.filter(
+  (k) => !PRICE_FLAG_KEYS.includes(k)
+);
+
 const defaultToggles: FeatureFlagToggles = {
   tyre: { superAdmin: true, admin: true },
   carWash: { superAdmin: true, admin: true },
@@ -109,7 +119,10 @@ function Toggle({
   );
 }
 
+type TabId = "func" | "prices";
+
 export function AdminFeatureFlagsClient() {
+  const [activeTab, setActiveTab] = useState<TabId>("func");
   const [toggles, setToggles] = useState<FeatureFlagToggles>(defaultToggles);
 
   const setSuperAdmin = (key: AdminFlagKey, value: boolean) => {
@@ -144,7 +157,38 @@ export function AdminFeatureFlagsClient() {
         </div>
       </div>
 
-      <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
+      {/* Tabs */}
+      <div className="border-b border-slate-200">
+        <nav className="flex gap-1" aria-label={t("admin.featureFlags")}>
+          <button
+            type="button"
+            onClick={() => setActiveTab("func")}
+            aria-selected={activeTab === "func"}
+            className={`px-5 py-3 font-bold rounded-t-xl transition-colors ${
+              activeTab === "func"
+                ? "bg-white border border-b-0 border-slate-200 text-slate-900 -mb-px"
+                : "text-slate-500 hover:text-slate-700 hover:bg-slate-50"
+            }`}
+          >
+            {t("admin.featureFlagsTab")}
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab("prices")}
+            aria-selected={activeTab === "prices"}
+            className={`px-5 py-3 font-bold rounded-t-xl transition-colors ${
+              activeTab === "prices"
+                ? "bg-white border border-b-0 border-slate-200 text-slate-900 -mb-px"
+                : "text-slate-500 hover:text-slate-700 hover:bg-slate-50"
+            }`}
+          >
+            {t("admin.pricesTab")}
+          </button>
+        </nav>
+      </div>
+
+      {activeTab === "func" && (
+      <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden rounded-t-none">
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead className="bg-slate-50 border-b border-slate-100">
@@ -168,7 +212,7 @@ export function AdminFeatureFlagsClient() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {ADMIN_FLAG_KEYS.map((key) => {
+              {FUNCTIONALITY_FLAG_KEYS.map((key) => {
                 const { superAdmin, admin } = toggles[key] ?? {
                   superAdmin: true,
                   admin: true,
@@ -242,6 +286,116 @@ export function AdminFeatureFlagsClient() {
           </table>
         </div>
       </div>
+      )}
+
+      {activeTab === "prices" && (
+        <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden rounded-t-none">
+          <div className="p-6 border-b border-slate-100">
+            <h2 className="text-xl font-bold text-slate-900">
+              {t("admin.pricesSectionTitle")}
+            </h2>
+            <p className="text-slate-500 text-sm mt-1">
+              {t("admin.pricesSectionDesc")}
+            </p>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left">
+              <thead className="bg-slate-50 border-b border-slate-100">
+                <tr>
+                  <th className="px-8 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">
+                    Funcționalitate
+                  </th>
+                  {MOCK_ADMIN_ROLE === "super_admin" && (
+                    <th className="px-8 py-4 text-xs font-black text-slate-400 uppercase tracking-widest text-center w-32">
+                      {t("admin.superAdmin")}
+                    </th>
+                  )}
+                  {MOCK_ADMIN_ROLE === "admin" && (
+                    <th className="px-8 py-4 text-xs font-black text-slate-400 uppercase tracking-widest text-center w-32">
+                      {t("admin.adminRole")}
+                    </th>
+                  )}
+                  <th className="px-8 py-4 text-xs font-black text-slate-400 uppercase tracking-widest text-center w-24">
+                    {t("admin.effective")}
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {PRICE_FLAG_KEYS.map((key) => {
+                  const { superAdmin, admin } = toggles[key] ?? {
+                    superAdmin: true,
+                    admin: true,
+                  };
+                  const eff = effectiveFlag(superAdmin, admin);
+                  const { labelKey, descKey } = flagMeta[key];
+                  return (
+                    <tr
+                      key={key}
+                      className="hover:bg-slate-50/50 transition-colors"
+                    >
+                      <td className="px-8 py-6">
+                        <div className="flex items-start gap-4">
+                          <span
+                            className={`mt-1.5 w-2 h-2 rounded-full shrink-0 ${
+                              eff ? "bg-green-500" : "bg-slate-300"
+                            }`}
+                            aria-hidden
+                          />
+                          <div>
+                            <p className="font-bold text-slate-900">
+                              {t(labelKey)}
+                            </p>
+                            <p className="text-sm text-slate-500 mt-0.5">
+                              {t(descKey)}
+                            </p>
+                          </div>
+                        </div>
+                      </td>
+                      {MOCK_ADMIN_ROLE === "super_admin" && (
+                        <td className="px-8 py-6 text-center">
+                          <div className="flex justify-center">
+                            <Toggle
+                              on={superAdmin}
+                              onClick={() => setSuperAdmin(key, !superAdmin)}
+                              ariaLabel={`${t(labelKey)} ${t("admin.superAdmin")}`}
+                            />
+                          </div>
+                        </td>
+                      )}
+                      {MOCK_ADMIN_ROLE === "admin" && (
+                        <td className="px-8 py-6 text-center">
+                          <div className="flex justify-center">
+                            <Toggle
+                              on={admin}
+                              onClick={() => setAdmin(key, !admin)}
+                              ariaLabel={`${t(labelKey)} ${t("admin.adminRole")}`}
+                            />
+                          </div>
+                        </td>
+                      )}
+                      <td className="px-8 py-6 text-center">
+                        <span
+                          className={`inline-flex items-center gap-1.5 text-sm font-bold ${
+                            eff ? "text-green-600" : "text-slate-400"
+                          }`}
+                        >
+                          <span
+                            className={`w-2 h-2 rounded-full ${
+                              eff ? "bg-green-500" : "bg-slate-300"
+                            }`}
+                            aria-hidden
+                          />
+                          {eff ? "ON" : "OFF"}
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
 
       <div className="flex justify-end gap-4">
         <button

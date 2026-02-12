@@ -1,20 +1,8 @@
-import { get } from "@/lib/api-client";
+import { getQuoteRequests, type QuoteRequest } from "@/lib/quote-requests-store";
 import { t } from "@/lib/i18n";
 import Link from "next/link";
 
-export interface QuoteRequest {
-  id: string;
-  createdAt: string;
-  name: string;
-  phone: string;
-  email: string;
-  carMake: string;
-  carModel: string;
-  carYear: string;
-  description: string;
-  photoUrl?: string;
-  status?: string;
-}
+export type { QuoteRequest };
 
 function formatDate(iso: string): string {
   try {
@@ -34,20 +22,14 @@ function truncate(s: string, max: number): string {
   return s.slice(0, max) + "…";
 }
 
-export default async function AdminQuotesPage() {
-  const result = await get<{ items: QuoteRequest[] }>("/quote-requests");
-  const items: QuoteRequest[] =
-    "data" in result && result.data?.items ? result.data.items : [];
-  const hasError = "error" in result;
+export default function AdminQuotesPage() {
+  const items = getQuoteRequests();
 
   return (
     <div>
       <h1 className="text-2xl font-bold text-slate-900 mb-4">
         {t("admin.quotes")}
       </h1>
-      {hasError ? (
-        <p className="text-red-600 mb-4">{t("errors.network")}</p>
-      ) : null}
       <div className="border rounded-lg overflow-hidden">
         <table className="w-full text-left">
           <thead className="bg-slate-100">
