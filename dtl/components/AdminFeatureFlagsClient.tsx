@@ -22,6 +22,9 @@ const ADMIN_FLAG_KEYS: AdminFlagKey[] = [
   "requestQuote",
   "programare",
   "authentication",
+  "showServicePrices",
+  "showTyrePrices",
+  "showCarWashPrices",
 ];
 
 const defaultToggles: FeatureFlagToggles = {
@@ -30,6 +33,9 @@ const defaultToggles: FeatureFlagToggles = {
   requestQuote: { superAdmin: true, admin: true },
   programare: { superAdmin: true, admin: true },
   authentication: { superAdmin: true, admin: true },
+  showServicePrices: { superAdmin: true, admin: true },
+  showTyrePrices: { superAdmin: true, admin: true },
+  showCarWashPrices: { superAdmin: true, admin: true },
 };
 
 const flagMeta: Record<
@@ -49,6 +55,18 @@ const flagMeta: Record<
   authentication: {
     labelKey: "admin.flagAuthentication",
     descKey: "admin.flagAuthenticationDesc",
+  },
+  showServicePrices: {
+    labelKey: "admin.flagShowServicePrices",
+    descKey: "admin.flagShowServicePricesDesc",
+  },
+  showTyrePrices: {
+    labelKey: "admin.flagShowTyrePrices",
+    descKey: "admin.flagShowTyrePricesDesc",
+  },
+  showCarWashPrices: {
+    labelKey: "admin.flagShowCarWashPrices",
+    descKey: "admin.flagShowCarWashPricesDesc",
   },
 };
 

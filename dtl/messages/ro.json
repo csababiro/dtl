@@ -216,6 +216,12 @@
     "flagProgramareDesc": "CTA pe home (hero + Ce oferim), nav Programare, pagina Programare.",
     "flagAuthentication": "Autentificare (Cont)",
     "flagAuthenticationDesc": "Nav Cont și pagina /cont.",
+    "flagShowServicePrices": "Afișare prețuri service general",
+    "flagShowServicePricesDesc": "Prețurile pentru revizii, frâne, diagnoză pe pagina Servicii.",
+    "flagShowTyrePrices": "Afișare prețuri anvelope",
+    "flagShowTyrePricesDesc": "Prețurile pentru anvelope pe pagina Servicii.",
+    "flagShowCarWashPrices": "Afișare prețuri spălătorie",
+    "flagShowCarWashPricesDesc": "Prețurile pentru spălătorie pe pagina Servicii.",
     "saveFlags": "Salvează modificările",
     "saveFlagsDisabledHint": "Vom conecta la API ulterior."
   },

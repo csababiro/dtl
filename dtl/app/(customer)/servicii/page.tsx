@@ -4,7 +4,13 @@ import { getFeatureFlags } from "@/lib/feature-flags";
 import { getBusinessSettings } from "@/lib/settings";
 import { t } from "@/lib/i18n";
 import { ImageWithFallback } from "@/components/ImageWithFallback";
-import { isModuleEnabled, isAnyBookingEnabled } from "@/lib/feature-flags";
+import {
+  isModuleEnabled,
+  isAnyBookingEnabled,
+  isServicePriceVisible,
+  isTyrePriceVisible,
+  isCarWashPriceVisible,
+} from "@/lib/feature-flags";
 
 const SERVICE_GENERAL_IMG =
   "https://images.unsplash.com/photo-1581092160562-40aa08e78837?q=80&w=1080";
@@ -19,6 +25,9 @@ export default async function ServiciiPage() {
   const showTyre = isModuleEnabled(flags, "tyre");
   const showCarWash = isModuleEnabled(flags, "carWash");
   const showBooking = isAnyBookingEnabled(flags);
+  const showServicePrices = isServicePriceVisible(flags);
+  const showTyrePrices = isTyrePriceVisible(flags);
+  const showCarWashPrices = isCarWashPriceVisible(flags);
 
   const categories = [
     {
@@ -27,6 +36,7 @@ export default async function ServiciiPage() {
       icon: Wrench,
       img: SERVICE_GENERAL_IMG,
       show: true,
+      showPrice: showServicePrices,
       items: [
         { name: "Revizie periodică (Ulei + Filtre)", price: "de la 450 RON" },
         { name: "Sistem de frânare (Plăcuțe/Discuri)", price: "de la 150 RON" },
@@ -39,6 +49,7 @@ export default async function ServiciiPage() {
       icon: Shield,
       img: SERVICE_TYRE_IMG,
       show: showTyre,
+      showPrice: showTyrePrices,
       items: [
         { name: "Schimb anvelope (set 4)", price: "de la 160 RON" },
         { name: "Echilibrare roți", price: "de la 60 RON" },
@@ -51,6 +62,7 @@ export default async function ServiciiPage() {
       icon: Clock,
       img: SERVICE_WASH_IMG,
       show: showCarWash,
+      showPrice: showCarWashPrices,
       items: [
         { name: "Spălare exterior + interior", price: "de la 60 RON" },
         { name: "Ceară lichidă profesională", price: "30 RON" },
@@ -114,9 +126,11 @@ export default async function ServiciiPage() {
                         />
                         {item.name}
                       </span>
-                      <span className="text-sm font-bold text-slate-500">
-                        {item.price}
-                      </span>
+                      {cat.showPrice && (
+                        <span className="text-sm font-bold text-slate-500">
+                          {item.price}
+                        </span>
+                      )}
                     </li>
                   ))}
                 </ul>
