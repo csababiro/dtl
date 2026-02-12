@@ -1,0 +1,988 @@
+openapi: 3.0.3
+info:
+  title: DTL API
+  description: API for DTL service (quote requests, appointment requests, push, settings). See api.md for narrative documentation.
+  version: 1.0.0
+
+servers:
+  - url: /api
+    description: Same-origin or NEXT_PUBLIC_API_URL base
+
+tags:
+  # ---- Frontend (customer-facing) ----
+  - name: Frontend – Quote requests
+    description: Customer submits a quote request (cerere ofertă). POST only.
+  - name: Frontend – Appointment requests
+    description: Customer submits a booking request.
+  - name: Frontend – Slots
+    description: Availability slots for the booking calendar (planned).
+  - name: Frontend – Feature flags
+    description: App reads feature flags (e.g. which modules are enabled).
+  - name: Frontend – Business settings
+    description: App reads business info (name, address, hours).
+  - name: Frontend – Push
+    description: Client registers for push (user), loads service worker.
+  # ---- Admin ----
+  - name: Admin – Quote requests
+    description: List and update status of quote requests.
+  - name: Admin – Appointments
+    description: Full CRUD for appointments.
+  - name: Admin – Push
+    description: Register admin token, send notifications.
+  - name: Admin – Feature flags
+    description: Update feature flags.
+  - name: Admin – Business settings
+    description: Update business settings.
+  - name: Admin – Gallery
+    description: Gallery items CRUD.
+  - name: Admin – Testimonials
+    description: Testimonials CRUD.
+  - name: Admin – Working hours
+    description: Get and update working hours (orar).
+  - name: Admin – Contact
+    description: Get and update contact settings.
+
+paths:
+  /quote-requests:
+    get:
+      tags: [Admin – Quote requests]
+      summary: List quote requests
+      operationId: getQuoteRequests
+      responses:
+        "200":
+          description: List of quote requests
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/QuoteRequest"
+    post:
+      tags: [Frontend – Quote requests]
+      summary: Create a quote request
+      operationId: createQuoteRequest
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/QuoteRequestCreate"
+      responses:
+        "201":
+          description: Created quote request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QuoteRequest"
+        "400":
+          description: Invalid request body
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /appointment-requests:
+    post:
+      tags: [Frontend – Appointment requests]
+      summary: Submit an appointment (booking) request
+      description: Stub returns 201 with id and status; no persistence in current implementation.
+      operationId: createAppointmentRequest
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AppointmentRequestCreate"
+      responses:
+        "201":
+          description: Request accepted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AppointmentRequestResponse"
+        "400":
+          description: Invalid request body
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /push/register:
+    post:
+      tags: [Frontend – Push, Admin – Push]
+      summary: Register FCM token for push notifications
+      description: Frontend uses with role user (and ref); admin uses with role admin.
+      operationId: pushRegister
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PushRegisterBody"
+      responses:
+        "200":
+          description: Registered
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [ok]
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+        "400":
+          description: Missing token or invalid role/ref
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /push/notify-admin:
+    post:
+      tags: [Admin – Push]
+      summary: Send push notification to all registered admin tokens
+      description: E.g. type booking with name, date, time. Returns 503 if FCM not configured.
+      operationId: pushNotifyAdmin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NotifyAdminBody"
+      responses:
+        "200":
+          description: Send result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                  sent:
+                    type: integer
+                  failed:
+                    type: integer
+        "503":
+          description: FCM not configured
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /push/notify-user:
+    post:
+      tags: [Admin – Push]
+      summary: Send push notification to user by ref
+      operationId: pushNotifyUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NotifyUserBody"
+      responses:
+        "200":
+          description: Sent (sent 0 or 1)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                  sent:
+                    type: integer
+                    enum: [0, 1]
+        "503":
+          description: FCM not configured
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /push/sw:
+    get:
+      tags: [Frontend – Push]
+      summary: FCM service worker script
+      description: Returns JavaScript with Firebase config injected. Content-Type application/javascript.
+      operationId: pushSw
+      responses:
+        "200":
+          description: Service worker script
+          content:
+            application/javascript:
+              schema:
+                type: string
+
+  /settings/feature-flags:
+    get:
+      tags: [Frontend – Feature flags]
+      summary: Get feature flags
+      description: Returns object merged with client defaults. When showUnavailableSlots is true, booking UI should show unavailable slots (e.g. greyed out) to normal users.
+      operationId: getFeatureFlags
+      responses:
+        "200":
+          description: Feature flags object
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FeatureFlags"
+    put:
+      tags: [Admin – Feature flags]
+      summary: Update feature flags
+      operationId: adminPutFeatureFlags
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FeatureFlags"
+      responses:
+        "200":
+          description: Updated feature flags
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FeatureFlags"
+
+  /settings/business:
+    get:
+      tags: [Frontend – Business settings]
+      summary: Get business settings
+      operationId: getBusinessSettings
+      responses:
+        "200":
+          description: Business settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BusinessSettings"
+    put:
+      tags: [Admin – Business settings]
+      summary: Update business settings
+      operationId: adminPutBusinessSettings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BusinessSettings"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BusinessSettings"
+
+  /slots:
+    get:
+      tags: [Frontend – Slots]
+      summary: Get availability slots for a date (planned)
+      description: When showUnavailableSlots feature flag is true, response must include both available and unavailable slots so the client can render unavailable slots as visible but not selectable.
+      operationId: getSlots
+      parameters:
+        - name: date
+          in: query
+          required: true
+          description: Date in YYYY-MM-DD format
+          schema:
+            type: string
+            pattern: "^\\d{4}-\\d{2}-\\d{2}$"
+      responses:
+        "200":
+          description: List of slots with availability
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SlotsResponse"
+
+  # ---- Admin API (planned; all require admin auth) ----
+  /appointments:
+    get:
+      tags: [Admin – Appointments]
+      summary: List appointments
+      operationId: adminGetAppointments
+      responses:
+        "200":
+          description: List of appointments
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Appointment"
+
+  /appointments/{id}:
+    get:
+      tags: [Admin – Appointments]
+      summary: Get appointment by id
+      operationId: adminGetAppointmentById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Appointment
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Appointment"
+        "404":
+          description: Not found
+    patch:
+      tags: [Admin – Appointments]
+      summary: Update appointment (status and/or date/time)
+      operationId: adminUpdateAppointment
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AppointmentUpdate"
+      responses:
+        "200":
+          description: Updated appointment
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Appointment"
+        "404":
+          description: Not found
+    delete:
+      tags: [Admin – Appointments]
+      summary: Delete appointment
+      operationId: adminDeleteAppointment
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Deleted
+        "404":
+          description: Not found
+
+  /quote-requests/{id}:
+    patch:
+      tags: [Admin – Quote requests]
+      summary: Update quote request (e.g. status prepared)"
+      operationId: adminUpdateQuoteRequest
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  example: "prepared"
+      responses:
+        "200":
+          description: Updated quote request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QuoteRequest"
+        "404":
+          description: Not found
+
+  /gallery:
+    get:
+      tags: [Admin – Gallery]
+      summary: List gallery items
+      operationId: adminGetGallery
+      responses:
+        "200":
+          description: List of gallery items
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/GalleryItem"
+    post:
+      tags: [Admin – Gallery]
+      summary: Add gallery item
+      operationId: adminAddGalleryItem
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GalleryItemCreate"
+      responses:
+        "201":
+          description: Created gallery item
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GalleryItem"
+
+  /gallery/{id}:
+    delete:
+      tags: [Admin – Gallery]
+      summary: Delete gallery item
+      operationId: adminDeleteGalleryItem
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Deleted
+        "404":
+          description: Not found
+
+  /testimonials:
+    get:
+      tags: [Admin – Testimonials]
+      summary: List testimonials
+      operationId: adminGetTestimonials
+      responses:
+        "200":
+          description: List of testimonials
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/TestimonialItem"
+    post:
+      tags: [Admin – Testimonials]
+      summary: Add testimonial
+      operationId: adminAddTestimonial
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TestimonialItemCreate"
+      responses:
+        "201":
+          description: Created testimonial
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TestimonialItem"
+
+  /testimonials/{id}:
+    patch:
+      tags: [Admin – Testimonials]
+      summary: Update testimonial
+      operationId: adminUpdateTestimonial
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TestimonialItemUpdate"
+      responses:
+        "200":
+          description: Updated testimonial
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TestimonialItem"
+        "404":
+          description: Not found
+    delete:
+      tags: [Admin – Testimonials]
+      summary: Delete testimonial
+      operationId: adminDeleteTestimonial
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Deleted
+        "404":
+          description: Not found
+
+  /settings/working-hours:
+    get:
+      tags: [Admin – Working hours]
+      summary: Get working hours (orar)
+      operationId: adminGetWorkingHours
+      responses:
+        "200":
+          description: Working hours schedule
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkingHoursSchedule"
+    put:
+      tags: [Admin – Working hours]
+      summary: Update working hours
+      operationId: adminPutWorkingHours
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WorkingHoursSchedule"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkingHoursSchedule"
+
+  /settings/contact:
+    get:
+      tags: [Admin – Contact]
+      summary: Get contact settings
+      operationId: adminGetContact
+      responses:
+        "200":
+          description: Contact settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ContactSettings"
+    put:
+      tags: [Admin – Contact]
+      summary: Update contact settings
+      operationId: adminPutContact
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ContactSettings"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ContactSettings"
+
+components:
+  schemas:
+    QuoteRequest:
+      type: object
+      properties:
+        id:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        name:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
+        carMake:
+          type: string
+        carModel:
+          type: string
+        carYear:
+          type: string
+        description:
+          type: string
+        chassis:
+          type: string
+        photoUrl:
+          type: string
+        status:
+          type: string
+
+    QuoteRequestCreate:
+      type: object
+      required:
+        - name
+        - phone
+        - email
+        - carMake
+        - carModel
+        - carYear
+        - description
+      properties:
+        name:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
+        carMake:
+          type: string
+        carModel:
+          type: string
+        carYear:
+          type: string
+        description:
+          type: string
+        chassis:
+          type: string
+        photoUrl:
+          type: string
+
+    AppointmentRequestCreate:
+      type: object
+      properties:
+        name:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
+        carMake:
+          type: string
+        carModel:
+          type: string
+        carYear:
+          type: string
+        description:
+          type: string
+        date:
+          type: string
+          description: Date e.g. YYYY-MM-DD
+        time:
+          type: string
+          description: Time HH:mm
+        type:
+          type: string
+          enum: [general, tyre, carWash]
+
+    AppointmentRequestResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        status:
+          type: string
+          example: "requested"
+
+    PushRegisterBody:
+      type: object
+      required:
+        - token
+      properties:
+        token:
+          type: string
+        role:
+          type: string
+          enum: [admin, user]
+        ref:
+          type: string
+          description: Required when role is user
+
+    NotifyAdminBody:
+      type: object
+      properties:
+        type:
+          type: string
+          example: "booking"
+        name:
+          type: string
+        date:
+          type: string
+        time:
+          type: string
+
+    NotifyUserBody:
+      type: object
+      required:
+        - ref
+      properties:
+        ref:
+          type: string
+        title:
+          type: string
+          example: "Notificare"
+        body:
+          type: string
+
+    FeatureFlags:
+      type: object
+      description: All properties optional booleans; merged with client defaults.
+      properties:
+        tyreService:
+          type: boolean
+        carWash:
+          type: boolean
+        requestQuote:
+          type: boolean
+        generalServiceBooking:
+          type: boolean
+        tyreServiceBooking:
+          type: boolean
+        carWashBooking:
+          type: boolean
+        partsOrdering:
+          type: boolean
+        cardInstallmentPayment:
+          type: boolean
+        authentication:
+          type: boolean
+        tyreServiceVisible:
+          type: boolean
+        carWashVisible:
+          type: boolean
+        requestQuoteVisible:
+          type: boolean
+        generalServiceBookingVisible:
+          type: boolean
+        tyreServiceBookingVisible:
+          type: boolean
+        carWashBookingVisible:
+          type: boolean
+        partsOrderingVisible:
+          type: boolean
+        cardInstallmentPaymentVisible:
+          type: boolean
+        authenticationVisible:
+          type: boolean
+        showServicePrices:
+          type: boolean
+        showTyreServicePrices:
+          type: boolean
+        showCarWashPrices:
+          type: boolean
+        gallery:
+          type: boolean
+        testimonials:
+          type: boolean
+        showUnavailableSlots:
+          type: boolean
+          description: When true, booking UI shows unavailable slots to normal users (e.g. greyed out).
+
+    BusinessSettings:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        address:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
+        whatsapp:
+          type: string
+        logoUrl:
+          type: string
+        hours:
+          type: object
+          additionalProperties:
+            type: string
+
+    Slot:
+      type: object
+      required:
+        - time
+        - available
+      properties:
+        time:
+          type: string
+          description: HH:mm
+        available:
+          type: boolean
+
+    SlotsResponse:
+      type: array
+      items:
+        $ref: "#/components/schemas/Slot"
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+
+    # Admin / backend entities
+    Appointment:
+      type: object
+      description: Admin view of an appointment (lib/dummy-appointments.ts).
+      properties:
+        id:
+          type: string
+        nume:
+          type: string
+        telefon:
+          type: string
+        email:
+          type: string
+        data:
+          type: string
+          description: Date e.g. d MMM yyyy
+        ora:
+          type: string
+          description: HH:mm
+        marca:
+          type: string
+        model:
+          type: string
+        tip:
+          type: string
+          enum: [general, tyre, carWash]
+        status:
+          type: string
+          enum: [Confirmat, "În așteptare"]
+        descriere:
+          type: string
+
+    AppointmentUpdate:
+      type: object
+      description: Partial update for appointment (status and/or date/time).
+      properties:
+        status:
+          type: string
+          enum: [Confirmat, "În așteptare"]
+        data:
+          type: string
+          description: Date e.g. YYYY-MM-DD
+        ora:
+          type: string
+          description: HH:mm
+
+    WorkingHoursSchedule:
+      type: object
+      description: "Per-day schedule Mon-Sat (lib/working-hours.ts). Each day is either start/end or closed true."
+      required: [days]
+      properties:
+        days:
+          type: array
+          minItems: 6
+          maxItems: 6
+          items:
+            type: object
+            description: "Either start/end (HH:mm) or closed true"
+            properties:
+              start:
+                type: string
+                description: HH:mm
+              end:
+                type: string
+                description: HH:mm
+              closed:
+                type: boolean
+
+    ContactSettings:
+      type: object
+      properties:
+        companyName:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
+        address:
+          type: string
+
+    GalleryItem:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        caption:
+          type: string
+        imageUrl:
+          type: string
+        order:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+
+    GalleryItemCreate:
+      type: object
+      description: Create gallery item (id and createdAt may be server-generated).
+      properties:
+        title:
+          type: string
+        caption:
+          type: string
+        imageUrl:
+          type: string
+        order:
+          type: integer
+
+    TestimonialItem:
+      type: object
+      properties:
+        id:
+          type: string
+        author:
+          type: string
+        role:
+          type: string
+        text:
+          type: string
+        rating:
+          type: number
+        createdAt:
+          type: string
+          format: date-time
+        visible:
+          type: boolean
+
+    TestimonialItemCreate:
+      type: object
+      properties:
+        author:
+          type: string
+        role:
+          type: string
+        text:
+          type: string
+        rating:
+          type: number
+        visible:
+          type: boolean
+
+    TestimonialItemUpdate:
+      type: object
+      description: Partial update for testimonial.
+      properties:
+        author:
+          type: string
+        role:
+          type: string
+        text:
+          type: string
+        rating:
+          type: number
+        visible:
+          type: boolean

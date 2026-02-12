@@ -249,6 +249,7 @@
     "contactInfo": "Contact",
     "operatingHours": "Program",
     "orar": "Orar",
+    "apiDocs": "API Docs (Swagger)",
     "orarDescription": "Intervalul orar afișat în calendar (Lună/Săptămână/Zi). Salvat local în browser.",
     "workingHoursStart": "Ora deschidere",
     "workingHoursEnd": "Ora închidere",

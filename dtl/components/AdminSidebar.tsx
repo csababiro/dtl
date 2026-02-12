@@ -18,6 +18,7 @@ import {
   MessageCircle,
   Clock,
   X,
+  BookOpen,
 } from "lucide-react";
 import { t } from "@/lib/i18n";
 
@@ -34,6 +35,7 @@ const menuItems: { nameKey: string; icon: React.ComponentType<{ size?: number }>
   { nameKey: "admin.testimonials", icon: MessageCircle, path: "/admin/testimonials" },
   { nameKey: "admin.orar", icon: Clock, path: "/admin/orar" },
   { nameKey: "admin.settings", icon: Settings, path: "/admin/settings" },
+  { nameKey: "admin.apiDocs", icon: BookOpen, path: "/admin/api-docs" },
 ];
 
 interface AdminSidebarProps {

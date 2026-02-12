@@ -23,7 +23,6 @@ import {
   DESCRIPTION_MAX,
   CHASSIS_MAX,
 } from "@/lib/field-limits";
-import { toast } from "sonner";
 import { CreateAccountPromptModal } from "@/components/CreateAccountPromptModal";
 import { notifyOnQuoteSuccess } from "@/lib/push-notify";
 
@@ -118,7 +117,6 @@ export function CereOfertaForm() {
     setShowCreateAccountPrompt(true);
     reset();
     setFile(null);
-    toast.success(t("cereOferta.successToast"));
     setLoading(false);
     notifyOnQuoteSuccess({ name: data.name?.trim() ?? "" });
   };
