@@ -160,6 +160,12 @@
   },
   "admin": {
     "title": "Admin",
+    "searchPlaceholder": "Caută programări, clienți...",
+    "notifications": "Notificări",
+    "staffDashboard": "Staff Dashboard",
+    "loginSubtitle": "Accesează panoul de administrare DTL Service",
+    "backToSite": "Înapoi la site-ul principal",
+    "secureBadge": "Securizat de DTL Security System",
     "dashboard": "Panou",
     "calendar": "Calendar",
     "appointments": "Programări",
