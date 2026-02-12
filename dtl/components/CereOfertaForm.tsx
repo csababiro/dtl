@@ -334,9 +334,9 @@ export function CereOfertaForm() {
                   return {
                     ...rest,
                     ref,
-                    onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
+                    onChange: (e: { target: { value: string } }) => {
                       e.target.value = e.target.value.toUpperCase().replace(/[^A-Z0-9\-]/g, "");
-                      onChange(e);
+                      return onChange(e);
                     },
                   };
                 })()}

@@ -10,8 +10,8 @@ import {
   Settings,
   Flag,
   Wrench,
-  Image as ImageIcon,
   Users,
+  UsersRound,
   LogOut,
   ChevronRight,
 } from "lucide-react";
@@ -23,7 +23,7 @@ const menuItems: { nameKey: string; icon: React.ComponentType<{ size?: number }>
   { nameKey: "admin.appointments", icon: ClipboardList, path: "/admin/appointments" },
   { nameKey: "admin.quotes", icon: FileText, path: "/admin/quotes" },
   { nameKey: "admin.services", icon: Wrench, path: "/admin/services" },
-  { nameKey: "admin.content", icon: ImageIcon, path: "/admin/content" },
+  { nameKey: "admin.clients", icon: UsersRound, path: "/admin/clients" },
   { nameKey: "admin.users", icon: Users, path: "/admin/users" },
   { nameKey: "admin.featureFlags", icon: Flag, path: "/admin/feature-flags" },
   { nameKey: "admin.settings", icon: Settings, path: "/admin/settings" },

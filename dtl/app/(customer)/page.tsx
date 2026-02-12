@@ -66,39 +66,42 @@ export default async function HomePage() {
   const showCarWash = isModuleEnabled(flags, "carWash");
 
   type ProgramareTab = "general" | "tyre" | "carWash";
-  const services: {
+  type ServiceItem = {
     title: string;
     desc: string;
     icon: typeof Wrench;
     img: string;
     show: boolean;
     programareTab: ProgramareTab;
-  }[] = [
-    {
-      title: t("home.serviceGeneral"),
-      desc: "Revizii, frâne, suspensie, motor și diagnoză computerizată completă.",
-      icon: Wrench,
-      img: SERVICE_GENERAL_IMG,
-      show: true,
-      programareTab: "general",
-    },
-    {
-      title: t("home.serviceTyre"),
-      desc: "Montaj, echilibrare, hotel anvelope și geometrie roți 3D.",
-      icon: Shield,
-      img: SERVICE_TYRE_IMG,
-      show: showTyre,
-      programareTab: "tyre",
-    },
-    {
-      title: t("home.serviceCarWash"),
-      desc: "Spălare profesională, detailing interior și cosmetizare.",
-      icon: Clock,
-      img: SERVICE_WASH_IMG,
-      show: showCarWash,
-      programareTab: "carWash",
-    },
-  ].filter((s) => s.show);
+  };
+  const services: ServiceItem[] = (
+    [
+      {
+        title: t("home.serviceGeneral"),
+        desc: "Revizii, frâne, suspensie, motor și diagnoză computerizată completă.",
+        icon: Wrench,
+        img: SERVICE_GENERAL_IMG,
+        show: true,
+        programareTab: "general" as const,
+      },
+      {
+        title: t("home.serviceTyre"),
+        desc: "Montaj, echilibrare, hotel anvelope și geometrie roți 3D.",
+        icon: Shield,
+        img: SERVICE_TYRE_IMG,
+        show: showTyre,
+        programareTab: "tyre" as const,
+      },
+      {
+        title: t("home.serviceCarWash"),
+        desc: "Spălare profesională, detailing interior și cosmetizare.",
+        icon: Clock,
+        img: SERVICE_WASH_IMG,
+        show: showCarWash,
+        programareTab: "carWash" as const,
+      },
+    ] as ServiceItem[]
+  ).filter((s) => s.show);
 
   const heroSubtitleParts = [t("home.serviceGeneral")];
   if (showTyre) heroSubtitleParts.push(t("home.serviceTyre"));
