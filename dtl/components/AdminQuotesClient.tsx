@@ -48,10 +48,18 @@ export function AdminQuotesClient({ items, onMarkPrepared }: AdminQuotesClientPr
           <p className="py-8 text-center text-slate-500">{t("admin.noData")}</p>
         ) : (
           items.map((item) => (
-            <Link
+            <div
               key={item.id}
-              href={`/admin/quotes/${item.id}`}
-              className="block bg-white rounded-xl border border-slate-200 shadow-sm p-4 space-y-3 hover:bg-slate-50/50 transition-colors"
+              role="button"
+              tabIndex={0}
+              onClick={() => router.push(`/admin/quotes/${item.id}`)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  router.push(`/admin/quotes/${item.id}`);
+                }
+              }}
+              className="block bg-white rounded-xl border border-slate-200 shadow-sm p-4 space-y-3 hover:bg-slate-50/50 transition-colors cursor-pointer"
             >
               <div className="flex items-start justify-between gap-2">
                 <span className="font-bold text-slate-900">{item.name}</span>
@@ -122,7 +130,7 @@ export function AdminQuotesClient({ items, onMarkPrepared }: AdminQuotesClientPr
                   WhatsApp
                 </a>
               </div>
-            </Link>
+            </div>
           ))
         )}
       </div>

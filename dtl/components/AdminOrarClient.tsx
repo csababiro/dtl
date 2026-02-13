@@ -18,6 +18,16 @@ const DAY_KEYS = [
   "admin.daySat",
 ] as const;
 
+/** 24h time options every 30 min (06:00 – 22:00) for orar dropdowns */
+const TIME_OPTIONS_24H = (() => {
+  const opts: string[] = [];
+  for (let h = 6; h <= 22; h++) {
+    opts.push(`${String(h).padStart(2, "0")}:00`);
+    if (h < 22) opts.push(`${String(h).padStart(2, "0")}:30`);
+  }
+  return opts;
+})();
+
 function isClosed(d: DaySchedule): d is { closed: true } {
   return "closed" in d && d.closed === true;
 }
@@ -93,28 +103,34 @@ export function AdminOrarClient() {
                       <label className="text-sm text-slate-500 w-24 shrink-0">
                         {t("admin.workingHoursStart")}
                       </label>
-                      <input
-                        type="time"
+                      <select
                         value={start}
                         onChange={(e) =>
                           setDay(index, { ...day, start: e.target.value, end })
                         }
                         className="px-3 py-2 rounded-lg border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none min-h-[44px]"
-                      />
+                      >
+                        {TIME_OPTIONS_24H.map((opt) => (
+                          <option key={opt} value={opt}>{opt}</option>
+                        ))}
+                      </select>
                     </div>
                     <span className="text-slate-400 hidden sm:inline md:inline">–</span>
                     <div className="flex items-center gap-2">
                       <label className="text-sm text-slate-500 w-24 shrink-0">
                         {t("admin.workingHoursEnd")}
                       </label>
-                      <input
-                        type="time"
+                      <select
                         value={end}
                         onChange={(e) =>
                           setDay(index, { ...day, start, end: e.target.value })
                         }
                         className="px-3 py-2 rounded-lg border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none min-h-[44px]"
-                      />
+                      >
+                        {TIME_OPTIONS_24H.map((opt) => (
+                          <option key={opt} value={opt}>{opt}</option>
+                        ))}
+                      </select>
                     </div>
                   </div>
                 )}

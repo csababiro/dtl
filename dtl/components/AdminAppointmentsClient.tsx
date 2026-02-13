@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useFormStatus } from "react-dom";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Calendar as CalendarIcon, Clock, User, History } from "lucide-react";
 import { parse, startOfDay } from "date-fns";
 import { enUS } from "date-fns/locale";
@@ -62,6 +62,7 @@ export function AdminAppointmentsClient({
   referenceToday,
   onApprove,
 }: AdminAppointmentsClientProps) {
+  const router = useRouter();
   const [tab, setTab] = useState<Tab>("upcoming");
   const [typeFilter, setTypeFilter] = useState<TypeFilter>("all");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
@@ -233,9 +234,17 @@ export function AdminAppointmentsClient({
                       className="flex flex-wrap items-center gap-4 p-4 rounded-xl bg-slate-50 border border-slate-100 hover:border-slate-200 transition-colors border-l-4"
                       style={{ borderLeftColor: rowColor }}
                     >
-                      <Link
-                        href={`/admin/appointments/${appt.id}`}
-                        className="flex flex-wrap items-center gap-4 flex-1 min-w-0"
+                      <div
+                        role="button"
+                        tabIndex={0}
+                        onClick={() => router.push(`/admin/appointments/${appt.id}`)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            router.push(`/admin/appointments/${appt.id}`);
+                          }
+                        }}
+                        className="flex flex-wrap items-center gap-4 flex-1 min-w-0 cursor-pointer"
                       >
                         <span className="flex items-center gap-2 text-slate-500 font-mono text-sm">
                           <Clock size={16} />
@@ -257,7 +266,7 @@ export function AdminAppointmentsClient({
                         >
                           {getTipLabel(appt.tip)}
                         </span>
-                      </Link>
+                      </div>
                       <span
                         className={`px-3 py-1 rounded-full text-xs font-bold uppercase ${
                           appt.status === "Confirmat"

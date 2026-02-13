@@ -191,6 +191,13 @@ export function AdminCalendarClient({ appointments }: AdminCalendarClientProps) 
           popup
           eventPropGetter={eventStyleGetter}
           onSelectEvent={(event) => router.push(`/admin/appointments/${event.id}`)}
+          formats={{
+            timeGutterFormat: (date: Date) => format(date, "HH:mm"),
+            eventTimeRangeFormat: ({ start, end }: { start: Date; end: Date }) =>
+              `${format(start, "HH:mm")} – ${format(end, "HH:mm")}`,
+            agendaTimeRangeFormat: ({ start, end }: { start: Date; end: Date }) =>
+              `${format(start, "HH:mm")} – ${format(end, "HH:mm")}`,
+          }}
           messages={{
             date: "Dată",
             time: "Oră",
