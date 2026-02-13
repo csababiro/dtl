@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getUserTokenFromDb } from "@/lib/db/push-tokens";
+import { getUserToken } from "@/lib/services";
 
 export async function POST(request: Request) {
   try {
@@ -12,7 +12,10 @@ export async function POST(request: Request) {
     if (!ref || typeof ref !== "string") {
       return NextResponse.json({ error: "ref required" }, { status: 400 });
     }
-    const token = await getUserTokenFromDb(ref);
+    const tokenResult = await getUserToken(ref);
+    if ("error" in tokenResult)
+      return NextResponse.json({ error: tokenResult.error.message }, { status: 500 });
+    const token = tokenResult.data;
     if (!token) {
       return NextResponse.json({ ok: true, sent: 0 });
     }

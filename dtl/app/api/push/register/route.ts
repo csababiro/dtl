@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { addAdminTokenInDb, addUserTokenInDb } from "@/lib/db/push-tokens";
+import { addAdminToken, addUserToken } from "@/lib/services";
 
 export async function POST(request: Request) {
   try {
@@ -13,11 +13,15 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "token required" }, { status: 400 });
     }
     if (role === "admin") {
-      await addAdminTokenInDb(token);
+      const result = await addAdminToken(token);
+      if ("error" in result)
+        return NextResponse.json({ error: result.error.message }, { status: 500 });
       return NextResponse.json({ ok: true });
     }
     if (role === "user" && ref && typeof ref === "string") {
-      await addUserTokenInDb(ref, token);
+      const result = await addUserToken(ref, token);
+      if ("error" in result)
+        return NextResponse.json({ error: result.error.message }, { status: 500 });
       return NextResponse.json({ ok: true });
     }
     return NextResponse.json(

@@ -1,19 +1,23 @@
 import { NextResponse } from "next/server";
 import type { BusinessSettings } from "@/lib/settings";
-import { getBusinessSettingsFromDb, putBusinessSettingsInDb } from "@/lib/db/business-settings";
+import { getBusinessSettings, putBusinessSettings } from "@/lib/services";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
-  const stored = await getBusinessSettingsFromDb();
-  return NextResponse.json(stored);
+  const result = await getBusinessSettings();
+  if ("error" in result)
+    return NextResponse.json({ error: result.error.message }, { status: 500 });
+  return NextResponse.json(result.data);
 }
 
 export async function PUT(request: Request) {
   try {
     const body = (await request.json()) as Partial<BusinessSettings>;
-    const stored = await putBusinessSettingsInDb(body);
-    return NextResponse.json(stored);
+    const result = await putBusinessSettings(body);
+    if ("error" in result)
+      return NextResponse.json({ error: result.error.message }, { status: 500 });
+    return NextResponse.json(result.data);
   } catch {
     return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
   }

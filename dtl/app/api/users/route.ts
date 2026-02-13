@@ -1,12 +1,40 @@
 import { NextResponse } from "next/server";
-import { getUsersFromDb, addUserInDb } from "@/lib/db/users";
+import { getUsers, addUser } from "@/lib/services";
 import type { DummyUserRole } from "@/lib/dummy-users";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
-  const items = await getUsersFromDb();
-  return NextResponse.json({ items });
+  // #region agent log
+  fetch("http://127.0.0.1:7244/ingest/38291e03-8924-411d-af90-c560fa478f53", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      location: "app/api/users/route.ts:GET",
+      message: "GET /api/users entry",
+      data: {},
+      timestamp: Date.now(),
+      hypothesisId: "C",
+    }),
+  }).catch(() => {});
+  // #endregion
+  const result = await getUsers();
+  // #region agent log
+  fetch("http://127.0.0.1:7244/ingest/38291e03-8924-411d-af90-c560fa478f53", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      location: "app/api/users/route.ts:GET",
+      message: "after getUsers()",
+      data: { hasError: "error" in result, hasData: "data" in result },
+      timestamp: Date.now(),
+      hypothesisId: "C",
+    }),
+  }).catch(() => {});
+  // #endregion
+  if ("error" in result)
+    return NextResponse.json({ error: result.error.message }, { status: 500 });
+  return NextResponse.json({ items: result.data });
 }
 
 export async function POST(request: Request) {
@@ -26,14 +54,16 @@ export async function POST(request: Request) {
     if (!name || !email) {
       return NextResponse.json({ error: "name and email required" }, { status: 400 });
     }
-    const user = await addUserInDb({
+    const result = await addUser({
       name,
       email,
       role,
       active: body.active !== false,
       canManageUsers: role === "Admin" ? !!body.canManageUsers : undefined,
     });
-    return NextResponse.json(user, { status: 201 });
+    if ("error" in result)
+      return NextResponse.json({ error: result.error.message }, { status: 500 });
+    return NextResponse.json(result.data, { status: 201 });
   } catch {
     return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
   }

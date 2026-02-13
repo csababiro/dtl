@@ -1,9 +1,11 @@
 import { NextResponse } from "next/server";
-import { getClientsFromDb } from "@/lib/db/clients";
+import { getClients } from "@/lib/services";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
-  const items = await getClientsFromDb();
-  return NextResponse.json({ items });
+  const result = await getClients();
+  if ("error" in result)
+    return NextResponse.json({ error: result.error.message }, { status: 500 });
+  return NextResponse.json({ items: result.data });
 }

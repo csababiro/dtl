@@ -1,14 +1,16 @@
 import { NextResponse } from "next/server";
-import { getQuoteRequestByIdFromDb, setQuoteRequestStatusInDb } from "@/lib/db/quote-requests";
+import { getQuoteRequestById, setQuoteRequestStatus } from "@/lib/services";
 
 export async function GET(
   _request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  const item = await getQuoteRequestByIdFromDb(id);
-  if (!item) return NextResponse.json({ error: "Not found" }, { status: 404 });
-  return NextResponse.json(item);
+  const result = await getQuoteRequestById(id);
+  if ("error" in result)
+    return NextResponse.json({ error: result.error.message }, { status: 500 });
+  if (!result.data) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  return NextResponse.json(result.data);
 }
 
 export async function PATCH(
@@ -16,14 +18,18 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  const item = await getQuoteRequestByIdFromDb(id);
-  if (!item) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  const itemResult = await getQuoteRequestById(id);
+  if ("error" in itemResult)
+    return NextResponse.json({ error: itemResult.error.message }, { status: 500 });
+  if (!itemResult.data) return NextResponse.json({ error: "Not found" }, { status: 404 });
   try {
     const body = (await request.json()) as { status?: string };
     const status = body.status != null ? String(body.status).trim() : "";
     if (!status) return NextResponse.json({ error: "status required" }, { status: 400 });
-    const updated = await setQuoteRequestStatusInDb(id, status);
-    return NextResponse.json(updated!);
+    const result = await setQuoteRequestStatus(id, status);
+    if ("error" in result)
+      return NextResponse.json({ error: result.error.message }, { status: 500 });
+    return NextResponse.json(result.data!);
   } catch {
     return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
   }

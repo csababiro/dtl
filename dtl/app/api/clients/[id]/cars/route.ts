@@ -1,19 +1,20 @@
 import { NextResponse } from "next/server";
-import { getClientByIdFromDb } from "@/lib/db/clients";
-import {
-  getCarsByClientIdFromDb,
-  addClientCarInDb,
-} from "@/lib/db/client-cars";
+import { getClientById, getCarsByClientId, addClientCar } from "@/lib/services";
 
 export async function GET(
   _request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  const client = await getClientByIdFromDb(id);
-  if (!client) return NextResponse.json({ error: "Client not found" }, { status: 404 });
-  const items = await getCarsByClientIdFromDb(id);
-  return NextResponse.json({ items });
+  const clientResult = await getClientById(id);
+  if ("error" in clientResult)
+    return NextResponse.json({ error: clientResult.error.message }, { status: 500 });
+  if (!clientResult.data)
+    return NextResponse.json({ error: "Client not found" }, { status: 404 });
+  const carsResult = await getCarsByClientId(id);
+  if ("error" in carsResult)
+    return NextResponse.json({ error: carsResult.error.message }, { status: 500 });
+  return NextResponse.json({ items: carsResult.data });
 }
 
 export async function POST(
@@ -21,8 +22,11 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  const client = await getClientByIdFromDb(id);
-  if (!client) return NextResponse.json({ error: "Client not found" }, { status: 404 });
+  const clientResult = await getClientById(id);
+  if ("error" in clientResult)
+    return NextResponse.json({ error: clientResult.error.message }, { status: 500 });
+  if (!clientResult.data)
+    return NextResponse.json({ error: "Client not found" }, { status: 404 });
   try {
     const body = (await request.json()) as {
       carMake?: string;
@@ -40,14 +44,16 @@ export async function POST(
         { status: 400 }
       );
     }
-    const car = await addClientCarInDb({
+    const result = await addClientCar({
       clientId: id,
       carMake,
       carModel,
       carYear,
       chassis,
     });
-    return NextResponse.json(car, { status: 201 });
+    if ("error" in result)
+      return NextResponse.json({ error: result.error.message }, { status: 500 });
+    return NextResponse.json(result.data, { status: 201 });
   } catch {
     return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
   }

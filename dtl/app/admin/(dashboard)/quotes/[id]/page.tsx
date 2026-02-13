@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { getQuoteRequestByIdFromDb } from "@/lib/db/quote-requests";
+import { getQuoteRequestById } from "@/lib/services";
 import { t } from "@/lib/i18n";
 import { AdminQuoteDetailClient } from "@/components/admin/AdminQuoteDetailClient";
 import { markQuotePrepared } from "../actions";
@@ -12,7 +12,9 @@ interface PageProps {
 
 export default async function AdminQuoteDetailPage({ params }: PageProps) {
   const { id } = await params;
-  const item = await getQuoteRequestByIdFromDb(id);
+  const result = await getQuoteRequestById(id);
+  if ("error" in result) notFound();
+  const item = result.data;
   if (!item) notFound();
 
   return (

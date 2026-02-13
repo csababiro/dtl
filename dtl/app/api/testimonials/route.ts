@@ -1,14 +1,13 @@
 import { NextResponse } from "next/server";
-import {
-  getTestimonialsFromDb,
-  addTestimonialInDb,
-} from "@/lib/db/testimonials";
+import { getTestimonials, addTestimonial } from "@/lib/services";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
-  const items = await getTestimonialsFromDb();
-  return NextResponse.json({ items });
+  const result = await getTestimonials();
+  if ("error" in result)
+    return NextResponse.json({ error: result.error.message }, { status: 500 });
+  return NextResponse.json({ items: result.data });
 }
 
 export async function POST(request: Request) {
@@ -28,14 +27,16 @@ export async function POST(request: Request) {
         { status: 400 }
       );
     }
-    const item = await addTestimonialInDb({
+    const result = await addTestimonial({
       author,
       role: body.role != null ? String(body.role).trim() : undefined,
       text,
       rating: body.rating != null ? Number(body.rating) : undefined,
       visible: body.visible !== false,
     });
-    return NextResponse.json(item, { status: 201 });
+    if ("error" in result)
+      return NextResponse.json({ error: result.error.message }, { status: 500 });
+    return NextResponse.json(result.data, { status: 201 });
   } catch {
     return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
   }

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getAdminTokensFromDb } from "@/lib/db/push-tokens";
+import { getAdminTokens } from "@/lib/services";
 
 export async function POST(request: Request) {
   try {
@@ -10,7 +10,10 @@ export async function POST(request: Request) {
       time?: string;
     };
     const { type, name, date, time } = body;
-    const tokens = await getAdminTokensFromDb();
+    const tokensResult = await getAdminTokens();
+    if ("error" in tokensResult)
+      return NextResponse.json({ error: tokensResult.error.message }, { status: 500 });
+    const tokens = tokensResult.data;
     if (tokens.length === 0) {
       return NextResponse.json({ ok: true, sent: 0 });
     }

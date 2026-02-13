@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { format, parse } from "date-fns";
 import { enUS } from "date-fns/locale";
-import { createAppointmentInDb } from "@/lib/db/appointments";
+import { createAppointment } from "@/lib/services";
 
 export async function POST(request: Request) {
   try {
@@ -37,7 +37,7 @@ export async function POST(request: Request) {
       dataFormatted = dateInput;
     }
     const id = "apt-" + Date.now() + "-" + Math.random().toString(36).slice(2, 8);
-    const appointment = await createAppointmentInDb({
+    const result = await createAppointment({
       id,
       nume: name,
       telefon: phone,
@@ -50,8 +50,10 @@ export async function POST(request: Request) {
       status: "În așteptare",
       descriere: body.description != null ? String(body.description).trim() : undefined,
     });
+    if ("error" in result)
+      return NextResponse.json({ error: result.error.message }, { status: 500 });
     return NextResponse.json(
-      { id: appointment.id, status: "requested" },
+      { id: result.data.id, status: "requested" },
       { status: 201 }
     );
   } catch {

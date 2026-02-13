@@ -1,19 +1,23 @@
 import { NextResponse } from "next/server";
 import type { ContactSettings } from "@/lib/contact-settings";
-import { getContactSettingsFromDb, putContactSettingsInDb } from "@/lib/db/contact-settings";
+import { getContactSettings, putContactSettings } from "@/lib/services";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
-  const stored = await getContactSettingsFromDb();
-  return NextResponse.json(stored);
+  const result = await getContactSettings();
+  if ("error" in result)
+    return NextResponse.json({ error: result.error.message }, { status: 500 });
+  return NextResponse.json(result.data);
 }
 
 export async function PUT(request: Request) {
   try {
     const body = (await request.json()) as Partial<ContactSettings>;
-    const stored = await putContactSettingsInDb(body);
-    return NextResponse.json(stored);
+    const result = await putContactSettings(body);
+    if ("error" in result)
+      return NextResponse.json({ error: result.error.message }, { status: 500 });
+    return NextResponse.json(result.data);
   } catch {
     return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
   }

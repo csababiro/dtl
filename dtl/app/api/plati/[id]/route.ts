@@ -1,14 +1,16 @@
 import { NextResponse } from "next/server";
-import { getPlataByIdFromDb, updatePlataNotesInDb } from "@/lib/db/plati";
+import { getPlataById, updatePlataNotes } from "@/lib/services";
 
 export async function GET(
   _request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  const plata = await getPlataByIdFromDb(id);
-  if (!plata) return NextResponse.json({ error: "Not found" }, { status: 404 });
-  return NextResponse.json(plata);
+  const result = await getPlataById(id);
+  if ("error" in result)
+    return NextResponse.json({ error: result.error.message }, { status: 500 });
+  if (!result.data) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  return NextResponse.json(result.data);
 }
 
 export async function PATCH(
@@ -16,13 +18,17 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  const plata = await getPlataByIdFromDb(id);
-  if (!plata) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  const plataResult = await getPlataById(id);
+  if ("error" in plataResult)
+    return NextResponse.json({ error: plataResult.error.message }, { status: 500 });
+  if (!plataResult.data) return NextResponse.json({ error: "Not found" }, { status: 404 });
   try {
     const body = (await request.json()) as { notes?: string };
     const notes = body.notes != null ? String(body.notes) : "";
-    const updated = await updatePlataNotesInDb(id, notes);
-    return NextResponse.json(updated!);
+    const result = await updatePlataNotes(id, notes);
+    if ("error" in result)
+      return NextResponse.json({ error: result.error.message }, { status: 500 });
+    return NextResponse.json(result.data!);
   } catch {
     return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
   }

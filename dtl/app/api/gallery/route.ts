@@ -1,14 +1,13 @@
 import { NextResponse } from "next/server";
-import {
-  getGalleryItemsFromDb,
-  addGalleryItemInDb,
-} from "@/lib/db/gallery";
+import { getGalleryItems, addGalleryItem } from "@/lib/services";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
-  const items = await getGalleryItemsFromDb();
-  return NextResponse.json({ items });
+  const result = await getGalleryItems();
+  if ("error" in result)
+    return NextResponse.json({ error: result.error.message }, { status: 500 });
+  return NextResponse.json({ items: result.data });
 }
 
 export async function POST(request: Request) {
@@ -22,12 +21,14 @@ export async function POST(request: Request) {
     if (!imageUrl) {
       return NextResponse.json({ error: "imageUrl required" }, { status: 400 });
     }
-    const item = await addGalleryItemInDb({
+    const result = await addGalleryItem({
       imageUrl,
       title: body.title != null ? String(body.title).trim() : undefined,
       caption: body.caption != null ? String(body.caption).trim() : undefined,
     });
-    return NextResponse.json(item, { status: 201 });
+    if ("error" in result)
+      return NextResponse.json({ error: result.error.message }, { status: 500 });
+    return NextResponse.json(result.data, { status: 201 });
   } catch {
     return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
   }

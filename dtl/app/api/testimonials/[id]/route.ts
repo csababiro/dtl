@@ -1,18 +1,20 @@
 import { NextResponse } from "next/server";
 import {
-  getTestimonialByIdFromDb,
-  updateTestimonialInDb,
-  removeTestimonialFromDb,
-} from "@/lib/db/testimonials";
+  getTestimonialById,
+  updateTestimonial,
+  removeTestimonial,
+} from "@/lib/services";
 
 export async function GET(
   _request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  const item = await getTestimonialByIdFromDb(id);
-  if (!item) return NextResponse.json({ error: "Not found" }, { status: 404 });
-  return NextResponse.json(item);
+  const result = await getTestimonialById(id);
+  if ("error" in result)
+    return NextResponse.json({ error: result.error.message }, { status: 500 });
+  if (!result.data) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  return NextResponse.json(result.data);
 }
 
 export async function PATCH(
@@ -20,8 +22,10 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  const item = await getTestimonialByIdFromDb(id);
-  if (!item) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  const itemResult = await getTestimonialById(id);
+  if ("error" in itemResult)
+    return NextResponse.json({ error: itemResult.error.message }, { status: 500 });
+  if (!itemResult.data) return NextResponse.json({ error: "Not found" }, { status: 404 });
   try {
     const body = (await request.json()) as {
       author?: string;
@@ -42,8 +46,10 @@ export async function PATCH(
     if (body.text !== undefined) updates.text = String(body.text).trim();
     if (body.rating !== undefined) updates.rating = Number(body.rating);
     if (body.visible !== undefined) updates.visible = Boolean(body.visible);
-    const updated = await updateTestimonialInDb(id, updates);
-    return NextResponse.json(updated!);
+    const result = await updateTestimonial(id, updates);
+    if ("error" in result)
+      return NextResponse.json({ error: result.error.message }, { status: 500 });
+    return NextResponse.json(result.data!);
   } catch {
     return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
   }
@@ -54,7 +60,9 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  const ok = await removeTestimonialFromDb(id);
-  if (!ok) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  const result = await removeTestimonial(id);
+  if ("error" in result)
+    return NextResponse.json({ error: result.error.message }, { status: 500 });
+  if (!result.data) return NextResponse.json({ error: "Not found" }, { status: 404 });
   return new NextResponse(null, { status: 204 });
 }

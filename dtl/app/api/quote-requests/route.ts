@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getQuoteRequestsFromDb, createQuoteRequestInDb } from "@/lib/db/quote-requests";
+import { getQuoteRequests, createQuoteRequest } from "@/lib/services";
 import type { QuoteRequest } from "@/lib/quote-requests-store";
 
 export type { QuoteRequest };
@@ -7,8 +7,10 @@ export type { QuoteRequest };
 export const dynamic = "force-dynamic";
 
 export async function GET() {
-  const items = await getQuoteRequestsFromDb();
-  return NextResponse.json({ items });
+  const result = await getQuoteRequests();
+  if ("error" in result)
+    return NextResponse.json({ error: result.error.message }, { status: 500 });
+  return NextResponse.json({ items: result.data });
 }
 
 export async function POST(request: Request) {
@@ -25,7 +27,7 @@ export async function POST(request: Request) {
       description,
       photoUrl,
     } = body;
-    const item = await createQuoteRequestInDb({
+    const result = await createQuoteRequest({
       name: String(name ?? "").trim(),
       phone: String(phone ?? "").trim(),
       email: String(email ?? "").trim(),
@@ -37,7 +39,9 @@ export async function POST(request: Request) {
       photoUrl: photoUrl != null ? String(photoUrl) : undefined,
       status: "pending",
     });
-    return NextResponse.json(item, { status: 201 });
+    if ("error" in result)
+      return NextResponse.json({ error: result.error.message }, { status: 500 });
+    return NextResponse.json(result.data, { status: 201 });
   } catch (e) {
     return NextResponse.json(
       { error: e instanceof Error ? e.message : "Invalid request" },

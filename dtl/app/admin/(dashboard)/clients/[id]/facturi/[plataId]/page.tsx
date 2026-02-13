@@ -1,7 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { getClientByIdFromDb } from "@/lib/db/clients";
-import { getPlataByIdFromDb } from "@/lib/db/plati";
+import { getClientById, getPlataById } from "@/lib/services";
 import { AdminFacturaDetailClient } from "@/components/admin/AdminFacturaDetailClient";
 import { updatePlataNotesAction } from "./actions";
 import { ArrowLeft } from "lucide-react";
@@ -25,10 +24,13 @@ function formatDateOnly(dateStr: string): string {
 
 export default async function AdminFacturaDetailPage({ params }: PageProps) {
   const { id: clientId, plataId } = await params;
-  const client = await getClientByIdFromDb(clientId);
-  if (!client) notFound();
-  const plata = await getPlataByIdFromDb(plataId);
-  if (!plata || plata.clientId !== client.id) notFound();
+  const clientResult = await getClientById(clientId);
+  if ("error" in clientResult || !clientResult.data) notFound();
+  const client = clientResult.data;
+  const plataResult = await getPlataById(plataId);
+  if ("error" in plataResult || !plataResult.data) notFound();
+  const plata = plataResult.data;
+  if (plata.clientId !== client.id) notFound();
 
   return (
     <div className="space-y-6">

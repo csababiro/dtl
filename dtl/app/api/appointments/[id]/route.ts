@@ -2,21 +2,23 @@ import { NextResponse } from "next/server";
 import { format, parse } from "date-fns";
 import { enUS } from "date-fns/locale";
 import {
-  getAppointmentByIdFromDb,
-  updateAppointmentStatusInDb,
-  updateAppointmentDateTimeInDb,
-  deleteAppointmentFromDb,
-  updateAppointmentNotesInDb,
-} from "@/lib/db/appointments";
+  getAppointmentById,
+  updateAppointmentStatus,
+  updateAppointmentDateTime,
+  updateAppointmentNotes,
+  deleteAppointment,
+} from "@/lib/services";
 
 export async function GET(
   _request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  const appointment = await getAppointmentByIdFromDb(id);
-  if (!appointment) return NextResponse.json({ error: "Not found" }, { status: 404 });
-  return NextResponse.json(appointment);
+  const result = await getAppointmentById(id);
+  if ("error" in result)
+    return NextResponse.json({ error: result.error.message }, { status: 500 });
+  if (!result.data) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  return NextResponse.json(result.data);
 }
 
 export async function PATCH(
@@ -24,8 +26,10 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  const appointment = await getAppointmentByIdFromDb(id);
-  if (!appointment) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  const appResult = await getAppointmentById(id);
+  if ("error" in appResult)
+    return NextResponse.json({ error: appResult.error.message }, { status: 500 });
+  if (!appResult.data) return NextResponse.json({ error: "Not found" }, { status: 404 });
   try {
     const body = (await request.json()) as {
       status?: string;
@@ -38,8 +42,10 @@ export async function PATCH(
       if (body.status !== "Confirmat" && body.status !== "În așteptare") {
         return NextResponse.json({ error: "Invalid status" }, { status: 400 });
       }
-      const updated = await updateAppointmentStatusInDb(id, body.status);
-      if (updated) return NextResponse.json(updated);
+      const result = await updateAppointmentStatus(id, body.status);
+      if ("error" in result)
+        return NextResponse.json({ error: result.error.message }, { status: 500 });
+      if (result.data) return NextResponse.json(result.data);
     }
     if (body.data !== undefined && body.ora !== undefined) {
       const dataInput = String(body.data).trim();
@@ -48,18 +54,24 @@ export async function PATCH(
         return NextResponse.json({ error: "data and ora required" }, { status: 400 });
       const parsed = parse(dataInput, "yyyy-MM-dd", new Date());
       const data = format(parsed, "d MMM yyyy", { locale: enUS });
-      const updated = await updateAppointmentDateTimeInDb(id, data, ora);
-      if (updated) return NextResponse.json(updated);
+      const result = await updateAppointmentDateTime(id, data, ora);
+      if ("error" in result)
+        return NextResponse.json({ error: result.error.message }, { status: 500 });
+      if (result.data) return NextResponse.json(result.data);
     }
     if (body.descriere !== undefined || body.clientNotes !== undefined) {
-      const updated = await updateAppointmentNotesInDb(id, {
+      const result = await updateAppointmentNotes(id, {
         descriere: body.descriere,
         clientNotes: body.clientNotes,
       });
-      if (updated) return NextResponse.json(updated);
+      if ("error" in result)
+        return NextResponse.json({ error: result.error.message }, { status: 500 });
+      if (result.data) return NextResponse.json(result.data);
     }
-    const final = await getAppointmentByIdFromDb(id);
-    return NextResponse.json(final!);
+    const finalResult = await getAppointmentById(id);
+    if ("error" in finalResult)
+      return NextResponse.json({ error: finalResult.error.message }, { status: 500 });
+    return NextResponse.json(finalResult.data!);
   } catch {
     return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
   }
@@ -70,7 +82,9 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  const ok = await deleteAppointmentFromDb(id);
-  if (!ok) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  const result = await deleteAppointment(id);
+  if ("error" in result)
+    return NextResponse.json({ error: result.error.message }, { status: 500 });
+  if (!result.data) return NextResponse.json({ error: "Not found" }, { status: 404 });
   return new NextResponse(null, { status: 204 });
 }

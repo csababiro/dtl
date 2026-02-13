@@ -4,16 +4,16 @@ import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import type { DummyUserRole } from "@/lib/dummy-users";
 import {
-  getCurrentUserCanManageUsersFromDb,
-  addUserInDb,
-  updateUserInDb,
-  deleteUserFromDb,
-} from "@/lib/db/users";
-import { createInvitationInDb } from "@/lib/db/invitations";
+  getCurrentUserCanManageUsers,
+  addUser,
+  updateUser,
+  deleteUser,
+  createInvitation,
+} from "@/lib/services";
 
 async function guardCanManage() {
-  const can = await getCurrentUserCanManageUsersFromDb();
-  if (!can) return { ok: false as const, error: "forbidden" as const };
+  const result = await getCurrentUserCanManageUsers();
+  if ("error" in result || !result.data) return { ok: false as const, error: "forbidden" as const };
   return { ok: true as const };
 }
 
@@ -31,14 +31,18 @@ export async function createUserAction(formData: FormData) {
   const validRoles: DummyUserRole[] = ["Super Admin", "Admin", "Staff"];
   if (!validRoles.includes(role)) return { ok: false, error: "validation" as const };
 
-  const user = await addUserInDb({
+  const addResult = await addUser({
     name,
     email,
     role,
     active,
     canManageUsers: role === "Admin" ? canManageUsers : undefined,
   });
-  const inv = await createInvitationInDb(user.id, user.email);
+  if ("error" in addResult) return { ok: false, error: "validation" as const };
+  const user = addResult.data;
+  const invResult = await createInvitation(user.id, user.email);
+  if ("error" in invResult) return { ok: false, error: "validation" as const };
+  const inv = invResult.data;
   const h = await headers();
   const host = h.get("host") ?? "";
   const proto = h.get("x-forwarded-proto") ?? "http";
@@ -65,16 +69,17 @@ export async function updateUserAction(formData: FormData) {
 
   if (role && !["Super Admin", "Admin", "Staff"].includes(role)) return { ok: false, error: "validation" as const };
 
-  const updated = await updateUserInDb(id, {
+  const result = await updateUser(id, {
     ...(name !== undefined && { name }),
     ...(email !== undefined && { email }),
     ...(role !== undefined && { role }),
     ...(active !== undefined && { active }),
     ...(canManageUsers !== undefined && { canManageUsers }),
   });
-  if (!updated) return { ok: false, error: "not_found" as const };
+  if ("error" in result) return { ok: false, error: "not_found" as const };
+  if (!result.data) return { ok: false, error: "not_found" as const };
   revalidatePath("/admin/users");
-  return { ok: true, user: updated };
+  return { ok: true, user: result.data };
 }
 
 export async function deleteUserAction(formData: FormData) {
@@ -84,8 +89,9 @@ export async function deleteUserAction(formData: FormData) {
   const id = String(formData.get("id") ?? "").trim();
   if (!id) return { ok: false, error: "validation" as const };
 
-  const deleted = await deleteUserFromDb(id);
-  if (!deleted) return { ok: false, error: "not_found" as const };
+  const result = await deleteUser(id);
+  if ("error" in result) return { ok: false, error: "not_found" as const };
+  if (!result.data) return { ok: false, error: "not_found" as const };
   revalidatePath("/admin/users");
   return { ok: true };
 }
@@ -98,8 +104,9 @@ export async function setUserActiveAction(formData: FormData) {
   const active = formData.get("active") === "true";
   if (!id) return { ok: false, error: "validation" as const };
 
-  const updated = await updateUserInDb(id, { active });
-  if (!updated) return { ok: false, error: "not_found" as const };
+  const result = await updateUser(id, { active });
+  if ("error" in result) return { ok: false, error: "not_found" as const };
+  if (!result.data) return { ok: false, error: "not_found" as const };
   revalidatePath("/admin/users");
-  return { ok: true, user: updated };
+  return { ok: true, user: result.data };
 }

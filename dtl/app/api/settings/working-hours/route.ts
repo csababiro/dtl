@@ -1,12 +1,14 @@
 import { NextResponse } from "next/server";
 import type { WorkingHoursSchedule } from "@/lib/working-hours";
-import { getWorkingHoursFromDb, putWorkingHoursInDb } from "@/lib/db/working-hours";
+import { getWorkingHours, putWorkingHours } from "@/lib/services";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
-  const stored = await getWorkingHoursFromDb();
-  return NextResponse.json(stored);
+  const result = await getWorkingHours();
+  if ("error" in result)
+    return NextResponse.json({ error: result.error.message }, { status: 500 });
+  return NextResponse.json(result.data);
 }
 
 export async function PUT(request: Request) {
@@ -21,8 +23,10 @@ export async function PUT(request: Request) {
     const schedule: WorkingHoursSchedule = {
       days: body.days.slice(0, 6) as WorkingHoursSchedule["days"],
     };
-    const stored = await putWorkingHoursInDb(schedule);
-    return NextResponse.json(stored);
+    const result = await putWorkingHours(schedule);
+    if ("error" in result)
+      return NextResponse.json({ error: result.error.message }, { status: 500 });
+    return NextResponse.json(result.data);
   } catch {
     return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
   }
