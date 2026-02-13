@@ -1,8 +1,12 @@
 import { t } from "@/lib/i18n";
-import { DUMMY_CLIENTS } from "@/lib/dummy-clients";
+import { get } from "@/lib/api-client";
+import type { DummyClient } from "@/lib/dummy-clients";
 import { AdminClientsClient } from "@/components/AdminClientsClient";
 
-export default function AdminClientsPage() {
+export default async function AdminClientsPage() {
+  const result = await get<{ items: DummyClient[] }>("/clients");
+  const clients = "data" in result ? result.data.items : [];
+
   return (
     <div className="space-y-6">
       <div>
@@ -10,11 +14,11 @@ export default function AdminClientsPage() {
           {t("admin.clients")}
         </h1>
         <p className="text-slate-500 mt-1">
-          Listă clienți (date dummy, fără API). Caută și sortează după nume.
+          Listă clienți. Caută și sortează după nume.
         </p>
       </div>
 
-      <AdminClientsClient clients={DUMMY_CLIENTS} />
+      <AdminClientsClient clients={clients} />
     </div>
   );
 }

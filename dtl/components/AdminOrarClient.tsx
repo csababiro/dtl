@@ -2,10 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Clock } from "lucide-react";
-import {
-  getWorkingHoursSchedule,
-  setWorkingHoursSchedule,
-} from "@/lib/working-hours";
+import { get, put } from "@/lib/api-client";
 import type { WorkingHoursSchedule, DaySchedule } from "@/lib/working-hours";
 import { t } from "@/lib/i18n";
 
@@ -32,19 +29,32 @@ function isClosed(d: DaySchedule): d is { closed: true } {
   return "closed" in d && d.closed === true;
 }
 
+const DEFAULT_DAY = { start: "08:00", end: "17:00" };
+const DEFAULT_SCHEDULE: WorkingHoursSchedule = {
+  days: [DEFAULT_DAY, DEFAULT_DAY, DEFAULT_DAY, DEFAULT_DAY, DEFAULT_DAY, DEFAULT_DAY],
+};
+
 export function AdminOrarClient() {
-  const [schedule, setSchedule] = useState<WorkingHoursSchedule>(() =>
-    getWorkingHoursSchedule()
-  );
+  const [schedule, setSchedule] = useState<WorkingHoursSchedule>(DEFAULT_SCHEDULE);
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
-    setSchedule(getWorkingHoursSchedule());
+    const load = async () => {
+      const result = await get<WorkingHoursSchedule>("/settings/working-hours");
+      if ("data" in result && result.data?.days?.length >= 6) {
+        setSchedule(result.data);
+      }
+    };
+    load();
   }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setWorkingHoursSchedule(schedule);
+    const result = await put<WorkingHoursSchedule, WorkingHoursSchedule>(
+      "/settings/working-hours",
+      schedule
+    );
+    if ("error" in result) return;
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   };

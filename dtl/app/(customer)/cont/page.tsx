@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import { getFeatureFlags, isAuthenticationEnabled } from "@/lib/feature-flags";
 import { t } from "@/lib/i18n";
 import { ContPageClient } from "@/components/ContPageClient";
@@ -21,5 +22,9 @@ export default async function ContPage() {
     );
   }
 
-  return <ContPageClient />;
+  return (
+    <Suspense fallback={<div className="max-w-4xl mx-auto px-4 py-8 animate-pulse text-slate-500">Se încarcă...</div>}>
+      <ContPageClient />
+    </Suspense>
+  );
 }

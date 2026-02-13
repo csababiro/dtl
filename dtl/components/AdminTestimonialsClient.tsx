@@ -2,12 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { MessageCircle, Star, Plus, Pencil, Trash2 } from "lucide-react";
-import {
-  getTestimonials,
-  addTestimonial,
-  updateTestimonial,
-  removeTestimonial,
-} from "@/lib/testimonials-store";
+import { get, post, patch, del } from "@/lib/api-client";
 import type { TestimonialItem } from "@/lib/dummy-testimonials";
 import { t } from "@/lib/i18n";
 
@@ -37,8 +32,13 @@ export function AdminTestimonialsClient() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState(emptyForm);
 
+  const loadItems = async () => {
+    const result = await get<{ items: TestimonialItem[] }>("/testimonials");
+    if ("data" in result) setItems(result.data.items);
+  };
+
   useEffect(() => {
-    setItems(getTestimonials());
+    loadItems();
   }, []);
 
   const openAdd = () => {
@@ -65,7 +65,7 @@ export function AdminTestimonialsClient() {
     setForm(emptyForm);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const author = form.author.trim();
     const text = form.text.trim();
@@ -73,30 +73,29 @@ export function AdminTestimonialsClient() {
     const rating = form.rating ? Number(form.rating) as number : undefined;
     const role = form.role.trim() || undefined;
     if (editingId) {
-      updateTestimonial(editingId, {
-        author,
-        role,
-        text,
-        rating: rating ?? undefined,
-        visible: form.visible,
-      });
+      const result = await patch<TestimonialItem, Partial<TestimonialItem>>(
+        `/testimonials/${editingId}`,
+        { author, role, text, rating: rating ?? undefined, visible: form.visible }
+      );
+      if ("error" in result) return;
     } else {
-      addTestimonial({
+      const result = await post<TestimonialItem, Partial<TestimonialItem>>("/testimonials", {
         author,
         role,
         text,
         rating: rating ?? undefined,
         visible: form.visible,
       });
+      if ("error" in result) return;
     }
-    setItems(getTestimonials());
+    await loadItems();
     closeForm();
   };
 
-  const handleDelete = (id: string) => {
-    if (typeof window === "undefined") return;
-    removeTestimonial(id);
-    setItems(getTestimonials());
+  const handleDelete = async (id: string) => {
+    const result = await del<unknown>(`/testimonials/${id}`);
+    if ("error" in result) return;
+    await loadItems();
     if (editingId === id) closeForm();
   };
 
@@ -104,7 +103,7 @@ export function AdminTestimonialsClient() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <p className="text-sm text-slate-500">
-          {items.length} testimoniale (salvate local, fără API).
+          {items.length} testimoniale.
         </p>
         <button
           type="button"

@@ -1,9 +1,10 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { getClientById } from "@/lib/dummy-clients";
-import { getAppointmentsByClientEmail } from "@/lib/appointments-store";
-import { getPlatiByClientId } from "@/lib/plati-store";
-import { getCarsByClientId } from "@/lib/client-cars-store";
+import { get } from "@/lib/api-client";
+import type { DummyClient } from "@/lib/dummy-clients";
+import type { DummyAppointment } from "@/lib/dummy-appointments";
+import type { ClientPlata } from "@/lib/dummy-plati";
+import type { ClientCar } from "@/lib/client-cars-store";
 import { AdminClientDetailClient } from "@/components/AdminClientDetailClient";
 import { ArrowLeft } from "lucide-react";
 
@@ -13,12 +14,23 @@ interface PageProps {
 
 export default async function AdminClientDetailPage({ params }: PageProps) {
   const { id } = await params;
-  const client = getClientById(id);
-  if (!client) notFound();
+  const clientResult = await get<DummyClient>(`/clients/${id}`);
+  if ("error" in clientResult) notFound();
+  const client = clientResult.data;
 
-  const appointments = getAppointmentsByClientEmail(client.email);
-  const plati = getPlatiByClientId(id);
-  const cars = getCarsByClientId(id);
+  const [platiResult, carsResult, appointmentsResult] = await Promise.all([
+    get<{ items: ClientPlata[] }>(`/clients/${id}/plati`),
+    get<{ items: ClientCar[] }>(`/clients/${id}/cars`),
+    get<{ items: DummyAppointment[] }>("/appointments"),
+  ]);
+
+  const plati = "data" in platiResult ? platiResult.data.items : [];
+  const cars = "data" in carsResult ? carsResult.data.items : [];
+  const allAppointments = "data" in appointmentsResult ? appointmentsResult.data.items : [];
+  const email = client.email.trim().toLowerCase();
+  const appointments = allAppointments.filter(
+    (a) => a.email.trim().toLowerCase() === email
+  );
 
   return (
     <div className="space-y-6">

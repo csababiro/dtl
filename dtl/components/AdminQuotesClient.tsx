@@ -101,7 +101,7 @@ export function AdminQuotesClient({ items, onMarkPrepared }: AdminQuotesClientPr
                 onClick={(e) => e.stopPropagation()}
               >
                 {(item.status ?? "pending") !== "prepared" && (
-                  <form action={onMarkPrepared} className="inline shrink-0" onClick={(e) => e.stopPropagation()}>
+                  <form action={(fd) => void onMarkPrepared(undefined, fd)} className="inline shrink-0" onClick={(e) => e.stopPropagation()}>
                     <input type="hidden" name="id" value={item.id} />
                     <MarkPreparedButton />
                   </form>
@@ -187,7 +187,7 @@ export function AdminQuotesClient({ items, onMarkPrepared }: AdminQuotesClientPr
                   <td className="px-4 py-2" onClick={(e) => e.stopPropagation()}>
                     <div className="flex gap-2 flex-nowrap items-center">
                       {(item.status ?? "pending") !== "prepared" && (
-                        <form action={onMarkPrepared} className="inline">
+                        <form action={(fd) => void onMarkPrepared(undefined, fd)} className="inline">
                           <input type="hidden" name="id" value={item.id} />
                           <MarkPreparedButton />
                         </form>

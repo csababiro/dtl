@@ -279,7 +279,7 @@ export function AdminAppointmentsClient({
                           : t("admin.pending")}
                       </span>
                       {appt.status === "În așteptare" && onApprove && (
-                        <form action={onApprove} className="ml-auto" onClick={(e) => e.stopPropagation()}>
+                        <form action={(fd) => void onApprove(undefined, fd)} className="ml-auto" onClick={(e) => e.stopPropagation()}>
                           <input type="hidden" name="id" value={appt.id} />
                           <ApproveButton />
                         </form>

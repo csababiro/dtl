@@ -128,7 +128,7 @@ export function AdminAppointmentDetailClient({
         </div>
 
         {onUpdateNotes ? (
-          <form action={onUpdateNotes as (formData: FormData) => Promise<void>} className="space-y-4 border-t border-slate-100 pt-6">
+          <form action={(fd) => void onUpdateNotes(fd)} className="space-y-4 border-t border-slate-100 pt-6">
             <input type="hidden" name="id" value={appointment.id} />
             <HiddenReturnToClient returnToClientId={returnToClientId} />
             <div>
@@ -185,7 +185,7 @@ export function AdminAppointmentDetailClient({
           <p className="text-sm font-bold text-slate-600 mb-3">
             Modifică data și ora
           </p>
-          <form action={onUpdateTime} className="flex flex-wrap items-end gap-4">
+          <form action={(fd) => void onUpdateTime(undefined, fd)} className="flex flex-wrap items-end gap-4">
             <input type="hidden" name="id" value={appointment.id} />
             <HiddenReturnToClient returnToClientId={returnToClientId} />
             <div className="flex items-center gap-2">
@@ -214,7 +214,7 @@ export function AdminAppointmentDetailClient({
 
         <div className="flex flex-wrap gap-3 border-t border-slate-100 pt-6">
           {appointment.status === "În așteptare" && (
-            <form action={onApprove}>
+            <form action={(fd) => void onApprove(undefined, fd)}>
               <input type="hidden" name="id" value={appointment.id} />
               <HiddenReturnToClient returnToClientId={returnToClientId} />
               <button
@@ -226,7 +226,7 @@ export function AdminAppointmentDetailClient({
             </form>
           )}
           <form
-            action={onDelete}
+            action={(fd) => void onDelete(undefined, fd)}
             onSubmit={(e) => {
               if (typeof window !== "undefined" && !window.confirm("Sigur ștergi această programare?")) {
                 e.preventDefault();

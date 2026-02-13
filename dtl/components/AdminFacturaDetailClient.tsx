@@ -43,7 +43,7 @@ export function AdminFacturaDetailClient({ plata, onUpdateNotes }: AdminFacturaD
           </div>
         </dl>
 
-        <form action={onUpdateNotes as (formData: FormData) => Promise<void>} className="border-t border-slate-100 pt-6">
+        <form action={(fd) => void onUpdateNotes(fd)} className="border-t border-slate-100 pt-6">
           <input type="hidden" name="id" value={plata.id} />
           <label className="block text-sm font-bold text-slate-500 uppercase tracking-wider mb-2">
             Notițe (client / admin)

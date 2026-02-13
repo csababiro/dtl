@@ -5,7 +5,8 @@ export type ApiError = {
   retriable?: boolean;
 };
 
-function getBaseUrl(): string {
+/** Base URL for API (e.g. same-origin /api or NEXT_PUBLIC_API_URL). Safe to use from server (RSC) or client. */
+export function getBaseUrl(): string {
   const url = process.env.NEXT_PUBLIC_API_URL;
   if (url != null && url !== "") return url.replace(/\/$/, "");
   // Same-origin fallback: use this app's /api (so form works without external backend)

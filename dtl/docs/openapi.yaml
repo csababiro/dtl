@@ -1,7 +1,11 @@
 openapi: 3.0.3
 info:
   title: DTL API
-  description: API for DTL service (quote requests, appointment requests, push, settings). See api.md for narrative documentation.
+  description: |
+    API for DTL service (quote requests, appointment requests, push, settings, admin CRUD).
+    See api.md for narrative documentation.
+    Admin and settings endpoints are implemented as Next.js API routes; they use in-memory or
+    localStorage-backed stores (no external DB yet).
   version: 1.0.0
 
 servers:
@@ -41,12 +45,345 @@ tags:
     description: Get and update working hours (orar).
   - name: Admin – Contact
     description: Get and update contact settings.
+  - name: Admin – Clients
+    description: List and get client details.
+  - name: Admin – Plăți
+    description: Invoices/payments per client.
+  - name: Admin – Client cars
+    description: Cars belonging to a client.
+  - name: Admin – Users
+    description: Admin users CRUD.
 
 paths:
+  /clients:
+    get:
+      tags: [Admin – Clients]
+      summary: List clients
+      description: Implemented via Next.js route; uses in-memory store.
+      operationId: getClients
+      responses:
+        "200":
+          description: List of clients
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Client"
+
+  /clients/{id}:
+    get:
+      tags: [Admin – Clients]
+      summary: Get client by id
+      operationId: getClientById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Client
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Client"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /clients/{id}/plati:
+    get:
+      tags: [Admin – Plăți]
+      summary: List plăți (invoices) for a client
+      operationId: getClientPlati
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Client id
+      responses:
+        "200":
+          description: List of plăți
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/ClientPlata"
+        "404":
+          description: Client not found
+
+  /plati/{id}:
+    get:
+      tags: [Admin – Plăți]
+      summary: Get plată by id
+      operationId: getPlataById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Plată
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClientPlata"
+        "404":
+          description: Not found
+    patch:
+      tags: [Admin – Plăți]
+      summary: Update plată (notes only)
+      operationId: updatePlata
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                notes:
+                  type: string
+      responses:
+        "200":
+          description: Updated plată
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClientPlata"
+        "404":
+          description: Not found
+
+  /clients/{id}/cars:
+    get:
+      tags: [Admin – Client cars]
+      summary: List cars for a client
+      operationId: getClientCars
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of cars
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/ClientCar"
+        "404":
+          description: Client not found
+    post:
+      tags: [Admin – Client cars]
+      summary: Add car for a client
+      operationId: addClientCar
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ClientCarCreate"
+      responses:
+        "201":
+          description: Created car
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClientCar"
+        "400":
+          description: Invalid body
+        "404":
+          description: Client not found
+
+  /clients/{id}/cars/{carId}:
+    patch:
+      tags: [Admin – Client cars]
+      summary: Update client car
+      operationId: updateClientCar
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: carId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ClientCarUpdate"
+      responses:
+        "200":
+          description: Updated car
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClientCar"
+        "404":
+          description: Not found
+    delete:
+      tags: [Admin – Client cars]
+      summary: Delete client car
+      operationId: deleteClientCar
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: carId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Deleted
+        "404":
+          description: Not found
+
+  /users:
+    get:
+      tags: [Admin – Users]
+      summary: List admin users
+      operationId: getUsers
+      responses:
+        "200":
+          description: List of users
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/User"
+    post:
+      tags: [Admin – Users]
+      summary: Create user
+      operationId: createUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserCreate"
+      responses:
+        "201":
+          description: Created user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "400":
+          description: Invalid body
+
+  /users/{id}:
+    get:
+      tags: [Admin – Users]
+      summary: Get user by id
+      operationId: getUserById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: User
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "404":
+          description: Not found
+    patch:
+      tags: [Admin – Users]
+      summary: Update user
+      operationId: updateUser
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserUpdate"
+      responses:
+        "200":
+          description: Updated user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "404":
+          description: Not found
+    delete:
+      tags: [Admin – Users]
+      summary: Delete user
+      operationId: deleteUser
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Deleted
+        "404":
+          description: Not found
+
   /quote-requests:
     get:
       tags: [Admin – Quote requests]
       summary: List quote requests
+      description: Implemented via Next.js route; uses in-memory store.
       operationId: getQuoteRequests
       responses:
         "200":
@@ -300,11 +637,12 @@ paths:
               schema:
                 $ref: "#/components/schemas/SlotsResponse"
 
-  # ---- Admin API (planned; all require admin auth) ----
+  # ---- Admin API (implemented via Next.js route; in-memory store) ----
   /appointments:
     get:
       tags: [Admin – Appointments]
       summary: List appointments
+      description: Implemented via Next.js route; uses in-memory store.
       operationId: adminGetAppointments
       responses:
         "200":
@@ -860,10 +1198,13 @@ components:
           enum: [Confirmat, "În așteptare"]
         descriere:
           type: string
+        clientNotes:
+          type: string
+          description: Client's or admin-editable notes (istoric).
 
     AppointmentUpdate:
       type: object
-      description: Partial update for appointment (status and/or date/time).
+      description: Partial update for appointment (status, date/time, descriere, clientNotes).
       properties:
         status:
           type: string
@@ -874,6 +1215,10 @@ components:
         ora:
           type: string
           description: HH:mm
+        descriere:
+          type: string
+        clientNotes:
+          type: string
 
     WorkingHoursSchedule:
       type: object
@@ -928,13 +1273,14 @@ components:
 
     GalleryItemCreate:
       type: object
-      description: Create gallery item (id and createdAt may be server-generated).
+      description: Create gallery item. imageUrl required (can be data URL from file upload); title/caption optional. id, order, createdAt server-generated.
       properties:
+        imageUrl:
+          type: string
+          description: Required; URL or data URL (e.g. from local file upload).
         title:
           type: string
         caption:
-          type: string
-        imageUrl:
           type: string
         order:
           type: integer
@@ -985,4 +1331,140 @@ components:
         rating:
           type: number
         visible:
+          type: boolean
+
+    Client:
+      type: object
+      description: Admin client (lib/dummy-clients.ts).
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        car:
+          type: string
+        programariCount:
+          type: integer
+        lastVisit:
+          type: string
+          format: date-time
+
+    ClientPlata:
+      type: object
+      description: Invoice/payment (lib/dummy-plati.ts).
+      properties:
+        id:
+          type: string
+        clientId:
+          type: string
+        nrFactura:
+          type: string
+        data:
+          type: string
+          description: YYYY-MM-DD
+        suma:
+          type: string
+        descriere:
+          type: string
+        notes:
+          type: string
+
+    ClientCar:
+      type: object
+      description: Client car (lib/client-cars-store.ts).
+      properties:
+        id:
+          type: string
+        clientId:
+          type: string
+        carMake:
+          type: string
+        carModel:
+          type: string
+        carYear:
+          type: string
+        chassis:
+          type: string
+
+    ClientCarCreate:
+      type: object
+      required: [carMake, carModel, carYear]
+      properties:
+        carMake:
+          type: string
+        carModel:
+          type: string
+        carYear:
+          type: string
+        chassis:
+          type: string
+
+    ClientCarUpdate:
+      type: object
+      description: Partial update for client car.
+      properties:
+        carMake:
+          type: string
+        carModel:
+          type: string
+        carYear:
+          type: string
+        chassis:
+          type: string
+
+    User:
+      type: object
+      description: Admin user (lib/users-store.ts, dummy-users.ts).
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        email:
+          type: string
+        role:
+          type: string
+          enum: [Super Admin, Admin, Staff]
+        active:
+          type: boolean
+        canManageUsers:
+          type: boolean
+        lastLogin:
+          type: string
+          format: date-time
+
+    UserCreate:
+      type: object
+      required: [name, email, role]
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        role:
+          type: string
+          enum: [Admin, Staff]
+        active:
+          type: boolean
+        canManageUsers:
+          type: boolean
+
+    UserUpdate:
+      type: object
+      description: Partial update for user.
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        role:
+          type: string
+          enum: [Admin, Staff]
+        active:
+          type: boolean
+        canManageUsers:
           type: boolean

@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { getAppointmentById } from "@/lib/appointments-store";
+import { get } from "@/lib/api-client";
+import type { DummyAppointment } from "@/lib/dummy-appointments";
 import { t } from "@/lib/i18n";
 import { AdminAppointmentDetailClient } from "@/components/AdminAppointmentDetailClient";
 import {
@@ -17,8 +18,9 @@ interface PageProps {
 
 export default async function AdminAppointmentDetailPage({ params }: PageProps) {
   const { id } = await params;
-  const appointment = getAppointmentById(id);
-  if (!appointment) notFound();
+  const result = await get<DummyAppointment>(`/appointments/${id}`);
+  if ("error" in result) notFound();
+  const appointment = result.data;
 
   return (
     <div className="space-y-6">

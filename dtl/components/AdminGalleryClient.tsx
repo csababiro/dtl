@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { Plus, Trash2, Upload } from "lucide-react";
-import { getGalleryItems, addGalleryItem, removeGalleryItem } from "@/lib/gallery-store";
+import { get, post, del } from "@/lib/api-client";
 import type { GalleryItem } from "@/lib/dummy-gallery";
 import { t } from "@/lib/i18n";
 
@@ -13,14 +13,19 @@ export function AdminGalleryClient() {
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const loadItems = async () => {
+    const result = await get<{ items: GalleryItem[] }>("/gallery");
+    if ("data" in result) setItems(result.data.items);
+  };
+
   useEffect(() => {
-    setItems(getGalleryItems());
+    loadItems();
   }, []);
 
-  const handleRemove = (id: string) => {
-    if (typeof window === "undefined") return;
-    removeGalleryItem(id);
-    setItems(getGalleryItems());
+  const handleRemove = async (id: string) => {
+    const result = await del<unknown>(`/gallery/${id}`);
+    if ("error" in result) return;
+    await loadItems();
   };
 
   const readFileAsDataUrl = (file: File): Promise<string> =>
@@ -41,11 +46,15 @@ export function AdminGalleryClient() {
     }
     try {
       const dataUrl = await readFileAsDataUrl(file);
-      addGalleryItem({
-        title: "",
+      const result = await post<GalleryItem, { imageUrl: string; title?: string }>("/gallery", {
         imageUrl: dataUrl,
+        title: "",
       });
-      setItems(getGalleryItems());
+      if ("error" in result) {
+        setAddError(result.error.message || "Eroare la adăugare.");
+        return;
+      }
+      await loadItems();
       setPendingFile(null);
       setShowAdd(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
@@ -58,7 +67,7 @@ export function AdminGalleryClient() {
     <div className="space-y-8">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <p className="text-sm text-slate-500">
-          {items.length} imagini (salvate local, fără API).
+          {items.length} imagini.
         </p>
         <button
           type="button"

@@ -4,8 +4,9 @@ This document is the source of truth for current and planned API behavior. It is
 
 ## Overview
 
-- **Current state:** Some routes live under the Next.js app at `/api` (quote-requests, appointment-requests, push). The client uses `lib/api-client.ts` to call either an external backend (`NEXT_PUBLIC_API_URL`) or the same-origin `/api`. Settings and feature flags are expected from the API; many other domains (appointments, working hours, gallery, testimonials, contact, create-account interest) are still store-only or localStorage/in-memory with no API yet.
+- **Current state:** All admin and settings endpoints are implemented as Next.js API routes under `/api`, backed by existing in-memory or localStorage stores (no external DB yet). The client uses `lib/api-client.ts` to call either an external backend (`NEXT_PUBLIC_API_URL`) or the same-origin `/api`. Implemented areas: quote-requests, appointment-requests, push, feature-flags, business settings, working hours, contact, clients, plăți, client cars, appointments, gallery, testimonials, users.
 - **Purpose:** Define existing contracts, data shapes, and planned behaviour (e.g. slot availability and the `showUnavailableSlots` feature flag) so APIs can be implemented consistently.
+- **Cont (customer):** Endpoints for "my appointments", "my plăți", "my cereri" are currently served via server actions (no REST yet). Optional future: `GET /cont/appointments`, `GET /cont/plati` with session auth.
 
 ## Base URL and client
 
@@ -83,29 +84,37 @@ Tokens are held in memory (`lib/push-tokens-store.ts`); no persistence.
 
 - **Create-account interest:** `lib/create-account-interest.ts`; localStorage; records offer/response for “create account” prompt. Future endpoints TBD.
 
-## Admin API (planned)
+## Admin API (implemented)
 
-The admin panel currently uses in-memory stores and localStorage. When a real backend is used, the following endpoints are needed so the admin UI can list, create, update, and delete data. All require admin authentication (to be defined; e.g. session cookie or Bearer token).
+The admin panel reads data via these API routes; mutations may use the same routes or server actions that call the same stores. All require admin authentication (session cookie; layout checks before rendering).
 
-| Area | Endpoints | Notes |
-|------|-----------|--------|
-| **Appointments** | GET `/appointments`, GET `/appointments/{id}`, PATCH `/appointments/{id}` (status and/or date/time), DELETE `/appointments/{id}` | Today: `lib/appointments-store.ts` (in-memory). |
-| **Quote requests** | GET `/quote-requests` (existing), PATCH `/quote-requests/{id}` (e.g. `status: "prepared"`) | Today: store + server action. |
-| **Gallery** | GET `/gallery`, POST `/gallery`, DELETE `/gallery/{id}` | Today: `lib/gallery-store.ts` (localStorage). |
-| **Testimonials** | GET `/testimonials`, POST `/testimonials`, PATCH `/testimonials/{id}`, DELETE `/testimonials/{id}` | Today: `lib/testimonials-store.ts` (localStorage). |
-| **Working hours (orar)** | GET `/settings/working-hours`, PUT `/settings/working-hours` | Today: `lib/working-hours.ts` (localStorage). Body: `WorkingHoursSchedule`. |
-| **Contact settings** | GET `/settings/contact`, PUT `/settings/contact` | Today: `lib/contact-settings.ts` (localStorage). Body: `ContactSettings`. |
-| **Feature flags** | GET `/settings/feature-flags` (existing), PUT `/settings/feature-flags` | Admin toggles; body: partial `FeatureFlags`. |
-| **Business settings** | GET `/settings/business` (existing), PUT `/settings/business` | Body: partial `BusinessSettings`. |
+| Area | Endpoints | Response / body |
+|------|-----------|-----------------|
+| **Clients** | GET `/clients`, GET `/clients/{id}` | `{ items: Client[] }`, `Client`. |
+| **Plăți** | GET `/clients/{id}/plati`, GET `/plati/{id}`, PATCH `/plati/{id}` (body: `notes`) | `{ items: ClientPlata[] }`, `ClientPlata`. |
+| **Client cars** | GET `/clients/{id}/cars`, POST `/clients/{id}/cars`, PATCH `/clients/{id}/cars/{carId}`, DELETE `/clients/{id}/cars/{carId}` | `{ items: ClientCar[] }`, `ClientCar`. Body: `ClientCarCreate` / `ClientCarUpdate`. |
+| **Users** | GET `/users`, POST `/users`, GET `/users/{id}`, PATCH `/users/{id}`, DELETE `/users/{id}` | `{ items: User[] }`, `User`. Body: `UserCreate` / `UserUpdate`. Invite/set-password remains server action. |
+| **Appointments** | GET `/appointments`, GET `/appointments/{id}`, PATCH `/appointments/{id}`, DELETE `/appointments/{id}` | `{ items: Appointment[] }`, `Appointment`. Body: `AppointmentUpdate`. |
+| **Quote requests** | GET `/quote-requests`, PATCH `/quote-requests/{id}` (body: `status`) | `{ items: QuoteRequest[] }`, `QuoteRequest`. |
+| **Gallery** | GET `/gallery`, POST `/gallery` (body: `imageUrl` required, `title`/`caption` optional), DELETE `/gallery/{id}` | `{ items: GalleryItem[] }`, `GalleryItem`. |
+| **Testimonials** | GET `/testimonials`, POST `/testimonials`, PATCH `/testimonials/{id}`, DELETE `/testimonials/{id}` | `{ items: TestimonialItem[] }`, `TestimonialItem`. |
+| **Working hours (orar)** | GET `/settings/working-hours`, PUT `/settings/working-hours` | `WorkingHoursSchedule`. |
+| **Contact settings** | GET `/settings/contact`, PUT `/settings/contact` | `ContactSettings`. |
+| **Feature flags** | GET `/settings/feature-flags`, PUT `/settings/feature-flags` | `FeatureFlags`. |
+| **Business settings** | GET `/settings/business`, PUT `/settings/business` | `BusinessSettings`. |
 
 Push: admin uses POST `/push/register` with `role: "admin"` (existing). No additional admin-only push endpoints required.
 
 ## Data shapes (reference)
 
-- **Appointment:** `DummyAppointment` in `lib/dummy-appointments.ts`: `id`, `nume`, `telefon`, `email`, `data`, `ora`, `marca`, `model`, `tip` (general | tyre | carWash), `status` (Confirmat | În așteptare), optional `descriere`. Date format e.g. "d MMM yyyy"; time "HH:mm".
+- **Client:** `DummyClient` in `lib/dummy-clients.ts`: `id`, `name`, `email`, `phone`, optional `car`, `programariCount`, optional `lastVisit`.
+- **ClientPlata:** `ClientPlata` in `lib/dummy-plati.ts`: `id`, `clientId`, `nrFactura`, `data`, `suma`, `descriere`, optional `notes`.
+- **ClientCar:** `ClientCar` in `lib/client-cars-store.ts`: `id`, `clientId`, `carMake`, `carModel`, `carYear`, optional `chassis`.
+- **User:** `DummyUser` in `lib/dummy-users.ts`: `id`, `name`, `email`, `role` (Super Admin | Admin | Staff), `active`, optional `canManageUsers`, optional `lastLogin`.
+- **Appointment:** `DummyAppointment` in `lib/dummy-appointments.ts`: `id`, `nume`, `telefon`, `email`, `data`, `ora`, `marca`, `model`, `tip` (general | tyre | carWash), `status` (Confirmat | În așteptare), optional `descriere`, optional `clientNotes`. Date format e.g. "d MMM yyyy"; time "HH:mm".
 - **QuoteRequest:** See `lib/quote-requests-store.ts` (listed under Quote requests above).
 - **Working hours:** `WorkingHoursSchedule` in `lib/working-hours.ts`: `days` array of 6 `DaySchedule` (Mon–Sat); each `DaySchedule` is `{ start, end }` or `{ closed: true }`.
 - **Business settings:** `BusinessSettings` in `lib/settings.ts`: `name`, `description`, `address`, `phone`, `email`, `whatsapp`, `logoUrl`, `hours` (record of day labels to display string).
 - **Contact settings:** `ContactSettings` in `lib/contact-settings.ts`: `companyName`, `phone`, `email`, `address`.
-- **Gallery item:** `GalleryItem` in `lib/dummy-gallery.ts`: `id`, `title`, optional `caption`, `imageUrl`, `order`, `createdAt`.
+- **Gallery item:** `GalleryItem` in `lib/dummy-gallery.ts`: `id`, `title`, optional `caption`, `imageUrl`, `order`, `createdAt`. Create: `imageUrl` required (data URL or URL), `title`/`caption` optional.
 - **Testimonial:** `TestimonialItem` in `lib/dummy-testimonials.ts`: `id`, `author`, optional `role`, `text`, optional `rating`, `createdAt`, `visible`.

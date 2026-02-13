@@ -1,11 +1,13 @@
 import { t } from "@/lib/i18n";
-import { getAppointments } from "@/lib/appointments-store";
+import { get } from "@/lib/api-client";
+import type { DummyAppointment } from "@/lib/dummy-appointments";
 import { AdminCalendarClient } from "@/components/AdminCalendarClient";
 import { Calendar as CalendarIcon } from "lucide-react";
 import Link from "next/link";
 
-export default function AdminCalendarPage() {
-  const appointments = getAppointments();
+export default async function AdminCalendarPage() {
+  const result = await get<{ items: DummyAppointment[] }>("/appointments");
+  const appointments = "data" in result ? result.data.items : [];
   return (
     <div className="space-y-8">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">

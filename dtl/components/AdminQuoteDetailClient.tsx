@@ -57,7 +57,7 @@ export function AdminQuoteDetailClient({ item, onMarkPrepared }: AdminQuoteDetai
             <span className="text-sm text-slate-500">{formatDate(item.createdAt)}</span>
           </div>
           {!isPrepared && (
-            <form action={onMarkPrepared} className="inline">
+            <form action={(fd) => void onMarkPrepared(undefined, fd)} className="inline">
               <input type="hidden" name="id" value={item.id} />
               <MarkPreparedButton />
             </form>

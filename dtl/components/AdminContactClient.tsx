@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Phone, Mail, MapPin, Building2 } from "lucide-react";
-import { getContactSettings, setContactSettings } from "@/lib/contact-settings";
+import { get, put } from "@/lib/api-client";
 import type { ContactSettings } from "@/lib/contact-settings";
 import { t } from "@/lib/i18n";
 
@@ -16,12 +16,19 @@ export function AdminContactClient() {
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
-    setForm(getContactSettings());
+    const load = async () => {
+      const result = await get<ContactSettings>("/settings/contact");
+      if ("data" in result && result.data) {
+        setForm((prev) => ({ ...prev, ...result.data }));
+      }
+    };
+    load();
   }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setContactSettings(form);
+    const result = await put<ContactSettings, ContactSettings>("/settings/contact", form);
+    if ("error" in result) return;
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   };
