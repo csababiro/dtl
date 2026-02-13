@@ -10,7 +10,9 @@ import {
   deleteAppointment as deleteAppointmentStore,
 } from "@/lib/appointments-store";
 
-export async function approveAppointment(_prev: unknown, formData: FormData) {
+export async function approveAppointment(prevOrFormData: unknown, formDataArg?: FormData) {
+  const formData = formDataArg ?? (prevOrFormData instanceof FormData ? prevOrFormData : null);
+  if (!formData) return { ok: false };
   const id = String(formData.get("id") ?? "").trim();
   if (!id) return { ok: false };
   const updated = updateAppointmentStatus(id, "Confirmat");
@@ -24,9 +26,11 @@ export async function approveAppointment(_prev: unknown, formData: FormData) {
 
 /** Update appointment date and time. formData: id, data (YYYY-MM-DD), ora (HH:mm). */
 export async function updateAppointmentTime(
-  _prev: unknown,
-  formData: FormData
+  prevOrFormData: unknown,
+  formDataArg?: FormData
 ) {
+  const formData = formDataArg ?? (prevOrFormData instanceof FormData ? prevOrFormData : null);
+  if (!formData) return { ok: false };
   const id = String(formData.get("id") ?? "").trim();
   const dataInput = String(formData.get("data") ?? "").trim();
   const ora = String(formData.get("ora") ?? "").trim();
@@ -42,7 +46,9 @@ export async function updateAppointmentTime(
   return { ok: !!updated };
 }
 
-export async function deleteAppointmentAction(_prev: unknown, formData: FormData) {
+export async function deleteAppointmentAction(prevOrFormData: unknown, formDataArg?: FormData) {
+  const formData = formDataArg ?? (prevOrFormData instanceof FormData ? prevOrFormData : null);
+  if (!formData) return { ok: false };
   const id = String(formData.get("id") ?? "").trim();
   if (!id) return { ok: false };
   const deleted = deleteAppointmentStore(id);
