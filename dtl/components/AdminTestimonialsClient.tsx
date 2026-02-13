@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { MessageCircle, Star, Plus, Pencil, Trash2 } from "lucide-react";
-import { get, post, patch, del } from "@/lib/api-client";
+import { useTestimonials } from "@/lib/hooks/useTestimonials";
 import type { TestimonialItem } from "@/lib/dummy-testimonials";
 import { t } from "@/lib/i18n";
 
@@ -27,19 +27,10 @@ const emptyForm = {
 };
 
 export function AdminTestimonialsClient() {
-  const [items, setItems] = useState<TestimonialItem[]>([]);
+  const { items, loading, error, add, update, remove } = useTestimonials();
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState(emptyForm);
-
-  const loadItems = async () => {
-    const result = await get<{ items: TestimonialItem[] }>("/testimonials");
-    if ("data" in result) setItems(result.data.items);
-  };
-
-  useEffect(() => {
-    loadItems();
-  }, []);
 
   const openAdd = () => {
     setEditingId(null);
@@ -72,38 +63,31 @@ export function AdminTestimonialsClient() {
     if (!author || !text) return;
     const rating = form.rating ? Number(form.rating) as number : undefined;
     const role = form.role.trim() || undefined;
+    const payload = { author, role, text, rating: rating ?? undefined, visible: form.visible };
     if (editingId) {
-      const result = await patch<TestimonialItem, Partial<TestimonialItem>>(
-        `/testimonials/${editingId}`,
-        { author, role, text, rating: rating ?? undefined, visible: form.visible }
-      );
+      const result = await update(editingId, payload);
       if ("error" in result) return;
     } else {
-      const result = await post<TestimonialItem, Partial<TestimonialItem>>("/testimonials", {
-        author,
-        role,
-        text,
-        rating: rating ?? undefined,
-        visible: form.visible,
-      });
+      const result = await add(payload);
       if ("error" in result) return;
     }
-    await loadItems();
     closeForm();
   };
 
   const handleDelete = async (id: string) => {
-    const result = await del<unknown>(`/testimonials/${id}`);
+    const result = await remove(id);
     if ("error" in result) return;
-    await loadItems();
     if (editingId === id) closeForm();
   };
 
   return (
     <div className="space-y-6">
+      {error && (
+        <p className="text-sm text-red-600">{error.message}</p>
+      )}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <p className="text-sm text-slate-500">
-          {items.length} testimoniale.
+          {loading ? "Se încarcă…" : `${items.length} testimoniale.`}
         </p>
         <button
           type="button"

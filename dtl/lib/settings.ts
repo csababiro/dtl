@@ -1,4 +1,4 @@
-import { get } from "./api-client";
+import { getBusinessSettings as getBusinessSettingsFromApi } from "./api/settings";
 import defaultSettings from "./default-business-settings.json";
 
 export interface BusinessSettings {
@@ -15,7 +15,7 @@ export interface BusinessSettings {
 const DEFAULT_SETTINGS: BusinessSettings = defaultSettings as BusinessSettings;
 
 export async function getBusinessSettings(): Promise<BusinessSettings> {
-  const result = await get<BusinessSettings>("/settings/business");
+  const result = await getBusinessSettingsFromApi();
   if ("error" in result) {
     return { ...DEFAULT_SETTINGS };
   }

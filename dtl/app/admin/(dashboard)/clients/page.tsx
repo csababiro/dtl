@@ -1,11 +1,10 @@
 import { t } from "@/lib/i18n";
-import { get } from "@/lib/api-client";
-import type { DummyClient } from "@/lib/dummy-clients";
+import { getClients } from "@/lib/api/clients";
 import { AdminClientsClient } from "@/components/AdminClientsClient";
 
 export default async function AdminClientsPage() {
-  const result = await get<{ items: DummyClient[] }>("/clients");
-  const clients = "data" in result ? result.data.items : [];
+  const result = await getClients();
+  const clients = "data" in result ? result.data : [];
 
   return (
     <div className="space-y-6">

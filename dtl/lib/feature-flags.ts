@@ -1,4 +1,4 @@
-import { get } from "./api-client";
+import { getFeatureFlags as getFeatureFlagsFromApi } from "./api/settings";
 
 export interface FeatureFlags {
   tyreService?: boolean;
@@ -74,7 +74,7 @@ const DEFAULT_FEATURE_FLAGS: FeatureFlags = {
 };
 
 export async function getFeatureFlags(): Promise<FeatureFlags> {
-  const result = await get<FeatureFlags>("/settings/feature-flags");
+  const result = await getFeatureFlagsFromApi();
   if ("error" in result) {
     return { ...DEFAULT_FEATURE_FLAGS };
   }

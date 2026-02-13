@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Clock } from "lucide-react";
-import { get, put } from "@/lib/api-client";
-import type { WorkingHoursSchedule, DaySchedule } from "@/lib/working-hours";
+import { useWorkingHours } from "@/lib/hooks/useWorkingHours";
+import type { DaySchedule } from "@/lib/working-hours";
 import { t } from "@/lib/i18n";
 
 const DAY_KEYS = [
@@ -29,31 +29,13 @@ function isClosed(d: DaySchedule): d is { closed: true } {
   return "closed" in d && d.closed === true;
 }
 
-const DEFAULT_DAY = { start: "08:00", end: "17:00" };
-const DEFAULT_SCHEDULE: WorkingHoursSchedule = {
-  days: [DEFAULT_DAY, DEFAULT_DAY, DEFAULT_DAY, DEFAULT_DAY, DEFAULT_DAY, DEFAULT_DAY],
-};
-
 export function AdminOrarClient() {
-  const [schedule, setSchedule] = useState<WorkingHoursSchedule>(DEFAULT_SCHEDULE);
+  const { schedule, setSchedule, loading, error, save } = useWorkingHours();
   const [saved, setSaved] = useState(false);
-
-  useEffect(() => {
-    const load = async () => {
-      const result = await get<WorkingHoursSchedule>("/settings/working-hours");
-      if ("data" in result && result.data?.days?.length >= 6) {
-        setSchedule(result.data);
-      }
-    };
-    load();
-  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const result = await put<WorkingHoursSchedule, WorkingHoursSchedule>(
-      "/settings/working-hours",
-      schedule
-    );
+    const result = await save(schedule);
     if ("error" in result) return;
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
@@ -62,7 +44,7 @@ export function AdminOrarClient() {
   const setDay = (index: number, daySchedule: DaySchedule) => {
     setSchedule((prev) => ({
       ...prev,
-      days: prev.days.map((d, i) => (i === index ? daySchedule : d)) as WorkingHoursSchedule["days"],
+      days: prev.days.map((d, i) => (i === index ? daySchedule : d)) as typeof prev.days,
     }));
   };
 
@@ -79,6 +61,9 @@ export function AdminOrarClient() {
           </p>
         </div>
       </div>
+      {error && (
+        <p className="px-4 md:px-6 pt-4 text-sm text-red-600">{error.message}</p>
+      )}
       <form onSubmit={handleSubmit} className="p-4 md:p-6 space-y-6">
         <div className="space-y-4">
           {DAY_KEYS.map((labelKey, index) => {
@@ -157,7 +142,8 @@ export function AdminOrarClient() {
         <div className="flex items-center gap-4">
           <button
             type="submit"
-            className="px-6 py-3 rounded-xl font-bold bg-blue-600 text-white hover:bg-blue-700 transition-colors min-h-[44px]"
+            disabled={loading}
+            className="px-6 py-3 rounded-xl font-bold bg-blue-600 text-white hover:bg-blue-700 transition-colors min-h-[44px] disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {t("common.save")}
           </button>

@@ -1,33 +1,17 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Phone, Mail, MapPin, Building2 } from "lucide-react";
-import { get, put } from "@/lib/api-client";
-import type { ContactSettings } from "@/lib/contact-settings";
+import { useContactSettings } from "@/lib/hooks/useContactSettings";
 import { t } from "@/lib/i18n";
 
 export function AdminContactClient() {
-  const [form, setForm] = useState<ContactSettings>({
-    companyName: "",
-    phone: "",
-    email: "",
-    address: "",
-  });
+  const { settings, setSettings, loading, error, save } = useContactSettings();
   const [saved, setSaved] = useState(false);
-
-  useEffect(() => {
-    const load = async () => {
-      const result = await get<ContactSettings>("/settings/contact");
-      if ("data" in result && result.data) {
-        setForm((prev) => ({ ...prev, ...result.data }));
-      }
-    };
-    load();
-  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const result = await put<ContactSettings, ContactSettings>("/settings/contact", form);
+    const result = await save(settings);
     if ("error" in result) return;
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
@@ -46,6 +30,9 @@ export function AdminContactClient() {
           <p className="text-sm text-slate-500">{t("admin.contactSectionDesc")}</p>
         </div>
       </div>
+      {error && (
+        <p className="px-6 pt-4 text-sm text-red-600">{error.message}</p>
+      )}
       <form onSubmit={handleSubmit} className="p-6 space-y-6">
         <div>
           <label className="block text-sm font-bold text-slate-700 mb-2">
@@ -53,9 +40,9 @@ export function AdminContactClient() {
           </label>
           <input
             type="text"
-            value={form.companyName}
+            value={settings.companyName}
             onChange={(e) =>
-              setForm((f) => ({ ...f, companyName: e.target.value }))
+              setSettings((f) => ({ ...f, companyName: e.target.value }))
             }
             className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
             placeholder="DTL Service"
@@ -73,9 +60,9 @@ export function AdminContactClient() {
               />
               <input
                 type="tel"
-                value={form.phone}
+                value={settings.phone}
                 onChange={(e) =>
-                  setForm((f) => ({ ...f, phone: e.target.value }))
+                  setSettings((f) => ({ ...f, phone: e.target.value }))
                 }
                 className="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
               />
@@ -92,9 +79,9 @@ export function AdminContactClient() {
               />
               <input
                 type="email"
-                value={form.email}
+                value={settings.email}
                 onChange={(e) =>
-                  setForm((f) => ({ ...f, email: e.target.value }))
+                  setSettings((f) => ({ ...f, email: e.target.value }))
                 }
                 className="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
               />
@@ -111,9 +98,9 @@ export function AdminContactClient() {
               className="absolute left-4 top-4 text-slate-400 shrink-0"
             />
             <textarea
-              value={form.address}
+              value={settings.address}
               onChange={(e) =>
-                setForm((f) => ({ ...f, address: e.target.value }))
+                setSettings((f) => ({ ...f, address: e.target.value }))
               }
               rows={2}
               className="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-none"
@@ -124,7 +111,8 @@ export function AdminContactClient() {
         <div className="flex items-center gap-4">
           <button
             type="submit"
-            className="px-6 py-3 rounded-xl font-bold bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+            disabled={loading}
+            className="px-6 py-3 rounded-xl font-bold bg-blue-600 text-white hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {t("common.save")}
           </button>

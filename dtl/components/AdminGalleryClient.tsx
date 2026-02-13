@@ -1,40 +1,30 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useRef } from "react";
 import { Plus, Trash2, Upload } from "lucide-react";
-import { get, post, del } from "@/lib/api-client";
-import type { GalleryItem } from "@/lib/dummy-gallery";
+import { useGallery } from "@/lib/hooks/useGallery";
 import { t } from "@/lib/i18n";
 
+function readFileAsDataUrl(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = () => reject(new Error("Eroare la citirea fișierului."));
+    reader.readAsDataURL(file);
+  });
+}
+
 export function AdminGalleryClient() {
-  const [items, setItems] = useState<GalleryItem[]>([]);
+  const { items, loading, error, refetch, addItem, removeItem } = useGallery();
   const [showAdd, setShowAdd] = useState(false);
   const [addError, setAddError] = useState<string | null>(null);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const loadItems = async () => {
-    const result = await get<{ items: GalleryItem[] }>("/gallery");
-    if ("data" in result) setItems(result.data.items);
-  };
-
-  useEffect(() => {
-    loadItems();
-  }, []);
-
   const handleRemove = async (id: string) => {
-    const result = await del<unknown>(`/gallery/${id}`);
+    const result = await removeItem(id);
     if ("error" in result) return;
-    await loadItems();
   };
-
-  const readFileAsDataUrl = (file: File): Promise<string> =>
-    new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = () => reject(new Error("Eroare la citirea fișierului."));
-      reader.readAsDataURL(file);
-    });
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,15 +36,11 @@ export function AdminGalleryClient() {
     }
     try {
       const dataUrl = await readFileAsDataUrl(file);
-      const result = await post<GalleryItem, { imageUrl: string; title?: string }>("/gallery", {
-        imageUrl: dataUrl,
-        title: "",
-      });
+      const result = await addItem({ imageUrl: dataUrl, title: "" });
       if ("error" in result) {
-        setAddError(result.error.message || "Eroare la adăugare.");
+        setAddError(result.error?.message ?? "Eroare la adăugare.");
         return;
       }
-      await loadItems();
       setPendingFile(null);
       setShowAdd(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
@@ -65,9 +51,12 @@ export function AdminGalleryClient() {
 
   return (
     <div className="space-y-8">
+      {error && (
+        <p className="text-sm text-red-600">{error.message}</p>
+      )}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <p className="text-sm text-slate-500">
-          {items.length} imagini.
+          {loading ? "Se încarcă…" : `${items.length} imagini.`}
         </p>
         <button
           type="button"
