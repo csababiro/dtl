@@ -1,19 +1,17 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Plus, Trash2 } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { Plus, Trash2, Upload } from "lucide-react";
 import { getGalleryItems, addGalleryItem, removeGalleryItem } from "@/lib/gallery-store";
 import type { GalleryItem } from "@/lib/dummy-gallery";
 import { t } from "@/lib/i18n";
 
-const DEFAULT_PLACEHOLDER = "https://placehold.co/800x500/e2e8f0/64748b?text=Imagine";
-
 export function AdminGalleryClient() {
   const [items, setItems] = useState<GalleryItem[]>([]);
   const [showAdd, setShowAdd] = useState(false);
-  const [newTitle, setNewTitle] = useState("");
-  const [newCaption, setNewCaption] = useState("");
-  const [newImageUrl, setNewImageUrl] = useState("");
+  const [addError, setAddError] = useState<string | null>(null);
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     setItems(getGalleryItems());
@@ -25,20 +23,35 @@ export function AdminGalleryClient() {
     setItems(getGalleryItems());
   };
 
-  const handleAdd = (e: React.FormEvent) => {
-    e.preventDefault();
-    const title = newTitle.trim() || "Imagine nouă";
-    const imageUrl = newImageUrl.trim() || DEFAULT_PLACEHOLDER.replace("text=Imagine", "text=" + encodeURIComponent(title));
-    addGalleryItem({
-      title,
-      caption: newCaption.trim() || undefined,
-      imageUrl,
+  const readFileAsDataUrl = (file: File): Promise<string> =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = () => reject(new Error("Eroare la citirea fișierului."));
+      reader.readAsDataURL(file);
     });
-    setItems(getGalleryItems());
-    setNewTitle("");
-    setNewCaption("");
-    setNewImageUrl("");
-    setShowAdd(false);
+
+  const handleAdd = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAddError(null);
+    const file = pendingFile;
+    if (!file || !file.type.startsWith("image/")) {
+      setAddError("Selectează o imagine (JPG, PNG, etc.).");
+      return;
+    }
+    try {
+      const dataUrl = await readFileAsDataUrl(file);
+      addGalleryItem({
+        title: "",
+        imageUrl: dataUrl,
+      });
+      setItems(getGalleryItems());
+      setPendingFile(null);
+      setShowAdd(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    } catch {
+      setAddError("Nu s-a putut încărca imaginea.");
+    }
   };
 
   return (
@@ -49,7 +62,7 @@ export function AdminGalleryClient() {
         </p>
         <button
           type="button"
-          onClick={() => setShowAdd((s) => !s)}
+          onClick={() => { setShowAdd((s) => !s); setAddError(null); setPendingFile(null); }}
           className="inline-flex items-center gap-2 px-5 py-3 rounded-xl font-bold bg-blue-600 text-white hover:bg-blue-700 transition-colors"
         >
           <Plus size={20} />
@@ -62,51 +75,39 @@ export function AdminGalleryClient() {
           <h3 className="font-bold text-slate-900 mb-4">{t("admin.addImage")}</h3>
           <form onSubmit={handleAdd} className="space-y-4 max-w-md">
             <div>
-              <label className="block text-sm font-bold text-slate-700 mb-1">
-                {t("admin.imageTitle")}
+              <label className="block text-sm font-bold text-slate-700 mb-2">
+                Imagine de pe calculator
               </label>
               <input
-                type="text"
-                value={newTitle}
-                onChange={(e) => setNewTitle(e.target.value)}
-                className="w-full px-4 py-2 rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                placeholder="ex. Service interior"
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  setPendingFile(f ?? null);
+                  setAddError(null);
+                }}
+                className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:font-bold file:bg-blue-100 file:text-blue-700 file:cursor-pointer hover:file:bg-blue-200"
               />
+              {pendingFile && (
+                <p className="text-sm text-slate-500 mt-1">
+                  <Upload size={14} className="inline mr-1" />
+                  {pendingFile.name}
+                </p>
+              )}
             </div>
-            <div>
-              <label className="block text-sm font-bold text-slate-700 mb-1">
-                {t("admin.imageCaption")}
-              </label>
-              <input
-                type="text"
-                value={newCaption}
-                onChange={(e) => setNewCaption(e.target.value)}
-                className="w-full px-4 py-2 rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                placeholder="Opțional"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-bold text-slate-700 mb-1">
-                {t("admin.imageUrl")}
-              </label>
-              <input
-                type="url"
-                value={newImageUrl}
-                onChange={(e) => setNewImageUrl(e.target.value)}
-                className="w-full px-4 py-2 rounded-xl border border-slate-200 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                placeholder="Lasă gol pentru placeholder"
-              />
-            </div>
+            {addError && <p className="text-sm text-red-600">{addError}</p>}
             <div className="flex gap-3">
               <button
                 type="submit"
-                className="px-5 py-2 rounded-xl font-bold bg-blue-600 text-white hover:bg-blue-700"
+                disabled={!pendingFile}
+                className="px-5 py-2 rounded-xl font-bold bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {t("admin.addImage")}
               </button>
               <button
                 type="button"
-                onClick={() => setShowAdd(false)}
+                onClick={() => { setShowAdd(false); setAddError(null); setPendingFile(null); }}
                 className="px-5 py-2 rounded-xl font-bold bg-slate-200 text-slate-700 hover:bg-slate-300"
               >
                 {t("common.cancel")}
@@ -126,7 +127,7 @@ export function AdminGalleryClient() {
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={item.imageUrl}
-                alt={item.title}
+                alt={item.title || "Imagine galerie"}
                 className="object-cover w-full h-full"
               />
               <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
