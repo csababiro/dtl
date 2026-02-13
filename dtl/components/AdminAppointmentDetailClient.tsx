@@ -54,6 +54,13 @@ interface AdminAppointmentDetailClientProps {
   onDelete: (prev: unknown, formData: FormData) => Promise<{ ok: boolean }>;
   onApprove: (prev: unknown, formData: FormData) => Promise<{ ok: boolean }>;
   onUpdateNotes?: (formData: FormData) => Promise<{ ok: boolean }>;
+  /** When set (e.g. from client detail page), forms include this so actions revalidate/redirect to client. */
+  returnToClientId?: string;
+}
+
+function HiddenReturnToClient({ returnToClientId }: { returnToClientId?: string }) {
+  if (!returnToClientId) return null;
+  return <input type="hidden" name="returnToClientId" value={returnToClientId} />;
 }
 
 export function AdminAppointmentDetailClient({
@@ -62,6 +69,7 @@ export function AdminAppointmentDetailClient({
   onDelete,
   onApprove,
   onUpdateNotes,
+  returnToClientId,
 }: AdminAppointmentDetailClientProps) {
   const typeColor = APPOINTMENT_TYPE_COLORS[appointment.tip] ?? "#64748b";
 
@@ -122,6 +130,7 @@ export function AdminAppointmentDetailClient({
         {onUpdateNotes ? (
           <form action={onUpdateNotes as (formData: FormData) => Promise<void>} className="space-y-4 border-t border-slate-100 pt-6">
             <input type="hidden" name="id" value={appointment.id} />
+            <HiddenReturnToClient returnToClientId={returnToClientId} />
             <div>
               <label className="block text-sm font-bold text-slate-500 uppercase tracking-wider mb-1">
                 Descriere (serviciu)
@@ -178,6 +187,7 @@ export function AdminAppointmentDetailClient({
           </p>
           <form action={onUpdateTime} className="flex flex-wrap items-end gap-4">
             <input type="hidden" name="id" value={appointment.id} />
+            <HiddenReturnToClient returnToClientId={returnToClientId} />
             <div className="flex items-center gap-2">
               <Calendar size={18} className="text-slate-400" />
               <input
@@ -206,6 +216,7 @@ export function AdminAppointmentDetailClient({
           {appointment.status === "În așteptare" && (
             <form action={onApprove}>
               <input type="hidden" name="id" value={appointment.id} />
+              <HiddenReturnToClient returnToClientId={returnToClientId} />
               <button
                 type="submit"
                 className="px-4 py-2 rounded-lg bg-green-600 text-white text-sm font-bold hover:bg-green-700"
@@ -223,6 +234,7 @@ export function AdminAppointmentDetailClient({
             }}
           >
             <input type="hidden" name="id" value={appointment.id} />
+            <HiddenReturnToClient returnToClientId={returnToClientId} />
             <DeleteButton />
           </form>
         </div>

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { getClientById } from "@/lib/dummy-clients";
 import { getAppointmentsByClientEmail } from "@/lib/appointments-store";
 import { getPlatiByClientId } from "@/lib/plati-store";
+import { getCarsByClientId } from "@/lib/client-cars-store";
 import { AdminClientDetailClient } from "@/components/AdminClientDetailClient";
 import { ArrowLeft } from "lucide-react";
 
@@ -17,6 +18,7 @@ export default async function AdminClientDetailPage({ params }: PageProps) {
 
   const appointments = getAppointmentsByClientEmail(client.email);
   const plati = getPlatiByClientId(id);
+  const cars = getCarsByClientId(id);
 
   return (
     <div className="space-y-6">
@@ -30,7 +32,7 @@ export default async function AdminClientDetailPage({ params }: PageProps) {
       <h1 className="text-3xl font-black text-slate-900">
         Client · {client.name}
       </h1>
-      <AdminClientDetailClient client={client} appointments={appointments} plati={plati} />
+      <AdminClientDetailClient client={client} appointments={appointments} plati={plati} cars={cars} />
     </div>
   );
 }

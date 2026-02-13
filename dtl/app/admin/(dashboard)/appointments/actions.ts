@@ -21,6 +21,8 @@ export async function approveAppointment(prevOrFormData: unknown, formDataArg?: 
     revalidatePath("/admin/appointments");
     revalidatePath("/admin/calendar");
     revalidatePath(`/admin/appointments/${id}`);
+    const returnToClientId = String(formData.get("returnToClientId") ?? "").trim();
+    if (returnToClientId) revalidatePath(`/admin/clients/${returnToClientId}`);
   }
   return { ok: !!updated };
 }
@@ -43,6 +45,8 @@ export async function updateAppointmentTime(
     revalidatePath("/admin/appointments");
     revalidatePath("/admin/calendar");
     revalidatePath(`/admin/appointments/${id}`);
+    const returnToClientId = String(formData.get("returnToClientId") ?? "").trim();
+    if (returnToClientId) revalidatePath(`/admin/clients/${returnToClientId}`);
   }
   return { ok: !!updated };
 }
@@ -56,6 +60,11 @@ export async function deleteAppointmentAction(prevOrFormData: unknown, formDataA
   if (deleted) {
     revalidatePath("/admin/appointments");
     revalidatePath("/admin/calendar");
+    const returnToClientId = String(formData.get("returnToClientId") ?? "").trim();
+    if (returnToClientId) {
+      revalidatePath(`/admin/clients/${returnToClientId}`);
+      redirect(`/admin/clients/${returnToClientId}`);
+    }
     redirect("/admin/appointments");
   }
   return { ok: false };
@@ -72,6 +81,8 @@ export async function updateAppointmentNotesAction(formData: FormData) {
     revalidatePath("/admin/appointments");
     revalidatePath("/admin/calendar");
     revalidatePath(`/admin/appointments/${id}`);
+    const returnToClientId = String(formData.get("returnToClientId") ?? "").trim();
+    if (returnToClientId) revalidatePath(`/admin/clients/${returnToClientId}`);
   }
   return { ok: !!updated };
 }
