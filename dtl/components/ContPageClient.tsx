@@ -560,7 +560,32 @@ export function ContPageClient() {
                     <h2 className="text-2xl font-black text-slate-900">
                       {t("cont.invoices")}
                     </h2>
-                    <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden overflow-x-auto">
+                    {/* Mobile: cards */}
+                    <div className="md:hidden space-y-3">
+                      {plati.length === 0 ? (
+                        <p className="py-8 text-slate-500 text-center">{t("cont.noInvoices")}</p>
+                      ) : (
+                        plati.map((f) => (
+                          <button
+                            key={f.id}
+                            type="button"
+                            onClick={() => setSelectedInvoiceId(f.id)}
+                            className="w-full text-left bg-white p-4 rounded-2xl border border-slate-100 shadow-sm hover:bg-slate-50/50 transition-colors"
+                          >
+                            <div className="flex items-center justify-between gap-3 mb-1">
+                              <span className="font-bold text-slate-900">Factura {f.nrFactura}</span>
+                              <span className="font-black text-blue-600">{f.suma}</span>
+                            </div>
+                            <p className="text-sm text-slate-500">{formatPlataDate(f.data)}</p>
+                            {f.descriere ? (
+                              <p className="text-sm text-slate-700 mt-1 line-clamp-2">{f.descriere}</p>
+                            ) : null}
+                          </button>
+                        ))
+                      )}
+                    </div>
+                    {/* Desktop: table (line representation) */}
+                    <div className="hidden md:block bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden overflow-x-auto">
                       <table className="w-full text-left min-w-[320px]">
                         <thead className="bg-slate-50 border-b border-slate-100">
                           <tr>
