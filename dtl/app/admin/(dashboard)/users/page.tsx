@@ -10,7 +10,7 @@ export default function AdminUsersPage() {
           {t("admin.users")}
         </h1>
         <p className="text-slate-500 mt-1">
-          Listă utilizatori (date dummy, fără API).
+          Listă utilizatori
         </p>
       </div>
 

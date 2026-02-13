@@ -77,3 +77,7 @@ export const DUMMY_CLIENTS: DummyClient[] = [
     lastVisit: "2025-02-15T08:00:00.000Z",
   },
 ];
+
+export function getClientById(id: string): DummyClient | null {
+  return DUMMY_CLIENTS.find((c) => c.id === id) ?? null;
+}

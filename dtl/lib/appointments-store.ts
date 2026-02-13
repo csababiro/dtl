@@ -27,6 +27,12 @@ export function getAppointmentById(id: string): DummyAppointment | null {
   return item ? { ...item } : null;
 }
 
+/** Appointments for a client, matched by email (normalized lowercase). */
+export function getAppointmentsByClientEmail(clientEmail: string): DummyAppointment[] {
+  const email = clientEmail.trim().toLowerCase();
+  return store.filter((a) => a.email.trim().toLowerCase() === email);
+}
+
 export function updateAppointmentStatus(
   id: string,
   status: DummyAppointmentStatus

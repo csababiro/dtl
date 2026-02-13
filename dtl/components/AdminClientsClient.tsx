@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Mail, User, Phone, Car, Calendar, Search } from "lucide-react";
 import type { DummyClient } from "@/lib/dummy-clients";
 
@@ -30,6 +31,7 @@ interface AdminClientsClientProps {
 }
 
 export function AdminClientsClient({ clients }: AdminClientsClientProps) {
+  const router = useRouter();
   const [search, setSearch] = useState("");
 
   const sortedFiltered = useMemo(() => {
@@ -88,7 +90,16 @@ export function AdminClientsClient({ clients }: AdminClientsClientProps) {
                   {list.map((client) => (
                     <div
                       key={client.id}
-                      className="rounded-xl border border-slate-200 bg-white shadow-sm p-4 space-y-3"
+                      role="button"
+                      tabIndex={0}
+                      onClick={() => router.push(`/admin/clients/${client.id}`)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          router.push(`/admin/clients/${client.id}`);
+                        }
+                      }}
+                      className="rounded-xl border border-slate-200 bg-white shadow-sm p-4 space-y-3 cursor-pointer hover:bg-slate-50/50 transition-colors"
                     >
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center shrink-0">
@@ -96,7 +107,7 @@ export function AdminClientsClient({ clients }: AdminClientsClientProps) {
                         </div>
                         <span className="font-bold text-slate-900">{client.name}</span>
                       </div>
-                      <div className="flex flex-col gap-1 text-sm">
+                      <div className="flex flex-col gap-1 text-sm" onClick={(e) => e.stopPropagation()}>
                         <a
                           href={`mailto:${client.email}`}
                           className="text-blue-600 hover:underline flex items-center gap-2"
@@ -180,7 +191,8 @@ export function AdminClientsClient({ clients }: AdminClientsClientProps) {
                     {list.map((client) => (
                       <tr
                         key={client.id}
-                        className="hover:bg-slate-50/50 transition-colors"
+                        className="hover:bg-slate-50/50 transition-colors cursor-pointer"
+                        onClick={() => router.push(`/admin/clients/${client.id}`)}
                       >
                         <td className="px-6 py-5">
                           <div className="flex items-center gap-3">
@@ -192,7 +204,7 @@ export function AdminClientsClient({ clients }: AdminClientsClientProps) {
                             </span>
                           </div>
                         </td>
-                        <td className="px-6 py-5">
+                        <td className="px-6 py-5" onClick={(e) => e.stopPropagation()}>
                           <div className="flex flex-col gap-1">
                             <a
                               href={`mailto:${client.email}`}
