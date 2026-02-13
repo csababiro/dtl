@@ -23,7 +23,7 @@ import {
   DESCRIPTION_MAX,
   CHASSIS_MAX,
 } from "@/lib/field-limits";
-import { CreateAccountPromptModal } from "@/components/CreateAccountPromptModal";
+import { CreateAccountPromptModal } from "./CreateAccountPromptModal";
 import { notifyOnQuoteSuccess } from "@/lib/push-notify";
 
 type CereOfertaFormValues = {

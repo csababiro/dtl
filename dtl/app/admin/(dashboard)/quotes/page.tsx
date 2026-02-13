@@ -1,6 +1,6 @@
 import { getQuoteRequests } from "@/lib/api/quote-requests";
 import { t } from "@/lib/i18n";
-import { AdminQuotesClient } from "@/components/AdminQuotesClient";
+import { AdminQuotesClient } from "@/components/admin/AdminQuotesClient";
 import { markQuotePrepared } from "./actions";
 import type { QuoteRequest } from "@/lib/quote-requests-store";
 

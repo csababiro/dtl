@@ -1,8 +1,8 @@
 import { getFeatureFlags } from "@/lib/feature-flags";
 import { getBusinessSettings } from "@/lib/settings";
-import { Header } from "@/components/Header";
-import { Footer } from "@/components/Footer";
-import { WhatsAppButton } from "@/components/WhatsAppButton";
+import { Header } from "@/components/customer/Header";
+import { Footer } from "@/components/customer/Footer";
+import { WhatsAppButton } from "@/components/customer/WhatsAppButton";
 
 export default async function CustomerLayout({
   children,

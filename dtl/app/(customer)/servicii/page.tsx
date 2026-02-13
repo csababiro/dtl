@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Wrench, Shield, Clock, ArrowRight, CheckCircle2 } from "lucide-react";
 import { getFeatureFlags } from "@/lib/feature-flags";
 import { t } from "@/lib/i18n";
-import { ImageWithFallback } from "@/components/ImageWithFallback";
+import { ImageWithFallback } from "@/components/shared/ImageWithFallback";
 import {
   isModuleEnabled,
   isAnyBookingEnabled,

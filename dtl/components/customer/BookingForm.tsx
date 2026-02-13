@@ -21,7 +21,7 @@ import {
   CAR_MAKE_MODEL_MAX,
   DESCRIPTION_MAX,
 } from "@/lib/field-limits";
-import { CreateAccountPromptModal } from "@/components/CreateAccountPromptModal";
+import { CreateAccountPromptModal } from "./CreateAccountPromptModal";
 import { notifyOnBookingSuccess } from "@/lib/push-notify";
 
 const TIME_SLOTS = [

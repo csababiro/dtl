@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getAppointmentById } from "@/lib/api/appointments";
 import { t } from "@/lib/i18n";
-import { AdminAppointmentDetailClient } from "@/components/AdminAppointmentDetailClient";
+import { AdminAppointmentDetailClient } from "@/components/admin/AdminAppointmentDetailClient";
 import {
   updateAppointmentTime,
   deleteAppointmentAction,

@@ -1,6 +1,6 @@
 import { t } from "@/lib/i18n";
 import { getAppointments } from "@/lib/api/appointments";
-import { AdminAppointmentsClient } from "@/components/AdminAppointmentsClient";
+import { AdminAppointmentsClient } from "@/components/admin/AdminAppointmentsClient";
 import Link from "next/link";
 import { approveAppointment } from "./actions";
 

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Wrench } from "lucide-react";
 import { t } from "@/lib/i18n";
-import { AdminLoginForm } from "@/components/AdminLoginForm";
+import { AdminLoginForm } from "@/components/admin/AdminLoginForm";
 
 export default function AdminLoginPage() {
   return (

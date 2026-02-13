@@ -2,7 +2,7 @@ import { getFeatureFlags } from "@/lib/feature-flags";
 import { t } from "@/lib/i18n";
 import Link from "next/link";
 import { isRequestQuoteEnabled } from "@/lib/feature-flags";
-import { CereOfertaForm } from "@/components/CereOfertaForm";
+import { CereOfertaForm } from "@/components/customer/CereOfertaForm";
 
 export default async function CereOfertaPage() {
   const flags = await getFeatureFlags();

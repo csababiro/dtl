@@ -1,4 +1,4 @@
-import { AdminFeatureFlagsClient } from "@/components/AdminFeatureFlagsClient";
+import { AdminFeatureFlagsClient } from "@/components/admin/AdminFeatureFlagsClient";
 
 export default function AdminFeatureFlagsPage() {
   return <AdminFeatureFlagsClient />;

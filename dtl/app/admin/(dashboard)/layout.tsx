@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
-import { AdminPushSetup } from "@/components/AdminPushSetup";
-import { AdminDashboardShell } from "@/components/AdminDashboardShell";
+import { AdminPushSetup } from "@/components/admin/AdminPushSetup";
+import { AdminDashboardShell } from "@/components/admin/AdminDashboardShell";
 
 const ADMIN_SESSION_COOKIE = "dtl_admin_session";
 

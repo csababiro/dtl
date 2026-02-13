@@ -1,6 +1,6 @@
 import { t } from "@/lib/i18n";
 import { getAppointments } from "@/lib/api/appointments";
-import { AdminCalendarClient } from "@/components/AdminCalendarClient";
+import { AdminCalendarClient } from "@/components/admin/AdminCalendarClient";
 import { Calendar as CalendarIcon } from "lucide-react";
 import Link from "next/link";
 

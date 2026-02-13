@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getQuoteRequestById } from "@/lib/quote-requests-store";
 import { t } from "@/lib/i18n";
-import { AdminQuoteDetailClient } from "@/components/AdminQuoteDetailClient";
+import { AdminQuoteDetailClient } from "@/components/admin/AdminQuoteDetailClient";
 import { markQuotePrepared } from "../actions";
 import { ArrowLeft } from "lucide-react";
 

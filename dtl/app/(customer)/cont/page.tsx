@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { getFeatureFlags, isAuthenticationEnabled } from "@/lib/feature-flags";
 import { t } from "@/lib/i18n";
-import { ContPageClient } from "@/components/ContPageClient";
+import { ContPageClient } from "@/components/customer/ContPageClient";
 
 export default async function ContPage() {
   const flags = await getFeatureFlags();

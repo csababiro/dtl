@@ -1,5 +1,5 @@
 import { t } from "@/lib/i18n";
-import { AdminGalleryClient } from "@/components/AdminGalleryClient";
+import { AdminGalleryClient } from "@/components/admin/AdminGalleryClient";
 
 export default function AdminGalleryPage() {
   return (

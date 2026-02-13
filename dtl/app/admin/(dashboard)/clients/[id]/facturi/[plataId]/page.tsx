@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getClientById } from "@/lib/dummy-clients";
 import { getPlataById } from "@/lib/plati-store";
-import { AdminFacturaDetailClient } from "@/components/AdminFacturaDetailClient";
+import { AdminFacturaDetailClient } from "@/components/admin/AdminFacturaDetailClient";
 import { updatePlataNotesAction } from "./actions";
 import { ArrowLeft } from "lucide-react";
 

@@ -1,7 +1,7 @@
 import { t } from "@/lib/i18n";
 import { getUsers } from "@/lib/api/users";
 import { getCurrentUserCanManageUsers } from "@/lib/users-store";
-import { AdminUsersClient } from "@/components/AdminUsersClient";
+import { AdminUsersClient } from "@/components/admin/AdminUsersClient";
 
 export default async function AdminUsersPage() {
   const result = await getUsers();

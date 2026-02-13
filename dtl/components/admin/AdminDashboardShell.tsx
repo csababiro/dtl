@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Menu } from "lucide-react";
-import { AdminSidebar } from "@/components/AdminSidebar";
+import { AdminSidebar } from "./AdminSidebar";
 
 export function AdminDashboardShell({
   children,

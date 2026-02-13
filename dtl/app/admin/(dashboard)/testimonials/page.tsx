@@ -1,5 +1,5 @@
 import { t } from "@/lib/i18n";
-import { AdminTestimonialsClient } from "@/components/AdminTestimonialsClient";
+import { AdminTestimonialsClient } from "@/components/admin/AdminTestimonialsClient";
 
 export default function AdminTestimonialsPage() {
   return (

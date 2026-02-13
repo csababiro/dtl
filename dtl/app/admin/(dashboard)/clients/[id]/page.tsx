@@ -6,7 +6,7 @@ import {
   getClientCars,
 } from "@/lib/api/clients";
 import { getAppointments } from "@/lib/api/appointments";
-import { AdminClientDetailClient } from "@/components/AdminClientDetailClient";
+import { AdminClientDetailClient } from "@/components/admin/AdminClientDetailClient";
 import { ArrowLeft } from "lucide-react";
 
 interface PageProps {

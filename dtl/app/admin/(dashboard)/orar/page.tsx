@@ -1,4 +1,4 @@
-import { AdminOrarClient } from "@/components/AdminOrarClient";
+import { AdminOrarClient } from "@/components/admin/AdminOrarClient";
 import { t } from "@/lib/i18n";
 
 export default function AdminOrarPage() {

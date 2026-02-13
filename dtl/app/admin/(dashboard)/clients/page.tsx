@@ -1,6 +1,6 @@
 import { t } from "@/lib/i18n";
 import { getClients } from "@/lib/api/clients";
-import { AdminClientsClient } from "@/components/AdminClientsClient";
+import { AdminClientsClient } from "@/components/admin/AdminClientsClient";
 
 export default async function AdminClientsPage() {
   const result = await getClients();

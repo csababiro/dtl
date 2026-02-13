@@ -12,8 +12,8 @@ import { getFeatureFlags } from "@/lib/feature-flags";
 import { getBusinessSettings } from "@/lib/settings";
 import { t } from "@/lib/i18n";
 import { getMapsUrl } from "@/lib/maps";
-import { InteractiveMap } from "@/components/InteractiveMap";
-import { ImageWithFallback } from "@/components/ImageWithFallback";
+import { InteractiveMap } from "@/components/customer/InteractiveMap";
+import { ImageWithFallback } from "@/components/shared/ImageWithFallback";
 import { isAnyBookingEnabled, isModuleEnabled } from "@/lib/feature-flags";
 
 const HERO_IMAGE =

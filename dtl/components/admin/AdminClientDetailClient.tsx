@@ -16,7 +16,7 @@ import {
   approveAppointment,
   updateAppointmentNotesAction,
 } from "@/app/admin/(dashboard)/appointments/actions";
-import { AdminAppointmentDetailClient } from "@/components/AdminAppointmentDetailClient";
+import { AdminAppointmentDetailClient } from "./AdminAppointmentDetailClient";
 import { X } from "lucide-react";
 
 function formatDate(iso: string | undefined): string {

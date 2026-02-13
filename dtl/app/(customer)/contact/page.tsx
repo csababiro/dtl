@@ -5,11 +5,11 @@ import {
   MessageCircle,
   Clock,
 } from "lucide-react";
-import { ContactForm } from "@/components/ContactForm";
+import { ContactForm } from "@/components/customer/ContactForm";
 import { getBusinessSettings } from "@/lib/settings";
 import { t } from "@/lib/i18n";
 import { getMapsUrl } from "@/lib/maps";
-import { InteractiveMap } from "@/components/InteractiveMap";
+import { InteractiveMap } from "@/components/customer/InteractiveMap";
 
 function formatHoursShort(hours: Record<string, string> | undefined): string {
   if (!hours) return "L-V: 08:00 - 18:00";

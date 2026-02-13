@@ -1,5 +1,5 @@
 import { t } from "@/lib/i18n";
-import { AdminContactClient } from "@/components/AdminContactClient";
+import { AdminContactClient } from "@/components/admin/AdminContactClient";
 
 export default function AdminSettingsPage() {
   return (

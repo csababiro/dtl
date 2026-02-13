@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { getFeatureFlags, isGalleryEnabled } from "@/lib/feature-flags";
 import { t } from "@/lib/i18n";
-import { GalleryWithLightbox } from "@/components/GalleryWithLightbox";
+import { GalleryWithLightbox } from "@/components/customer/GalleryWithLightbox";
 
 const GALLERY_IMAGES = [
   "https://images.unsplash.com/photo-1581092160562-40aa08e78837?q=80&w=600",
