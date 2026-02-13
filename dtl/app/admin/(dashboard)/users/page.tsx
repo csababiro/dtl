@@ -1,8 +1,10 @@
 import { t } from "@/lib/i18n";
-import { DUMMY_USERS } from "@/lib/dummy-users";
+import { getUsers, getCurrentUserCanManageUsers } from "@/lib/users-store";
 import { AdminUsersClient } from "@/components/AdminUsersClient";
 
 export default function AdminUsersPage() {
+  const users = getUsers();
+  const canManageUsers = getCurrentUserCanManageUsers();
   return (
     <div className="space-y-6">
       <div>
@@ -10,11 +12,11 @@ export default function AdminUsersPage() {
           {t("admin.users")}
         </h1>
         <p className="text-slate-500 mt-1">
-          Listă utilizatori
+          {t("admin.usersListDesc")}
         </p>
       </div>
 
-      <AdminUsersClient users={DUMMY_USERS} />
+      <AdminUsersClient users={users} canManageUsers={canManageUsers} />
     </div>
   );
 }

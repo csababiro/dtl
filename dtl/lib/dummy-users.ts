@@ -10,6 +10,8 @@ export interface DummyUser {
   email: string;
   role: DummyUserRole;
   active: boolean;
+  /** When true, this Admin can add/edit/delete other admins and staff. Only for role "Admin". */
+  canManageUsers?: boolean;
   lastLogin?: string;
 }
 
@@ -28,6 +30,7 @@ export const DUMMY_USERS: DummyUser[] = [
     email: "maria.ionescu@dtl.ro",
     role: "Admin",
     active: true,
+    canManageUsers: true,
     lastLogin: "2025-02-12T09:15:00.000Z",
   },
   {
@@ -36,6 +39,7 @@ export const DUMMY_USERS: DummyUser[] = [
     email: "ion.popescu@dtl.ro",
     role: "Admin",
     active: true,
+    canManageUsers: false,
     lastLogin: "2025-02-11T16:45:00.000Z",
   },
   {
