@@ -1,30 +1,18 @@
 import { NextResponse } from "next/server";
 import type { BusinessSettings } from "@/lib/settings";
-import defaultSettings from "@/lib/default-business-settings.json";
+import { getBusinessSettingsFromDb, putBusinessSettingsInDb } from "@/lib/db/business-settings";
 
-const DEFAULT: BusinessSettings = defaultSettings as BusinessSettings;
-
-declare global {
-  // eslint-disable-next-line no-var
-  var __businessSettings: BusinessSettings | undefined;
-}
-
-function getStored(): BusinessSettings {
-  if (typeof globalThis !== "undefined" && globalThis.__businessSettings) {
-    return { ...DEFAULT, ...globalThis.__businessSettings };
-  }
-  return { ...DEFAULT };
-}
+export const dynamic = "force-dynamic";
 
 export async function GET() {
-  return NextResponse.json(getStored());
+  const stored = await getBusinessSettingsFromDb();
+  return NextResponse.json(stored);
 }
 
 export async function PUT(request: Request) {
   try {
     const body = (await request.json()) as Partial<BusinessSettings>;
-    const stored = { ...getStored(), ...body };
-    if (typeof globalThis !== "undefined") globalThis.__businessSettings = stored;
+    const stored = await putBusinessSettingsInDb(body);
     return NextResponse.json(stored);
   } catch {
     return NextResponse.json({ error: "Invalid request body" }, { status: 400 });

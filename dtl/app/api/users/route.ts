@@ -1,9 +1,11 @@
 import { NextResponse } from "next/server";
-import { getUsers, addUser } from "@/lib/users-store";
+import { getUsersFromDb, addUserInDb } from "@/lib/db/users";
 import type { DummyUserRole } from "@/lib/dummy-users";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
-  const items = getUsers();
+  const items = await getUsersFromDb();
   return NextResponse.json({ items });
 }
 
@@ -18,11 +20,13 @@ export async function POST(request: Request) {
     };
     const name = String(body.name ?? "").trim();
     const email = String(body.email ?? "").trim().toLowerCase();
-    const role = (body.role === "Admin" || body.role === "Staff" ? body.role : "Staff") as DummyUserRole;
+    const role = (
+      body.role === "Admin" || body.role === "Staff" ? body.role : "Staff"
+    ) as DummyUserRole;
     if (!name || !email) {
       return NextResponse.json({ error: "name and email required" }, { status: 400 });
     }
-    const user = addUser({
+    const user = await addUserInDb({
       name,
       email,
       role,

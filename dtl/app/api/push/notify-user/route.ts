@@ -1,19 +1,26 @@
 import { NextResponse } from "next/server";
-import { getUserToken } from "@/lib/push-tokens-store";
+import { getUserTokenFromDb } from "@/lib/db/push-tokens";
 
 export async function POST(request: Request) {
   try {
-    const payload = await request.json() as { ref?: string; title?: string; body?: string };
+    const payload = (await request.json()) as {
+      ref?: string;
+      title?: string;
+      body?: string;
+    };
     const { ref, title, body: bodyText } = payload;
     if (!ref || typeof ref !== "string") {
       return NextResponse.json({ error: "ref required" }, { status: 400 });
     }
-    const token = getUserToken(ref);
+    const token = await getUserTokenFromDb(ref);
     if (!token) {
       return NextResponse.json({ ok: true, sent: 0 });
     }
     if (!process.env.FIREBASE_SERVICE_ACCOUNT_JSON) {
-      return NextResponse.json({ ok: false, error: "FCM not configured" }, { status: 503 });
+      return NextResponse.json(
+        { ok: false, error: "FCM not configured" },
+        { status: 503 }
+      );
     }
     const { getMessagingInstance } = await import("@/lib/firebase-admin");
     const messaging = getMessagingInstance();

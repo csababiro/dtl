@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { getClientById } from "@/lib/dummy-clients";
-import { getPlataById } from "@/lib/plati-store";
+import { getClientByIdFromDb } from "@/lib/db/clients";
+import { getPlataByIdFromDb } from "@/lib/db/plati";
 import { AdminFacturaDetailClient } from "@/components/admin/AdminFacturaDetailClient";
 import { updatePlataNotesAction } from "./actions";
 import { ArrowLeft } from "lucide-react";
@@ -25,9 +25,9 @@ function formatDateOnly(dateStr: string): string {
 
 export default async function AdminFacturaDetailPage({ params }: PageProps) {
   const { id: clientId, plataId } = await params;
-  const client = getClientById(clientId);
+  const client = await getClientByIdFromDb(clientId);
   if (!client) notFound();
-  const plata = getPlataById(plataId);
+  const plata = await getPlataByIdFromDb(plataId);
   if (!plata || plata.clientId !== client.id) notFound();
 
   return (

@@ -1,21 +1,19 @@
 import { NextResponse } from "next/server";
-import {
-  getQuoteRequests,
-  getQuoteRequestsStore,
-  nextQuoteRequestId,
-  type QuoteRequest,
-} from "@/lib/quote-requests-store";
+import { getQuoteRequestsFromDb, createQuoteRequestInDb } from "@/lib/db/quote-requests";
+import type { QuoteRequest } from "@/lib/quote-requests-store";
 
 export type { QuoteRequest };
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
-  const items = getQuoteRequests();
+  const items = await getQuoteRequestsFromDb();
   return NextResponse.json({ items });
 }
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
+    const body = (await request.json()) as Record<string, unknown>;
     const {
       name,
       phone,
@@ -26,11 +24,8 @@ export async function POST(request: Request) {
       chassis,
       description,
       photoUrl,
-    } = body as Record<string, unknown>;
-    const item: QuoteRequest = {
-      id: nextQuoteRequestId(),
-      createdAt: new Date().toISOString(),
-      status: "pending",
+    } = body;
+    const item = await createQuoteRequestInDb({
       name: String(name ?? "").trim(),
       phone: String(phone ?? "").trim(),
       email: String(email ?? "").trim(),
@@ -40,8 +35,8 @@ export async function POST(request: Request) {
       description: String(description ?? "").trim(),
       chassis: chassis != null ? String(chassis).trim() : undefined,
       photoUrl: photoUrl != null ? String(photoUrl) : undefined,
-    };
-    getQuoteRequestsStore().push(item);
+      status: "pending",
+    });
     return NextResponse.json(item, { status: 201 });
   } catch (e) {
     return NextResponse.json(

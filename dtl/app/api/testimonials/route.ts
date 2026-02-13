@@ -1,11 +1,13 @@
 import { NextResponse } from "next/server";
 import {
-  getTestimonialsServer,
-  addTestimonialServer,
-} from "@/lib/testimonials-server-store";
+  getTestimonialsFromDb,
+  addTestimonialInDb,
+} from "@/lib/db/testimonials";
+
+export const dynamic = "force-dynamic";
 
 export async function GET() {
-  const items = getTestimonialsServer();
+  const items = await getTestimonialsFromDb();
   return NextResponse.json({ items });
 }
 
@@ -21,9 +23,12 @@ export async function POST(request: Request) {
     const author = String(body.author ?? "").trim();
     const text = String(body.text ?? "").trim();
     if (!author || !text) {
-      return NextResponse.json({ error: "author and text required" }, { status: 400 });
+      return NextResponse.json(
+        { error: "author and text required" },
+        { status: 400 }
+      );
     }
-    const item = addTestimonialServer({
+    const item = await addTestimonialInDb({
       author,
       role: body.role != null ? String(body.role).trim() : undefined,
       text,

@@ -1,11 +1,11 @@
 "use server";
 
 import {
-  addClientCar,
-  updateClientCar,
-  deleteClientCar,
-  getCarById,
-} from "@/lib/client-cars-store";
+  addClientCarInDb,
+  deleteClientCarFromDb,
+  getCarByIdFromDb,
+  updateClientCarInDb,
+} from "@/lib/db/client-cars";
 
 export async function addCarAction(
   clientId: string,
@@ -18,7 +18,7 @@ export async function addCarAction(
   if (!carMake || !carModel || !carYear) {
     return { ok: false, error: "Marca, modelul și anul sunt obligatorii." };
   }
-  addClientCar({ clientId, carMake, carModel, carYear, chassis: chassis || undefined });
+  await addClientCarInDb({ clientId, carMake, carModel, carYear, chassis: chassis || undefined });
   return { ok: true };
 }
 
@@ -26,7 +26,7 @@ export async function updateCarAction(
   carId: string,
   formData: FormData
 ): Promise<{ ok: boolean; error?: string }> {
-  const existing = getCarById(carId);
+  const existing = await getCarByIdFromDb(carId);
   if (!existing) return { ok: false, error: "Mașina nu a fost găsită." };
   const carMake = (formData.get("carMake") as string)?.trim() ?? "";
   const carModel = (formData.get("carModel") as string)?.trim() ?? "";
@@ -35,11 +35,11 @@ export async function updateCarAction(
   if (!carMake || !carModel || !carYear) {
     return { ok: false, error: "Marca, modelul și anul sunt obligatorii." };
   }
-  updateClientCar(carId, { carMake, carModel, carYear, chassis });
+  await updateClientCarInDb(carId, { carMake, carModel, carYear, chassis: chassis || undefined });
   return { ok: true };
 }
 
 export async function deleteCarAction(carId: string): Promise<{ ok: boolean; error?: string }> {
-  const ok = deleteClientCar(carId);
+  const ok = await deleteClientCarFromDb(carId);
   return ok ? { ok: true } : { ok: false, error: "Mașina nu a fost găsită." };
 }

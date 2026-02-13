@@ -1,18 +1,18 @@
 import { NextResponse } from "next/server";
-import { getClientById } from "@/lib/dummy-clients";
+import { getClientByIdFromDb } from "@/lib/db/clients";
 import {
-  getCarsByClientId,
-  addClientCar,
-} from "@/lib/client-cars-store";
+  getCarsByClientIdFromDb,
+  addClientCarInDb,
+} from "@/lib/db/client-cars";
 
 export async function GET(
   _request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  const client = getClientById(id);
+  const client = await getClientByIdFromDb(id);
   if (!client) return NextResponse.json({ error: "Client not found" }, { status: 404 });
-  const items = getCarsByClientId(id);
+  const items = await getCarsByClientIdFromDb(id);
   return NextResponse.json({ items });
 }
 
@@ -21,7 +21,7 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  const client = getClientById(id);
+  const client = await getClientByIdFromDb(id);
   if (!client) return NextResponse.json({ error: "Client not found" }, { status: 404 });
   try {
     const body = (await request.json()) as {
@@ -40,7 +40,13 @@ export async function POST(
         { status: 400 }
       );
     }
-    const car = addClientCar({ clientId: id, carMake, carModel, carYear, chassis });
+    const car = await addClientCarInDb({
+      clientId: id,
+      carMake,
+      carModel,
+      carYear,
+      chassis,
+    });
     return NextResponse.json(car, { status: 201 });
   } catch {
     return NextResponse.json({ error: "Invalid request body" }, { status: 400 });

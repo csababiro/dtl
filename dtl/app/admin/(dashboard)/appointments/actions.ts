@@ -5,18 +5,18 @@ import { redirect } from "next/navigation";
 import { format, parse } from "date-fns";
 import { enUS } from "date-fns/locale";
 import {
-  updateAppointmentStatus,
-  updateAppointmentDateTime,
-  deleteAppointment as deleteAppointmentStore,
-  updateAppointmentNotes as updateAppointmentNotesStore,
-} from "@/lib/appointments-store";
+  updateAppointmentStatusInDb,
+  updateAppointmentDateTimeInDb,
+  deleteAppointmentFromDb,
+  updateAppointmentNotesInDb,
+} from "@/lib/db/appointments";
 
 export async function approveAppointment(prevOrFormData: unknown, formDataArg?: FormData) {
   const formData = formDataArg ?? (prevOrFormData instanceof FormData ? prevOrFormData : null);
   if (!formData) return { ok: false };
   const id = String(formData.get("id") ?? "").trim();
   if (!id) return { ok: false };
-  const updated = updateAppointmentStatus(id, "Confirmat");
+  const updated = await updateAppointmentStatusInDb(id, "Confirmat");
   if (updated) {
     revalidatePath("/admin/appointments");
     revalidatePath("/admin/calendar");
@@ -40,7 +40,7 @@ export async function updateAppointmentTime(
   if (!id || !dataInput || !ora) return { ok: false };
   const parsed = parse(dataInput, "yyyy-MM-dd", new Date());
   const data = format(parsed, "d MMM yyyy", { locale: enUS });
-  const updated = updateAppointmentDateTime(id, data, ora);
+  const updated = await updateAppointmentDateTimeInDb(id, data, ora);
   if (updated) {
     revalidatePath("/admin/appointments");
     revalidatePath("/admin/calendar");
@@ -56,7 +56,7 @@ export async function deleteAppointmentAction(prevOrFormData: unknown, formDataA
   if (!formData) return { ok: false };
   const id = String(formData.get("id") ?? "").trim();
   if (!id) return { ok: false };
-  const deleted = deleteAppointmentStore(id);
+  const deleted = await deleteAppointmentFromDb(id);
   if (deleted) {
     revalidatePath("/admin/appointments");
     revalidatePath("/admin/calendar");
@@ -76,7 +76,7 @@ export async function updateAppointmentNotesAction(formData: FormData) {
   if (!id) return { ok: false };
   const descriere = formData.get("descriere") != null ? String(formData.get("descriere")).trim() : undefined;
   const clientNotes = formData.get("clientNotes") != null ? String(formData.get("clientNotes")).trim() : undefined;
-  const updated = updateAppointmentNotesStore(id, { descriere, clientNotes });
+  const updated = await updateAppointmentNotesInDb(id, { descriere, clientNotes });
   if (updated) {
     revalidatePath("/admin/appointments");
     revalidatePath("/admin/calendar");

@@ -1,35 +1,34 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { getAppointmentsByClientEmail } from "@/lib/appointments-store";
-import { getPlatiByClientEmail, getPlataById, updatePlataNotes as updatePlataNotesStore } from "@/lib/plati-store";
-import { getQuoteRequestsByEmail } from "@/lib/quote-requests-store";
-import { updateAppointmentNotes } from "@/lib/appointments-store";
-import { getClientByEmail } from "@/lib/dummy-clients";
+import { getAppointmentsByClientEmailFromDb, updateAppointmentNotesInDb } from "@/lib/db/appointments";
+import { getPlatiByClientEmailFromDb, getPlataByIdFromDb, updatePlataNotesInDb } from "@/lib/db/plati";
+import { getQuoteRequestsByEmailFromDb } from "@/lib/db/quote-requests";
+import { getClientByEmailFromDb } from "@/lib/db/clients";
 
 /** Get appointments for the logged-in client (by email). */
 export async function getAppointmentsForClient(email: string) {
   if (!email?.trim()) return [];
-  return getAppointmentsByClientEmail(email.trim());
+  return getAppointmentsByClientEmailFromDb(email.trim());
 }
 
 /** Get plăți (facturi) for the logged-in client (by email). */
 export async function getPlatiForClient(email: string) {
   if (!email?.trim()) return [];
-  return getPlatiByClientEmail(email.trim());
+  return getPlatiByClientEmailFromDb(email.trim());
 }
 
 /** Get cereri ofertă for the logged-in client (by email). */
 export async function getCereriForClient(email: string) {
   if (!email?.trim()) return [];
-  return getQuoteRequestsByEmail(email.trim());
+  return getQuoteRequestsByEmailFromDb(email.trim());
 }
 
 /** Get a single plata by id; returns null if not found or not owned by client (by email). */
 export async function getPlataForClient(plataId: string, clientEmail: string) {
-  const client = getClientByEmail(clientEmail?.trim() ?? "");
+  const client = await getClientByEmailFromDb(clientEmail?.trim() ?? "");
   if (!client) return null;
-  const plata = getPlataById(plataId);
+  const plata = await getPlataByIdFromDb(plataId);
   if (!plata || plata.clientId !== client.id) return null;
   return plata;
 }
@@ -40,10 +39,10 @@ export async function updateAppointmentNotesForClient(
   clientNotes: string,
   clientEmail: string
 ) {
-  const appointments = getAppointmentsByClientEmail(clientEmail?.trim() ?? "");
+  const appointments = await getAppointmentsByClientEmailFromDb(clientEmail?.trim() ?? "");
   const owns = appointments.some((a) => a.id === appointmentId);
   if (!owns) return { ok: false };
-  const updated = updateAppointmentNotes(appointmentId, { clientNotes });
+  const updated = await updateAppointmentNotesInDb(appointmentId, { clientNotes });
   if (updated) revalidatePath("/cont");
   return { ok: !!updated };
 }
@@ -54,11 +53,11 @@ export async function updatePlataNotesForClient(
   notes: string,
   clientEmail: string
 ) {
-  const client = getClientByEmail(clientEmail?.trim() ?? "");
+  const client = await getClientByEmailFromDb(clientEmail?.trim() ?? "");
   if (!client) return { ok: false };
-  const plata = getPlataById(plataId);
+  const plata = await getPlataByIdFromDb(plataId);
   if (!plata || plata.clientId !== client.id) return { ok: false };
-  const updated = updatePlataNotesStore(plataId, notes);
+  const updated = await updatePlataNotesInDb(plataId, notes);
   if (updated) revalidatePath("/cont");
   return { ok: !!updated };
 }

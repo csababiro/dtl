@@ -1,12 +1,12 @@
 import { t } from "@/lib/i18n";
 import { getUsers } from "@/lib/api/users";
-import { getCurrentUserCanManageUsers } from "@/lib/users-store";
+import { getCurrentUserCanManageUsersFromDb } from "@/lib/db/users";
 import { AdminUsersClient } from "@/components/admin/AdminUsersClient";
 
 export default async function AdminUsersPage() {
   const result = await getUsers();
   const users = "data" in result ? result.data : [];
-  const canManageUsers = getCurrentUserCanManageUsers();
+  const canManageUsers = await getCurrentUserCanManageUsersFromDb();
   return (
     <div className="space-y-6">
       <div>
