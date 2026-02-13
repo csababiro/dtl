@@ -103,34 +103,40 @@ export function AdminOrarClient() {
                       <label className="text-sm text-slate-500 w-24 shrink-0">
                         {t("admin.workingHoursStart")}
                       </label>
-                      <select
-                        value={start}
-                        onChange={(e) =>
-                          setDay(index, { ...day, start: e.target.value, end })
-                        }
-                        className="px-3 py-2 rounded-lg border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none min-h-[44px]"
-                      >
-                        {TIME_OPTIONS_24H.map((opt) => (
-                          <option key={opt} value={opt}>{opt}</option>
-                        ))}
-                      </select>
+                      <div className="grid grid-cols-[auto_1rem] items-stretch">
+                        <select
+                          value={start}
+                          onChange={(e) =>
+                            setDay(index, { ...day, start: e.target.value, end })
+                          }
+                          className="min-w-0 px-3 py-2 pr-7 rounded-l-lg border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none min-h-[44px] border-r-0 rounded-r-none"
+                        >
+                          {TIME_OPTIONS_24H.map((opt) => (
+                            <option key={opt} value={opt}>{opt}</option>
+                          ))}
+                        </select>
+                        <span className="rounded-r-lg border border-slate-200 border-l-0 bg-slate-50" aria-hidden />
+                      </div>
                     </div>
                     <span className="text-slate-400 hidden sm:inline md:inline">–</span>
                     <div className="flex items-center gap-2">
                       <label className="text-sm text-slate-500 w-24 shrink-0">
                         {t("admin.workingHoursEnd")}
                       </label>
-                      <select
-                        value={end}
-                        onChange={(e) =>
-                          setDay(index, { ...day, start, end: e.target.value })
-                        }
-                        className="px-3 py-2 rounded-lg border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none min-h-[44px]"
-                      >
-                        {TIME_OPTIONS_24H.map((opt) => (
-                          <option key={opt} value={opt}>{opt}</option>
-                        ))}
-                      </select>
+                      <div className="grid grid-cols-[auto_1rem] items-stretch">
+                        <select
+                          value={end}
+                          onChange={(e) =>
+                            setDay(index, { ...day, start, end: e.target.value })
+                          }
+                          className="min-w-0 px-3 py-2 pr-7 rounded-l-lg border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none min-h-[44px] border-r-0 rounded-r-none"
+                        >
+                          {TIME_OPTIONS_24H.map((opt) => (
+                            <option key={opt} value={opt}>{opt}</option>
+                          ))}
+                        </select>
+                        <span className="rounded-r-lg border border-slate-200 border-l-0 bg-slate-50" aria-hidden />
+                      </div>
                     </div>
                   </div>
                 )}
