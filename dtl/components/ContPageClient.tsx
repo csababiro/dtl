@@ -17,6 +17,7 @@ import {
   CheckCircle,
   Eye,
   EyeOff,
+  FileText,
 } from "lucide-react";
 import { t } from "@/lib/i18n";
 import { phoneFilter, phoneRegisterOptions, withPhoneFilter, yearFilter, validateYearRange } from "@/lib/phone-validation";
@@ -28,6 +29,17 @@ import {
   CHASSIS_MAX,
   PASSWORD_MAX,
 } from "@/lib/field-limits";
+import {
+  getAppointmentsForClient,
+  getPlatiForClient,
+  getCereriForClient,
+  updateAppointmentNotesForClient,
+  updatePlataNotesForClient,
+} from "@/app/(customer)/cont/actions";
+import type { DummyAppointment } from "@/lib/dummy-appointments";
+import type { ClientPlata } from "@/lib/dummy-plati";
+import type { QuoteRequest } from "@/lib/quote-requests-store";
+import { APPOINTMENT_TYPE_LABELS } from "@/lib/appointment-constants";
 
 const STORAGE_KEY = "dtl_customer_session";
 const NAME_STORAGE_KEY = "dtl_customer_name";
@@ -37,7 +49,7 @@ const CARS_STORAGE_KEY = "dtl_customer_cars";
 const SIGNUP_PREFILL_KEY = "dtl_signup_prefill";
 
 type Tab = "signIn" | "signUp";
-type DashboardSection = "appointments" | "invoices" | "cars" | "settings";
+type DashboardSection = "appointments" | "invoices" | "cars" | "cereri" | "settings";
 
 type UserCar = { id: string; carMake: string; carModel: string; carYear: string; chassis?: string; photoFileName?: string };
 
@@ -48,6 +60,109 @@ const inputBase = "w-full p-4 bg-slate-50 rounded-xl outline-none focus:ring-2 f
 const inputBasePr = "w-full p-4 pr-12 bg-slate-50 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 transition-all border";
 const inputNormal = "border-slate-200";
 const inputError = "border-red-500";
+
+function ContAppointmentNotesForm({
+  appointmentId,
+  clientNotes,
+  clientEmail,
+  onSave,
+  pending,
+}: {
+  appointmentId: string;
+  clientNotes: string;
+  clientEmail: string;
+  onSave: () => void;
+  pending: boolean;
+}) {
+  const [value, setValue] = useState(clientNotes);
+  const [saving, setSaving] = useState(false);
+  useEffect(() => setValue(clientNotes), [clientNotes]);
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setSaving(true);
+    const res = await updateAppointmentNotesForClient(appointmentId, value, clientEmail);
+    setSaving(false);
+    if (res.ok) onSave();
+  }
+  return (
+    <form onSubmit={handleSubmit} className="space-y-2">
+      <textarea
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+        rows={3}
+        className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-700"
+        placeholder="Adaugă notițe despre această programare..."
+      />
+      <button
+        type="submit"
+        disabled={pending || saving}
+        className="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-bold hover:bg-blue-700 disabled:opacity-50"
+      >
+        {saving ? t("common.loading") : t("common.save")}
+      </button>
+    </form>
+  );
+}
+
+function ContFacturaNotesForm({
+  plataId,
+  notes,
+  clientEmail,
+  onSave,
+  pending,
+}: {
+  plataId: string;
+  notes: string;
+  clientEmail: string;
+  onSave: () => void;
+  pending: boolean;
+}) {
+  const [value, setValue] = useState(notes);
+  const [saving, setSaving] = useState(false);
+  useEffect(() => setValue(notes), [notes]);
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setSaving(true);
+    const res = await updatePlataNotesForClient(plataId, value, clientEmail);
+    setSaving(false);
+    if (res.ok) onSave();
+  }
+  return (
+    <form onSubmit={handleSubmit} className="space-y-2">
+      <textarea
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+        rows={3}
+        className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-700"
+        placeholder="Adaugă notițe despre această factură..."
+      />
+      <button
+        type="submit"
+        disabled={pending || saving}
+        className="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-bold hover:bg-blue-700 disabled:opacity-50"
+      >
+        {saving ? t("common.loading") : t("common.save")}
+      </button>
+    </form>
+  );
+}
+
+function formatPlataDate(dateStr: string): string {
+  try {
+    const d = new Date(dateStr + "T12:00:00");
+    return d.toLocaleDateString("ro-RO", { day: "2-digit", month: "2-digit", year: "numeric" });
+  } catch {
+    return dateStr;
+  }
+}
+
+function formatCerereDate(iso: string): string {
+  try {
+    return new Date(iso).toLocaleDateString("ro-RO", { day: "2-digit", month: "2-digit", year: "numeric" });
+  } catch {
+    return iso;
+  }
+}
 
 export function ContPageClient() {
   const searchParams = useSearchParams();
@@ -71,6 +186,12 @@ export function ContPageClient() {
   const [newCarPhoto, setNewCarPhoto] = useState<File | null>(null);
   const [newCarYearError, setNewCarYearError] = useState<string | null>(null);
   const [selectedAppointmentId, setSelectedAppointmentId] = useState<string | null>(null);
+  const [selectedInvoiceId, setSelectedInvoiceId] = useState<string | null>(null);
+  const [selectedCerereId, setSelectedCerereId] = useState<string | null>(null);
+  const [appointments, setAppointments] = useState<DummyAppointment[]>([]);
+  const [plati, setPlati] = useState<ClientPlata[]>([]);
+  const [cereri, setCereri] = useState<QuoteRequest[]>([]);
+  const [notesPending, setNotesPending] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   const loginForm = useForm<LoginFormValues>({ mode: "onChange" });
@@ -109,6 +230,13 @@ export function ContPageClient() {
       // ignore
     }
   }, []);
+
+  useEffect(() => {
+    if (!isLoggedIn || !email?.trim()) return;
+    getAppointmentsForClient(email).then(setAppointments);
+    getPlatiForClient(email).then(setPlati);
+    getCereriForClient(email).then(setCereri);
+  }, [isLoggedIn, email]);
 
   useEffect(() => {
     if (tab !== "signUp") return;
@@ -218,7 +346,7 @@ export function ContPageClient() {
                 <div className="w-20 h-20 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-3xl font-black mb-4">
                   IP
                 </div>
-                <h3 className="text-xl font-black text-slate-900">
+                <h3 className="text-xl font-bold text-slate-900">
                   {userName || email || "Ion Popescu"}
                 </h3>
                 <p className="text-sm text-slate-500">
@@ -230,6 +358,7 @@ export function ContPageClient() {
                   [
                     { id: "appointments" as const, name: t("cont.appointmentHistory"), icon: History },
                     { id: "invoices" as const, name: t("cont.invoices"), icon: CreditCard },
+                    { id: "cereri" as const, name: t("cont.cereri"), icon: FileText },
                     { id: "cars" as const, name: t("cont.myCars"), icon: Package },
                     { id: "settings" as const, name: t("cont.accountSettings"), icon: Settings },
                   ] as const
@@ -265,12 +394,10 @@ export function ContPageClient() {
               <section className="space-y-6">
                 {selectedAppointmentId ? (
                   (() => {
-                    const APPOINTMENTS = [
-                      { id: "P-8821", date: "15 Feb 2024", time: "10:00", type: "Service General", status: t("cont.requested") },
-                      { id: "P-7612", date: "22 Ian 2024", time: "14:30", type: "Anvelope", status: t("cont.completed") },
-                    ];
-                    const p = APPOINTMENTS.find((x) => x.id === selectedAppointmentId);
-                    if (!p) return null;
+                    const appt = appointments.find((x) => x.id === selectedAppointmentId);
+                    if (!appt) return null;
+                    const typeLabel = APPOINTMENT_TYPE_LABELS[appt.tip] ?? appt.tip;
+                    const statusLabel = appt.status === "Confirmat" ? t("cont.completed") : t("cont.requested");
                     return (
                       <>
                         <button
@@ -281,24 +408,44 @@ export function ContPageClient() {
                           <ChevronLeft size={20} />
                           {t("common.back")}
                         </button>
-                        <div className="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm">
-                          <h2 className="text-2xl font-black text-slate-900 mb-6">{p.type}</h2>
+                        <div className="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm space-y-6">
+                          <h2 className="text-2xl font-black text-slate-900">{typeLabel}</h2>
                           <dl className="grid gap-4 text-sm">
                             <div>
-                              <dt className="text-slate-500 font-medium mb-0.5">ID programare</dt>
-                              <dd className="text-slate-900 font-bold">{p.id}</dd>
-                            </div>
-                            <div>
                               <dt className="text-slate-500 font-medium mb-0.5">Data</dt>
-                              <dd className="text-slate-900">{p.date}</dd>
+                              <dd className="text-slate-900">{appt.data}</dd>
                             </div>
                             <div>
                               <dt className="text-slate-500 font-medium mb-0.5">Ora</dt>
-                              <dd className="text-slate-900">{p.time}</dd>
+                              <dd className="text-slate-900">{appt.ora}</dd>
                             </div>
                             <div>
                               <dt className="text-slate-500 font-medium mb-0.5">Status</dt>
-                              <dd className="text-slate-900">{p.status}</dd>
+                              <dd className="text-slate-900">{statusLabel}</dd>
+                            </div>
+                            {appt.descriere && (
+                              <div>
+                                <dt className="text-slate-500 font-medium mb-0.5">Descriere serviciu</dt>
+                                <dd className="text-slate-900">{appt.descriere}</dd>
+                              </div>
+                            )}
+                            <div>
+                              <dt className="text-slate-500 font-medium mb-0.5">Notițe</dt>
+                              <dd className="text-slate-900">
+                                <ContAppointmentNotesForm
+                                  appointmentId={appt.id}
+                                  clientNotes={appt.clientNotes ?? ""}
+                                  clientEmail={email}
+                                  onSave={() => {
+                                    setNotesPending(true);
+                                    getAppointmentsForClient(email).then((list) => {
+                                      setAppointments(list);
+                                      setNotesPending(false);
+                                    });
+                                  }}
+                                  pending={notesPending}
+                                />
+                              </dd>
                             </div>
                           </dl>
                         </div>
@@ -311,35 +458,41 @@ export function ContPageClient() {
                       {t("cont.appointmentHistory")}
                     </h2>
                     <div className="space-y-4">
-                      {[
-                        { id: "P-8821", date: "15 Feb 2024", time: "10:00", type: "Service General", status: t("cont.requested"), color: "bg-amber-100 text-amber-700" },
-                        { id: "P-7612", date: "22 Ian 2024", time: "14:30", type: "Anvelope", status: t("cont.completed"), color: "bg-green-100 text-green-700" },
-                      ].map((p) => (
-                        <button
-                          key={p.id}
-                          type="button"
-                          onClick={() => setSelectedAppointmentId(p.id)}
-                          className="w-full text-left bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-6 hover:border-blue-200 transition-colors"
-                        >
-                          <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-500">
-                              <Clock size={24} />
-                            </div>
-                            <div>
-                              <h4 className="font-bold text-slate-900">{p.type}</h4>
-                              <p className="text-sm text-slate-500">
-                                {p.date} • {p.time}
-                              </p>
-                            </div>
-                          </div>
-                          <div className="flex items-center justify-between sm:justify-end gap-6 w-full sm:w-auto">
-                            <span className={`px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-wider ${p.color}`}>
-                              {p.status}
-                            </span>
-                            <ChevronRight size={24} className="text-slate-400 shrink-0" />
-                          </div>
-                        </button>
-                      ))}
+                      {appointments.length === 0 ? (
+                        <p className="text-slate-500">{t("cont.noAppointments")}</p>
+                      ) : (
+                        appointments.map((appt) => {
+                          const typeLabel = APPOINTMENT_TYPE_LABELS[appt.tip] ?? appt.tip;
+                          const statusLabel = appt.status === "Confirmat" ? t("cont.completed") : t("cont.requested");
+                          const color = appt.status === "Confirmat" ? "bg-green-100 text-green-700" : "bg-amber-100 text-amber-700";
+                          return (
+                            <button
+                              key={appt.id}
+                              type="button"
+                              onClick={() => setSelectedAppointmentId(appt.id)}
+                              className="w-full text-left bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-6 hover:border-blue-200 transition-colors"
+                            >
+                              <div className="flex items-center gap-4">
+                                <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-500">
+                                  <Clock size={24} />
+                                </div>
+                                <div>
+                                  <h4 className="font-bold text-slate-900">{typeLabel}</h4>
+                                  <p className="text-sm text-slate-500">
+                                    {appt.data} • {appt.ora}
+                                  </p>
+                                </div>
+                              </div>
+                              <div className="flex items-center justify-between sm:justify-end gap-6 w-full sm:w-auto">
+                                <span className={`px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-wider ${color}`}>
+                                  {statusLabel}
+                                </span>
+                                <ChevronRight size={24} className="text-slate-400 shrink-0" />
+                              </div>
+                            </button>
+                          );
+                        })
+                      )}
                     </div>
                   </>
                 )}
@@ -348,63 +501,190 @@ export function ContPageClient() {
 
             {dashboardSection === "invoices" && (
               <section className="space-y-6">
-                <h2 className="text-2xl font-black text-slate-900">
-                  {t("cont.invoices")}
-                </h2>
-                <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden overflow-x-auto">
-                  <table className="w-full text-left min-w-[320px]">
-                    <thead className="bg-slate-50 border-b border-slate-100">
-                      <tr>
-                        <th className="px-4 sm:px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">
-                          Nr. Factură
-                        </th>
-                        <th className="px-4 sm:px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">
-                          Dată
-                        </th>
-                        <th className="px-4 sm:px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest text-right">
-                          Sumă
-                        </th>
-                        <th className="px-4 sm:px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">
-                          Status
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100">
-                      {[
-                        {
-                          nr: "FACT-2024-001",
-                          date: "22 Ian 2024",
-                          amount: "450 RON",
-                          status: "Plătit",
-                        },
-                        {
-                          nr: "FACT-2023-142",
-                          date: "15 Dec 2023",
-                          amount: "1.200 RON",
-                          status: "Plătit",
-                        },
-                      ].map((f, i) => (
-                        <tr
-                          key={i}
-                          className="hover:bg-slate-50/50 transition-colors cursor-pointer"
+                {selectedInvoiceId ? (
+                  (() => {
+                    const plata = plati.find((p) => p.id === selectedInvoiceId);
+                    if (!plata) return null;
+                    return (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => setSelectedInvoiceId(null)}
+                          className="flex items-center gap-2 text-slate-600 hover:text-slate-900 font-bold text-sm"
                         >
-                          <td className="px-4 sm:px-6 py-4 font-bold text-slate-900">
-                            {f.nr}
-                          </td>
-                          <td className="px-4 sm:px-6 py-4 text-slate-500">{f.date}</td>
-                          <td className="px-4 sm:px-6 py-4 text-right font-black text-blue-600">
-                            {f.amount}
-                          </td>
-                          <td className="px-4 sm:px-6 py-4">
-                            <span className="inline-flex items-center gap-1.5 text-green-600 font-bold text-sm">
-                              <CheckCircle size={14} /> {f.status}
-                            </span>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                          <ChevronLeft size={20} />
+                          {t("common.back")}
+                        </button>
+                        <div className="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm space-y-6">
+                          <h2 className="text-2xl font-black text-slate-900">
+                            Factura {plata.nrFactura} · {formatPlataDate(plata.data)}
+                          </h2>
+                          <dl className="grid gap-4 text-sm">
+                            <div>
+                              <dt className="text-slate-500 font-medium mb-0.5">Data</dt>
+                              <dd className="text-slate-900">{formatPlataDate(plata.data)}</dd>
+                            </div>
+                            <div>
+                              <dt className="text-slate-500 font-medium mb-0.5">Sumă</dt>
+                              <dd className="text-slate-900 font-bold">{plata.suma}</dd>
+                            </div>
+                            <div>
+                              <dt className="text-slate-500 font-medium mb-0.5">Descriere</dt>
+                              <dd className="text-slate-900">{plata.descriere}</dd>
+                            </div>
+                            <div>
+                              <dt className="text-slate-500 font-medium mb-0.5">Notițe</dt>
+                              <dd className="text-slate-900">
+                                <ContFacturaNotesForm
+                                  plataId={plata.id}
+                                  notes={plata.notes ?? ""}
+                                  clientEmail={email}
+                                  onSave={() => {
+                                    setNotesPending(true);
+                                    getPlatiForClient(email).then((list) => {
+                                      setPlati(list);
+                                      setNotesPending(false);
+                                    });
+                                  }}
+                                  pending={notesPending}
+                                />
+                              </dd>
+                            </div>
+                          </dl>
+                        </div>
+                      </>
+                    );
+                  })()
+                ) : (
+                  <>
+                    <h2 className="text-2xl font-black text-slate-900">
+                      {t("cont.invoices")}
+                    </h2>
+                    <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden overflow-x-auto">
+                      <table className="w-full text-left min-w-[320px]">
+                        <thead className="bg-slate-50 border-b border-slate-100">
+                          <tr>
+                            <th className="px-4 sm:px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">
+                              Nr. Factură
+                            </th>
+                            <th className="px-4 sm:px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">
+                              Dată
+                            </th>
+                            <th className="px-4 sm:px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest text-right">
+                              Sumă
+                            </th>
+                            <th className="px-4 sm:px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">
+                              Descriere
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100">
+                          {plati.length === 0 ? (
+                            <tr>
+                              <td colSpan={4} className="px-4 sm:px-6 py-8 text-slate-500 text-center">
+                                {t("cont.noInvoices")}
+                              </td>
+                            </tr>
+                          ) : (
+                            plati.map((f) => (
+                              <tr
+                                key={f.id}
+                                onClick={() => setSelectedInvoiceId(f.id)}
+                                className="hover:bg-slate-50/50 transition-colors cursor-pointer"
+                              >
+                                <td className="px-4 sm:px-6 py-4 font-semibold text-slate-700">{f.nrFactura}</td>
+                                <td className="px-4 sm:px-6 py-4 text-slate-500">{formatPlataDate(f.data)}</td>
+                                <td className="px-4 sm:px-6 py-4 text-right font-black text-blue-600">
+                                  {f.suma}
+                                </td>
+                                <td className="px-4 sm:px-6 py-4 text-slate-700">{f.descriere}</td>
+                              </tr>
+                            ))
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  </>
+                )}
+              </section>
+            )}
+
+            {dashboardSection === "cereri" && (
+              <section className="space-y-6">
+                {selectedCerereId ? (
+                  (() => {
+                    const cerere = cereri.find((c) => c.id === selectedCerereId);
+                    if (!cerere) return null;
+                    return (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => setSelectedCerereId(null)}
+                          className="flex items-center gap-2 text-slate-600 hover:text-slate-900 font-bold text-sm"
+                        >
+                          <ChevronLeft size={20} />
+                          {t("common.back")}
+                        </button>
+                        <div className="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm space-y-6">
+                          <h2 className="text-2xl font-black text-slate-900">
+                            {t("cont.cerereOferta")} · {formatCerereDate(cerere.createdAt)}
+                          </h2>
+                          <dl className="grid gap-4 text-sm">
+                            <div>
+                              <dt className="text-slate-500 font-medium mb-0.5">Data cerere</dt>
+                              <dd className="text-slate-900">{formatCerereDate(cerere.createdAt)}</dd>
+                            </div>
+                            <div>
+                              <dt className="text-slate-500 font-medium mb-0.5">Mașină</dt>
+                              <dd className="text-slate-900">{cerere.carMake} {cerere.carModel} ({cerere.carYear})</dd>
+                            </div>
+                            <div>
+                              <dt className="text-slate-500 font-medium mb-0.5">Status</dt>
+                              <dd className="text-slate-900">{(cerere.status ?? "pending") === "prepared" ? t("cont.cerereStatusPrepared") : t("cont.cerereStatusPending")}</dd>
+                            </div>
+                            <div className="sm:col-span-2">
+                              <dt className="text-slate-500 font-medium mb-0.5">Descriere</dt>
+                              <dd className="text-slate-900">{cerere.description}</dd>
+                            </div>
+                          </dl>
+                        </div>
+                      </>
+                    );
+                  })()
+                ) : (
+                  <>
+                    <h2 className="text-2xl font-black text-slate-900">
+                      {t("cont.cereri")}
+                    </h2>
+                    <div className="space-y-4">
+                      {cereri.length === 0 ? (
+                        <p className="text-slate-500">{t("cont.noCereri")}</p>
+                      ) : (
+                        cereri.map((c) => (
+                          <button
+                            key={c.id}
+                            type="button"
+                            onClick={() => setSelectedCerereId(c.id)}
+                            className="w-full text-left bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-6 hover:border-blue-200 transition-colors"
+                          >
+                            <div className="flex items-center gap-4">
+                              <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-500">
+                                <FileText size={24} />
+                              </div>
+                              <div>
+                                <h4 className="font-bold text-slate-900">{c.carMake} {c.carModel}</h4>
+                                <p className="text-sm text-slate-500">
+                                  {formatCerereDate(c.createdAt)} · {(c.status ?? "pending") === "prepared" ? t("cont.cerereStatusPrepared") : t("cont.cerereStatusPending")}
+                                </p>
+                              </div>
+                            </div>
+                            <ChevronRight size={24} className="text-slate-400 shrink-0" />
+                          </button>
+                        ))
+                      )}
+                    </div>
+                  </>
+                )}
               </section>
             )}
 

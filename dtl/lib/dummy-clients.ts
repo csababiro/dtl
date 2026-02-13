@@ -14,6 +14,15 @@ export interface DummyClient {
 
 export const DUMMY_CLIENTS: DummyClient[] = [
   {
+    id: "c0",
+    name: "Demo Utilizator",
+    email: "demo@dtl.ro",
+    phone: "0700 000 000",
+    car: "Demo Mașină",
+    programariCount: 4,
+    lastVisit: "2025-02-12T10:00:00.000Z",
+  },
+  {
     id: "c1",
     name: "Maria Popescu",
     email: "maria.popescu@email.ro",
@@ -80,4 +89,9 @@ export const DUMMY_CLIENTS: DummyClient[] = [
 
 export function getClientById(id: string): DummyClient | null {
   return DUMMY_CLIENTS.find((c) => c.id === id) ?? null;
+}
+
+export function getClientByEmail(email: string): DummyClient | null {
+  const normalized = email.trim().toLowerCase();
+  return DUMMY_CLIENTS.find((c) => c.email.trim().toLowerCase() === normalized) ?? null;
 }

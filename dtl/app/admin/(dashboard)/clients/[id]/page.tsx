@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getClientById } from "@/lib/dummy-clients";
 import { getAppointmentsByClientEmail } from "@/lib/appointments-store";
-import { getPlatiByClientId } from "@/lib/dummy-plati";
+import { getPlatiByClientId } from "@/lib/plati-store";
 import { AdminClientDetailClient } from "@/components/AdminClientDetailClient";
 import { ArrowLeft } from "lucide-react";
 

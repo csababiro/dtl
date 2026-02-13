@@ -53,6 +53,7 @@ interface AdminAppointmentDetailClientProps {
   onUpdateTime: (prev: unknown, formData: FormData) => Promise<{ ok: boolean }>;
   onDelete: (prev: unknown, formData: FormData) => Promise<{ ok: boolean }>;
   onApprove: (prev: unknown, formData: FormData) => Promise<{ ok: boolean }>;
+  onUpdateNotes?: (formData: FormData) => Promise<{ ok: boolean }>;
 }
 
 export function AdminAppointmentDetailClient({
@@ -60,6 +61,7 @@ export function AdminAppointmentDetailClient({
   onUpdateTime,
   onDelete,
   onApprove,
+  onUpdateNotes,
 }: AdminAppointmentDetailClientProps) {
   const typeColor = APPOINTMENT_TYPE_COLORS[appointment.tip] ?? "#64748b";
 
@@ -117,13 +119,57 @@ export function AdminAppointmentDetailClient({
           </div>
         </div>
 
-        {appointment.descriere && (
-          <div>
-            <p className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-1">
-              Descriere
-            </p>
-            <p className="text-slate-700">{appointment.descriere}</p>
-          </div>
+        {onUpdateNotes ? (
+          <form action={onUpdateNotes as (formData: FormData) => Promise<void>} className="space-y-4 border-t border-slate-100 pt-6">
+            <input type="hidden" name="id" value={appointment.id} />
+            <div>
+              <label className="block text-sm font-bold text-slate-500 uppercase tracking-wider mb-1">
+                Descriere (serviciu)
+              </label>
+              <textarea
+                name="descriere"
+                rows={2}
+                defaultValue={appointment.descriere ?? ""}
+                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700"
+                placeholder="Ex: Revizie, Schimb anvelope"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-bold text-slate-500 uppercase tracking-wider mb-1">
+                Notițe client / istoric
+              </label>
+              <textarea
+                name="clientNotes"
+                rows={3}
+                defaultValue={appointment.clientNotes ?? ""}
+                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700"
+                placeholder="Notițe editabile de client și admin"
+              />
+            </div>
+            <button
+              type="submit"
+              className="px-4 py-2 rounded-lg bg-slate-700 text-white text-sm font-bold hover:bg-slate-800"
+            >
+              Salvează descriere / notițe
+            </button>
+          </form>
+        ) : (
+          (appointment.descriere || appointment.clientNotes) && (
+            <div className="border-t border-slate-100 pt-6 space-y-2">
+              {appointment.descriere && (
+                <>
+                  <p className="text-sm font-bold text-slate-500 uppercase tracking-wider">Descriere</p>
+                  <p className="text-slate-700">{appointment.descriere}</p>
+                </>
+              )}
+              {appointment.clientNotes && (
+                <>
+                  <p className="text-sm font-bold text-slate-500 uppercase tracking-wider">Notițe</p>
+                  <p className="text-slate-700">{appointment.clientNotes}</p>
+                </>
+              )}
+            </div>
+          )
         )}
 
         <div className="border-t border-slate-100 pt-6">

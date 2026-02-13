@@ -7,6 +7,7 @@ import {
   updateAppointmentTime,
   deleteAppointmentAction,
   approveAppointment,
+  updateAppointmentNotesAction,
 } from "../actions";
 import { ArrowLeft } from "lucide-react";
 
@@ -36,6 +37,7 @@ export default async function AdminAppointmentDetailPage({ params }: PageProps) 
         onUpdateTime={updateAppointmentTime}
         onDelete={deleteAppointmentAction}
         onApprove={approveAppointment}
+        onUpdateNotes={updateAppointmentNotesAction}
       />
     </div>
   );

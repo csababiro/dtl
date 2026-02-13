@@ -168,11 +168,26 @@ export function AdminClientDetailClient({ client, appointments, plati }: AdminCl
               {plati.map((plata) => (
                 <li
                   key={plata.id}
-                  className="flex flex-wrap items-center gap-3 p-4 rounded-xl border border-slate-100"
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => router.push(`/admin/clients/${client.id}/facturi/${plata.id}`)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      router.push(`/admin/clients/${client.id}/facturi/${plata.id}`);
+                    }
+                  }}
+                  className="flex flex-wrap items-center gap-3 p-4 rounded-xl border border-slate-100 hover:bg-slate-50/50 cursor-pointer transition-colors"
                 >
                   <span className="text-slate-500 text-sm">{formatDateOnly(plata.data)}</span>
                   <span className="font-bold text-slate-900">{plata.suma}</span>
                   <span className="text-slate-700">{plata.descriere}</span>
+                  {plata.notes && (
+                    <span className="text-xs text-slate-400 truncate max-w-[120px]" title={plata.notes}>
+                      {plata.notes}
+                    </span>
+                  )}
+                  <span className="text-blue-600 text-sm font-medium ml-auto">Detalii</span>
                 </li>
               ))}
             </ul>

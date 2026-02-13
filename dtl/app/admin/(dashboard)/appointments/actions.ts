@@ -8,6 +8,7 @@ import {
   updateAppointmentStatus,
   updateAppointmentDateTime,
   deleteAppointment as deleteAppointmentStore,
+  updateAppointmentNotes as updateAppointmentNotesStore,
 } from "@/lib/appointments-store";
 
 export async function approveAppointment(prevOrFormData: unknown, formDataArg?: FormData) {
@@ -58,4 +59,19 @@ export async function deleteAppointmentAction(prevOrFormData: unknown, formDataA
     redirect("/admin/appointments");
   }
   return { ok: false };
+}
+
+/** Update descriere and/or clientNotes for an appointment. */
+export async function updateAppointmentNotesAction(formData: FormData) {
+  const id = String(formData.get("id") ?? "").trim();
+  if (!id) return { ok: false };
+  const descriere = formData.get("descriere") != null ? String(formData.get("descriere")).trim() : undefined;
+  const clientNotes = formData.get("clientNotes") != null ? String(formData.get("clientNotes")).trim() : undefined;
+  const updated = updateAppointmentNotesStore(id, { descriere, clientNotes });
+  if (updated) {
+    revalidatePath("/admin/appointments");
+    revalidatePath("/admin/calendar");
+    revalidatePath(`/admin/appointments/${id}`);
+  }
+  return { ok: !!updated };
 }

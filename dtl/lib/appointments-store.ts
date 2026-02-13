@@ -62,3 +62,15 @@ export function deleteAppointment(id: string): boolean {
   store.splice(idx, 1);
   return true;
 }
+
+/** Update client/description notes for an appointment (istoric). */
+export function updateAppointmentNotes(
+  id: string,
+  data: { descriere?: string; clientNotes?: string }
+): DummyAppointment | null {
+  const item = store.find((a) => a.id === id);
+  if (!item) return null;
+  if (data.descriere !== undefined) item.descriere = data.descriere;
+  if (data.clientNotes !== undefined) item.clientNotes = data.clientNotes;
+  return { ...item };
+}
