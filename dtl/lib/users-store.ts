@@ -99,3 +99,11 @@ export function deleteUser(id: string): boolean {
 export function setUserActive(id: string, active: boolean): DummyUser | null {
   return updateUser(id, { active });
 }
+
+/** Set password hash for user (after invitation set-password). */
+export function setUserPassword(id: string, passwordHash: string): DummyUser | null {
+  const u = store.find((x) => x.id === id);
+  if (!u) return null;
+  u.passwordHash = passwordHash;
+  return { ...u };
+}

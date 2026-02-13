@@ -3,8 +3,8 @@ import { getUserToken } from "@/lib/push-tokens-store";
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json() as { ref?: string; title?: string; body?: string };
-    const { ref, title, body } = body;
+    const payload = await request.json() as { ref?: string; title?: string; body?: string };
+    const { ref, title, body: bodyText } = payload;
     if (!ref || typeof ref !== "string") {
       return NextResponse.json({ error: "ref required" }, { status: 400 });
     }
@@ -18,7 +18,7 @@ export async function POST(request: Request) {
     const { getMessagingInstance } = await import("@/lib/firebase-admin");
     const messaging = getMessagingInstance();
     await messaging.send({
-      notification: { title: title ?? "Notificare", body: body ?? "" },
+      notification: { title: title ?? "Notificare", body: bodyText ?? "" },
       token,
     });
     return NextResponse.json({ ok: true, sent: 1 });

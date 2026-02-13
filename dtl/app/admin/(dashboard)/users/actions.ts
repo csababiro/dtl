@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { headers } from "next/headers";
 import type { DummyUserRole } from "@/lib/dummy-users";
 import {
   getCurrentUserCanManageUsers,
@@ -9,6 +10,7 @@ import {
   deleteUser as deleteUserStore,
   setUserActive as setUserActiveStore,
 } from "@/lib/users-store";
+import { createInvitation } from "@/lib/invitation-store";
 
 function guardCanManage() {
   if (!getCurrentUserCanManageUsers()) {
@@ -38,8 +40,14 @@ export async function createUserAction(formData: FormData) {
     active,
     canManageUsers: role === "Admin" ? canManageUsers : undefined,
   });
+  const inv = createInvitation(user.id, user.email);
+  const h = await headers();
+  const host = h.get("host") ?? "";
+  const proto = h.get("x-forwarded-proto") ?? "http";
+  const base = host ? `${proto}://${host}` : "";
+  const invitationLink = base ? `${base}/admin/set-password?token=${inv.token}` : "";
   revalidatePath("/admin/users");
-  return { ok: true, user };
+  return { ok: true, user, invitationLink };
 }
 
 export async function updateUserAction(formData: FormData) {

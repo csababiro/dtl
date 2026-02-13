@@ -12,6 +12,8 @@ import {
   UserCheck,
   UserX,
   X,
+  Copy,
+  Check,
 } from "lucide-react";
 import type { DummyUser, DummyUserRole } from "@/lib/dummy-users";
 import { t } from "@/lib/i18n";
@@ -49,6 +51,8 @@ export function AdminUsersClient({ users, canManageUsers }: AdminUsersClientProp
   const router = useRouter();
   const [formOpen, setFormOpen] = useState<"new" | DummyUser | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+  const [invitationLink, setInvitationLink] = useState<string | null>(null);
+  const [linkCopied, setLinkCopied] = useState(false);
   const [pending, setPending] = useState(false);
 
   const openCreate = () => setFormOpen("new");
@@ -58,6 +62,7 @@ export function AdminUsersClient({ users, canManageUsers }: AdminUsersClientProp
   const handleCreate = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setPending(true);
+    setInvitationLink(null);
     const form = e.currentTarget;
     const fd = new FormData(form);
     const res = await createUserAction(fd);
@@ -66,6 +71,9 @@ export function AdminUsersClient({ users, canManageUsers }: AdminUsersClientProp
       closeForm();
       form.reset();
       router.refresh();
+      if ("invitationLink" in res && res.invitationLink) {
+        setInvitationLink(res.invitationLink);
+      }
     }
   };
 
@@ -442,6 +450,53 @@ export function AdminUsersClient({ users, canManageUsers }: AdminUsersClientProp
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Invitation link modal */}
+      {invitationLink && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50"
+          onClick={() => { setInvitationLink(null); setLinkCopied(false); }}
+        >
+          <div
+            className="bg-white rounded-2xl shadow-xl max-w-lg w-full p-6"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="text-lg font-bold text-slate-900 mb-2">
+              {t("admin.invitationLinkTitle")}
+            </h3>
+            <p className="text-sm text-slate-600 mb-3">
+              Linkul expiră în 7 zile. Utilizatorul va seta parola la primul acces.
+            </p>
+            <div className="flex gap-2 mb-4">
+              <input
+                type="text"
+                readOnly
+                value={invitationLink}
+                className="flex-1 px-3 py-2 border border-slate-200 rounded-xl bg-slate-50 text-sm"
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  navigator.clipboard.writeText(invitationLink);
+                  setLinkCopied(true);
+                  setTimeout(() => setLinkCopied(false), 2000);
+                }}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-900 text-white font-medium hover:bg-slate-800 shrink-0"
+              >
+                {linkCopied ? <Check size={18} /> : <Copy size={18} />}
+                {linkCopied ? t("admin.invitationLinkCopied") : t("admin.invitationLinkCopy")}
+              </button>
+            </div>
+            <button
+              type="button"
+              onClick={() => { setInvitationLink(null); setLinkCopied(false); }}
+              className="w-full py-2.5 rounded-xl border border-slate-200 font-medium text-slate-700 hover:bg-slate-50"
+            >
+              {t("common.close")}
+            </button>
           </div>
         </div>
       )}

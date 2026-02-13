@@ -12,6 +12,8 @@ export interface DummyUser {
   active: boolean;
   /** When true, this Admin can add/edit/delete other admins and staff. Only for role "Admin". */
   canManageUsers?: boolean;
+  /** Set when user completes invitation (set-password) flow. */
+  passwordHash?: string;
   lastLogin?: string;
 }
 
