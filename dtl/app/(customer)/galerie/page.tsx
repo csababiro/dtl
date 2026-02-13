@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { getFeatureFlags, isGalleryEnabled } from "@/lib/feature-flags";
 import { t } from "@/lib/i18n";
-import { ImageWithFallback } from "@/components/ImageWithFallback";
+import { GalleryWithLightbox } from "@/components/GalleryWithLightbox";
 
 const GALLERY_IMAGES = [
   "https://images.unsplash.com/photo-1581092160562-40aa08e78837?q=80&w=600",
@@ -45,20 +45,7 @@ export default async function GaleriePage() {
         </div>
       </section>
       <section className="py-20 max-w-7xl mx-auto px-4 w-full">
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {GALLERY_IMAGES.map((src, i) => (
-            <div
-              key={i}
-              className="aspect-square rounded-2xl overflow-hidden border border-slate-200 shadow-sm hover:shadow-lg transition-shadow"
-            >
-              <ImageWithFallback
-                src={src}
-                alt=""
-                className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
-              />
-            </div>
-          ))}
-        </div>
+        <GalleryWithLightbox images={GALLERY_IMAGES} />
       </section>
     </div>
   );
