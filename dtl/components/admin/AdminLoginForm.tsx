@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { Mail, Lock, ChevronRight } from "lucide-react";
+import { Mail, Lock, ChevronRight, Eye, EyeOff } from "lucide-react";
 import { t } from "@/lib/i18n";
 import { EMAIL_MAX, PASSWORD_MAX } from "@/lib/field-limits";
 
@@ -17,6 +17,7 @@ const inputError = "border-red-500";
 export function AdminLoginForm() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const {
     register,
@@ -98,12 +99,20 @@ export function AdminLoginForm() {
           />
           <input
             id="password"
-            type="password"
+            type={showPassword ? "text" : "password"}
             placeholder="••••••••"
             {...register("password", { required: t("errors.completeThisField") })}
             maxLength={PASSWORD_MAX}
-            className={`${inputBase} ${errors.password ? inputError : inputNormal}`}
+            className={`${inputBase} pr-12 ${errors.password ? inputError : inputNormal}`}
           />
+          <button
+            type="button"
+            onClick={() => setShowPassword((v) => !v)}
+            className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100"
+            aria-label={showPassword ? "Ascunde parola" : "Arată parola"}
+          >
+            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+          </button>
         </div>
         {errors.password && (
           <p className="text-xs text-red-500 mt-1">{errors.password.message}</p>

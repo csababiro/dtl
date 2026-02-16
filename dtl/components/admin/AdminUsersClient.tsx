@@ -14,6 +14,9 @@ import {
   X,
   Copy,
   Check,
+  KeyRound,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import type { DummyUser, DummyUserRole } from "@/lib/dummy-users";
 import { t } from "@/lib/i18n";
@@ -46,9 +49,15 @@ export function AdminUsersClient({ users, canManageUsers }: AdminUsersClientProp
   const router = useRouter();
   const [formOpen, setFormOpen] = useState<"new" | DummyUser | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+  const [resetPasswordUser, setResetPasswordUser] = useState<DummyUser | null>(null);
   const [invitationLink, setInvitationLink] = useState<string | null>(null);
   const [linkCopied, setLinkCopied] = useState(false);
   const [pending, setPending] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
+  const [showCreatePassword, setShowCreatePassword] = useState(false);
+  const [showCreateConfirm, setShowCreateConfirm] = useState(false);
+  const [showResetPassword, setShowResetPassword] = useState(false);
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
 
   const openCreate = () => setFormOpen("new");
   const openEdit = (user: DummyUser) => setFormOpen(user);
@@ -56,6 +65,7 @@ export function AdminUsersClient({ users, canManageUsers }: AdminUsersClientProp
 
   const handleCreate = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setFormError(null);
     setPending(true);
     setInvitationLink(null);
     const form = e.currentTarget;
@@ -65,13 +75,36 @@ export function AdminUsersClient({ users, canManageUsers }: AdminUsersClientProp
     const role = (roleRaw === "Admin" || roleRaw === "Staff" ? roleRaw : "Staff") as DummyUserRole;
     const active = (form.querySelector('[name="active"]') as HTMLInputElement)?.checked ?? true;
     const canManageUsers = (form.querySelector('[name="canManageUsers"]') as HTMLInputElement)?.checked ?? false;
-    const res = await post<DummyUser>(
-      "/users",
-      { name, email, role, active, canManageUsers: role === "Admin" ? canManageUsers : undefined }
-    );
+    const password = (form.querySelector('[name="password"]') as HTMLInputElement)?.value?.trim() ?? "";
+    const passwordConfirm = (form.querySelector('[name="passwordConfirm"]') as HTMLInputElement)?.value?.trim() ?? "";
+    if (password || passwordConfirm) {
+      if (password.length < 8) {
+        setFormError(t("admin.passwordMinLength"));
+        setPending(false);
+        return;
+      }
+      if (password !== passwordConfirm) {
+        setFormError(t("admin.passwordMismatch"));
+        setPending(false);
+        return;
+      }
+    }
+    const payload: Record<string, unknown> = {
+      name,
+      email,
+      role,
+      active,
+      canManageUsers: role === "Admin" ? canManageUsers : undefined,
+    };
+    if (password) {
+      payload.password = password;
+      payload.passwordConfirm = passwordConfirm;
+    }
+    const res = await post<DummyUser>("/users", payload);
     setPending(false);
     if ("error" in res) {
       if (res.error.status === 401) router.push("/admin/login");
+      else setFormError(res.error.message);
       return;
     }
     closeForm();
@@ -131,6 +164,37 @@ export function AdminUsersClient({ users, canManageUsers }: AdminUsersClientProp
       if (res.error.status === 401) router.push("/admin/login");
       return;
     }
+    router.refresh();
+  };
+
+  const handleResetPassword = async (e: React.FormEvent<HTMLFormElement>) => {
+    if (!resetPasswordUser) return;
+    e.preventDefault();
+    setFormError(null);
+    const form = e.currentTarget;
+    const password = (form.querySelector('[name="resetPassword"]') as HTMLInputElement)?.value?.trim() ?? "";
+    const passwordConfirm = (form.querySelector('[name="resetPasswordConfirm"]') as HTMLInputElement)?.value?.trim() ?? "";
+    if (password.length < 8) {
+      setFormError(t("admin.passwordMinLength"));
+      return;
+    }
+    if (password !== passwordConfirm) {
+      setFormError(t("admin.passwordMismatch"));
+      return;
+    }
+    setPending(true);
+    const res = await patch<DummyUser>(`/users/${resetPasswordUser.id}`, {
+      password,
+      passwordConfirm,
+    });
+    setPending(false);
+    if ("error" in res) {
+      if (res.error.status === 401) router.push("/admin/login");
+      else setFormError(res.error.message);
+      return;
+    }
+    setResetPasswordUser(null);
+    form.reset();
     router.refresh();
   };
 
@@ -344,6 +408,14 @@ export function AdminUsersClient({ users, canManageUsers }: AdminUsersClientProp
                         </button>
                         <button
                           type="button"
+                          onClick={() => setResetPasswordUser(user)}
+                          className="p-2 rounded-lg text-slate-600 hover:bg-slate-100"
+                          title={t("admin.resetPassword")}
+                        >
+                          <KeyRound size={18} />
+                        </button>
+                        <button
+                          type="button"
                           onClick={() => setDeleteConfirm(user.id)}
                           className="p-2 rounded-lg text-red-600 hover:bg-red-50"
                           title={t("common.delete")}
@@ -411,6 +483,56 @@ export function AdminUsersClient({ users, canManageUsers }: AdminUsersClientProp
                   className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-slate-400 focus:border-transparent"
                 />
               </div>
+              {!isEdit && (
+                <>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                      {t("admin.password")}
+                    </label>
+                    <div className="relative">
+                      <input
+                        type={showCreatePassword ? "text" : "password"}
+                        name="password"
+                        autoComplete="new-password"
+                        placeholder={t("admin.passwordOptionalOnCreate")}
+                        className="w-full px-3 py-2 pr-10 border border-slate-200 rounded-xl focus:ring-2 focus:ring-slate-400 focus:border-transparent placeholder:text-slate-400"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowCreatePassword((v) => !v)}
+                        className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100"
+                        aria-label={showCreatePassword ? "Ascunde parola" : "Arată parola"}
+                      >
+                        {showCreatePassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                      </button>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                      {t("admin.confirmPassword")}
+                    </label>
+                    <div className="relative">
+                      <input
+                        type={showCreateConfirm ? "text" : "password"}
+                        name="passwordConfirm"
+                        autoComplete="new-password"
+                        className="w-full px-3 py-2 pr-10 border border-slate-200 rounded-xl focus:ring-2 focus:ring-slate-400 focus:border-transparent"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowCreateConfirm((v) => !v)}
+                        className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100"
+                        aria-label={showCreateConfirm ? "Ascunde parola" : "Arată parola"}
+                      >
+                        {showCreateConfirm ? <EyeOff size={18} /> : <Eye size={18} />}
+                      </button>
+                    </div>
+                  </div>
+                </>
+              )}
+              {formError && (
+                <p className="text-sm text-red-600">{formError}</p>
+              )}
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">
                   Rol
@@ -468,6 +590,93 @@ export function AdminUsersClient({ users, canManageUsers }: AdminUsersClientProp
                 <button
                   type="button"
                   onClick={closeForm}
+                  className="px-4 py-2.5 rounded-xl border border-slate-200 font-medium text-slate-700 hover:bg-slate-50"
+                >
+                  {t("common.cancel")}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Reset password modal */}
+      {resetPasswordUser && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50"
+          onClick={() => { setResetPasswordUser(null); setFormError(null); }}
+        >
+          <div
+            className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="text-lg font-bold text-slate-900 mb-1">
+              {t("admin.resetPasswordTitle")}
+            </h3>
+            <p className="text-sm text-slate-600 mb-4">
+              {t("admin.resetPasswordDesc")} – {resetPasswordUser.name} ({resetPasswordUser.email})
+            </p>
+            <form onSubmit={handleResetPassword} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">
+                  {t("admin.password")}
+                </label>
+                <div className="relative">
+                  <input
+                    type={showResetPassword ? "text" : "password"}
+                    name="resetPassword"
+                    required
+                    minLength={8}
+                    autoComplete="new-password"
+                    className="w-full px-3 py-2 pr-10 border border-slate-200 rounded-xl focus:ring-2 focus:ring-slate-400 focus:border-transparent"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowResetPassword((v) => !v)}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100"
+                    aria-label={showResetPassword ? "Ascunde parola" : "Arată parola"}
+                  >
+                    {showResetPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">
+                  {t("admin.confirmPassword")}
+                </label>
+                <div className="relative">
+                  <input
+                    type={showResetConfirm ? "text" : "password"}
+                    name="resetPasswordConfirm"
+                    required
+                    minLength={8}
+                    autoComplete="new-password"
+                    className="w-full px-3 py-2 pr-10 border border-slate-200 rounded-xl focus:ring-2 focus:ring-slate-400 focus:border-transparent"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowResetConfirm((v) => !v)}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100"
+                    aria-label={showResetConfirm ? "Ascunde parola" : "Arată parola"}
+                  >
+                    {showResetConfirm ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
+              </div>
+              {formError && (
+                <p className="text-sm text-red-600">{formError}</p>
+              )}
+              <div className="flex gap-2">
+                <button
+                  type="submit"
+                  disabled={pending}
+                  className="flex-1 py-2.5 rounded-xl bg-slate-900 text-white font-semibold hover:bg-slate-800 disabled:opacity-50"
+                >
+                  {pending ? t("common.loading") : t("common.save")}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setResetPasswordUser(null); setFormError(null); }}
                   className="px-4 py-2.5 rounded-xl border border-slate-200 font-medium text-slate-700 hover:bg-slate-50"
                 >
                   {t("common.cancel")}

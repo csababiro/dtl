@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
-import { getUserById, updateUser, deleteUser } from "@/lib/services";
+import { getUserById, updateUser, deleteUser, setUserPassword } from "@/lib/services";
 import type { DummyUserRole } from "@/lib/dummy-users";
 import { getAuthFromRequest } from "@/lib/auth/jwt";
+import { hashPassword } from "@/lib/password";
 
 function requireSuperAdmin(auth: { role: string } | null) {
   if (!auth) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -48,7 +49,19 @@ export async function PATCH(
       role?: string;
       active?: boolean;
       canManageUsers?: boolean;
+      password?: string;
+      passwordConfirm?: string;
     };
+    const password = typeof body.password === "string" ? body.password : "";
+    const passwordConfirm = typeof body.passwordConfirm === "string" ? body.passwordConfirm : "";
+    if (password || passwordConfirm) {
+      if (password.length < 8) {
+        return NextResponse.json({ error: "Parola trebuie să aibă cel puțin 8 caractere." }, { status: 400 });
+      }
+      if (password !== passwordConfirm) {
+        return NextResponse.json({ error: "Parolele nu coincid." }, { status: 400 });
+      }
+    }
     const updates: Partial<{
       name: string;
       email: string;
@@ -74,7 +87,15 @@ export async function PATCH(
     const result = await updateUser(id, updates);
     if ("error" in result)
       return NextResponse.json({ error: result.error.message }, { status: 500 });
-    return NextResponse.json(result.data!);
+    if (password) {
+      const hashed = await hashPassword(password);
+      const setResult = await setUserPassword(id, hashed);
+      if ("error" in setResult) {
+        return NextResponse.json({ error: setResult.error.message }, { status: 500 });
+      }
+    }
+    const updated = await getUserById(id);
+    return NextResponse.json(updated.data ?? result.data!);
   } catch {
     return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
   }

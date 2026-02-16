@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
-import { getUsers, addUser } from "@/lib/services";
+import { getUsers, addUser, setUserPassword } from "@/lib/services";
 import type { DummyUserRole } from "@/lib/dummy-users";
 import { getAuthFromRequest } from "@/lib/auth/jwt";
+import { hashPassword, verifyPassword } from "@/lib/password";
 
 export const dynamic = "force-dynamic";
 
@@ -63,6 +64,8 @@ export async function POST(request: Request) {
       role?: string;
       active?: boolean;
       canManageUsers?: boolean;
+      password?: string;
+      passwordConfirm?: string;
     };
     const name = String(body.name ?? "").trim();
     const email = String(body.email ?? "").trim().toLowerCase();
@@ -71,6 +74,16 @@ export async function POST(request: Request) {
     ) as DummyUserRole;
     if (!name || !email) {
       return NextResponse.json({ error: "name and email required" }, { status: 400 });
+    }
+    const password = typeof body.password === "string" ? body.password.trim() : "";
+    const passwordConfirm = typeof body.passwordConfirm === "string" ? body.passwordConfirm.trim() : "";
+    if (password || passwordConfirm) {
+      if (password.length < 8) {
+        return NextResponse.json({ error: "Parola trebuie să aibă cel puțin 8 caractere." }, { status: 400 });
+      }
+      if (password !== passwordConfirm) {
+        return NextResponse.json({ error: "Parolele nu coincid." }, { status: 400 });
+      }
     }
     const result = await addUser({
       name,
@@ -81,7 +94,26 @@ export async function POST(request: Request) {
     });
     if ("error" in result)
       return NextResponse.json({ error: result.error.message }, { status: 500 });
-    return NextResponse.json(result.data, { status: 201 });
+    const user = result.data;
+    if (password) {
+      const hashed = await hashPassword(password);
+      const setResult = await setUserPassword(user.id, hashed);
+      if ("error" in setResult) {
+        return NextResponse.json({ error: setResult.error.message }, { status: 500 });
+      }
+      const updated = setResult.data;
+      const storedHash = updated?.passwordHash;
+      const verifyOk =
+        storedHash?.startsWith("scrypt:v1:") &&
+        (await verifyPassword(password, storedHash));
+      if (!verifyOk) {
+        return NextResponse.json(
+          { error: "Parola nu a putut fi salvată corect. Încearcă din nou sau folosește Resetare parolă după creare." },
+          { status: 500 }
+        );
+      }
+    }
+    return NextResponse.json(user, { status: 201 });
   } catch {
     return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
   }

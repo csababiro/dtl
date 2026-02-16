@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Lock, Wrench } from "lucide-react";
+import { Lock, Wrench, Eye, EyeOff } from "lucide-react";
 import { t } from "@/lib/i18n";
 import { getInvitationInfo } from "./actions";
 import { setPasswordFromInvitationAction } from "./actions";
@@ -18,6 +18,8 @@ export function SetPasswordClient() {
   } | { ok: false; error: string } | null>(null);
   const [pending, setPending] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   useEffect(() => {
     if (!token) {
@@ -97,29 +99,49 @@ export function SetPasswordClient() {
               <label className="block text-sm font-medium text-slate-700 mb-1">
                 {t("admin.password")}
               </label>
-              <input
-                type="password"
-                name="password"
-                required
-                minLength={8}
-                autoComplete="new-password"
-                placeholder={t("admin.setPasswordPlaceholder")}
-                className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-slate-400 focus:border-transparent"
-              />
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  name="password"
+                  required
+                  minLength={8}
+                  autoComplete="new-password"
+                  placeholder={t("admin.setPasswordPlaceholder")}
+                  className="w-full px-3 py-2 pr-10 border border-slate-200 rounded-xl focus:ring-2 focus:ring-slate-400 focus:border-transparent"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((v) => !v)}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100"
+                  aria-label={showPassword ? "Ascunde parola" : "Arată parola"}
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
               <p className="text-xs text-slate-500 mt-1">{t("admin.setPasswordMinLength")}</p>
             </div>
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">
                 {t("admin.setPasswordConfirm")}
               </label>
-              <input
-                type="password"
-                name="confirmPassword"
-                required
-                minLength={8}
-                autoComplete="new-password"
-                className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-slate-400 focus:border-transparent"
-              />
+              <div className="relative">
+                <input
+                  type={showConfirm ? "text" : "password"}
+                  name="confirmPassword"
+                  required
+                  minLength={8}
+                  autoComplete="new-password"
+                  className="w-full px-3 py-2 pr-10 border border-slate-200 rounded-xl focus:ring-2 focus:ring-slate-400 focus:border-transparent"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirm((v) => !v)}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100"
+                  aria-label={showConfirm ? "Ascunde parola" : "Arată parola"}
+                >
+                  {showConfirm ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
             </div>
             {submitError && (
               <p className="text-sm text-red-600">

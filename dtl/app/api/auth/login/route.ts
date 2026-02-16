@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { JWT_COOKIE, signJwt } from "@/lib/auth/jwt";
-import { getUserByEmailFromDb } from "@/lib/db/users";
+import { getUserByEmailFromDb, getPasswordHashByEmailFromDb } from "@/lib/db/users";
 import { verifyPassword } from "@/lib/password";
 
 const COOKIE_MAX_AGE_SEC = 24 * 60 * 60; // 1 day
@@ -18,11 +18,11 @@ function resolveRole(email: string, dbRole: string | undefined): JwtRole {
 export async function POST(request: Request) {
   try {
     const adminEmail = process.env.ADMIN_EMAIL?.trim().toLowerCase();
-    const adminPassword = process.env.ADMIN_PASSWORD;
+    const adminPassword = process.env.ADMIN_PASSWORD?.trim();
 
     const body = (await request.json()) as { email?: string; password?: string };
     const email = String(body.email ?? "").trim().toLowerCase();
-    const password = String(body.password ?? "");
+    const password = String(body.password ?? "").trim();
 
     if (!email) {
       return NextResponse.json({ error: "Email required" }, { status: 400 });
@@ -31,26 +31,43 @@ export async function POST(request: Request) {
     let role: JwtRole;
     let sub: string;
 
-    if (adminEmail && adminPassword && email === adminEmail && password === adminPassword) {
+    if (adminEmail && adminPassword != null && adminPassword.length > 0 && email === adminEmail && password === adminPassword) {
       role = "super_admin";
       sub = email;
     } else {
       const user = await getUserByEmailFromDb(email);
+      const isDev = process.env.NODE_ENV === "development";
       if (!user) {
-        return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
+        if (isDev) console.log("[login] DB user not found for email:", email);
+        const body: { error: string; reason?: string } = { error: "Invalid credentials" };
+        if (isDev) body.reason = "user_not_found";
+        return NextResponse.json(body, { status: 401 });
       }
       if (!user.active) {
-        return NextResponse.json({ error: "Cont dezactivat" }, { status: 401 });
+        const body: { error: string; reason?: string } = { error: "Cont dezactivat" };
+        if (isDev) body.reason = "account_disabled";
+        return NextResponse.json(body, { status: 401 });
       }
-      if (!user.passwordHash) {
-        return NextResponse.json(
-          { error: "Parola nu a fost setată. Verifică emailul pentru invitație." },
-          { status: 401 }
-        );
+      const passwordRow = await getPasswordHashByEmailFromDb(email);
+      const storedHash = passwordRow?.passwordHash;
+      const hasValidHash =
+        storedHash &&
+        storedHash.trim().length > 0 &&
+        storedHash.startsWith("scrypt:v1:");
+      if (!hasValidHash || !passwordRow) {
+        if (isDev) console.log("[login] User found but no valid password hash (id:", user.id, ")");
+        const body: { error: string; reason?: string } = {
+          error: "Parola nu a fost setată. Verifică emailul pentru invitație.",
+        };
+        if (isDev) body.reason = "no_password_hash";
+        return NextResponse.json(body, { status: 401 });
       }
-      const ok = await verifyPassword(password, user.passwordHash);
+      const ok = await verifyPassword(password, storedHash);
       if (!ok) {
-        return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
+        if (isDev) console.log("[login] DB user found, password verify failed for:", user.email);
+        const body: { error: string; reason?: string } = { error: "Invalid credentials" };
+        if (isDev) body.reason = "password_verify_failed";
+        return NextResponse.json(body, { status: 401 });
       }
       role = resolveRole(email, user.role);
       sub = user.id;

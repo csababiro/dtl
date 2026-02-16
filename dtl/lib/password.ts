@@ -21,8 +21,8 @@ export async function hashPassword(plain: string): Promise<string> {
 
 export async function verifyPassword(plain: string, stored: string): Promise<boolean> {
   const parts = stored.split(":");
-  if (parts.length !== 3 || parts[0] !== "scrypt:v1") return false;
-  const [, saltHex, keyHex] = parts;
+  if (parts.length !== 4 || parts[0] !== "scrypt" || parts[1] !== "v1") return false;
+  const [, , saltHex, keyHex] = parts;
   const salt = Buffer.from(saltHex, "hex");
   const key = (await scryptAsync(plain, salt, KEY_LEN)) as Buffer;
   return key.toString("hex") === keyHex;
