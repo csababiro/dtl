@@ -1,18 +1,25 @@
 import { BookingForm } from "@/components/customer/BookingForm";
 import {
-  getFeatureFlags,
+  DEFAULT_FEATURE_FLAGS,
   isAnyBookingEnabled,
   isBookingEnabled,
 } from "@/lib/feature-flags";
+import { getFeatureFlags } from "@/lib/services/feature-flags";
 import { t } from "@/lib/i18n";
 import Link from "next/link";
+
+export const dynamic = "force-dynamic";
 
 export default async function ProgramarePage({
   searchParams,
 }: {
   searchParams: Promise<{ tab?: string }> | { tab?: string };
 }) {
-  const flags = await getFeatureFlags();
+  const result = await getFeatureFlags();
+  const flags =
+    "data" in result
+      ? { ...DEFAULT_FEATURE_FLAGS, ...result.data }
+      : DEFAULT_FEATURE_FLAGS;
   const showBooking = isAnyBookingEnabled(flags);
 
   if (!showBooking) {

@@ -4,6 +4,8 @@ import { getFeatureFlags, isAuthenticationEnabled } from "@/lib/feature-flags";
 import { t } from "@/lib/i18n";
 import { ContPageClient } from "@/components/customer/ContPageClient";
 
+export const dynamic = "force-dynamic";
+
 export default async function ContPage() {
   const flags = await getFeatureFlags();
   const showAuth = isAuthenticationEnabled(flags);

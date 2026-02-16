@@ -4,6 +4,8 @@ import Link from "next/link";
 import { isRequestQuoteEnabled } from "@/lib/feature-flags";
 import { CereOfertaForm } from "@/components/customer/CereOfertaForm";
 
+export const dynamic = "force-dynamic";
+
 export default async function CereOfertaPage() {
   const flags = await getFeatureFlags();
   const showQuote = isRequestQuoteEnabled(flags);

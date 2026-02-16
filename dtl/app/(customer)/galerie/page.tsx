@@ -14,6 +14,8 @@ const GALLERY_IMAGES = [
   "https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?q=80&w=600",
 ];
 
+export const dynamic = "force-dynamic";
+
 export default async function GaleriePage() {
   const flags = await getFeatureFlags();
   const showGallery = isGalleryEnabled(flags);

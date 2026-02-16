@@ -22,6 +22,8 @@ const SERVICE_TYRE_IMG =
 const SERVICE_WASH_IMG =
   "https://images.unsplash.com/photo-1607860108855-64acf2078ed9?q=80&w=1080";
 
+export const dynamic = "force-dynamic";
+
 export default async function ServiciiPage() {
   const flags = await getFeatureFlags();
   const showTyre = isModuleEnabled(flags, "tyre");

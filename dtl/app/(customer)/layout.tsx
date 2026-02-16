@@ -1,3 +1,4 @@
+import { unstable_noStore } from "next/cache";
 import { cookies } from "next/headers";
 import { getFeatureFlags as getFeatureFlagsFromService } from "@/lib/services";
 import { DEFAULT_FEATURE_FLAGS } from "@/lib/feature-flags";
@@ -8,11 +9,14 @@ import { WhatsAppButton } from "@/components/customer/WhatsAppButton";
 import { JWT_COOKIE, verifyJwt } from "@/lib/auth/jwt";
 import { MaintenancePage } from "@/components/customer/MaintenancePage";
 
+export const dynamic = "force-dynamic";
+
 export default async function CustomerLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  unstable_noStore();
   const flagsResult = await getFeatureFlagsFromService();
   const flags =
     "error" in flagsResult

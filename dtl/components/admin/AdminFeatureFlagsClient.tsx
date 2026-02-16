@@ -118,11 +118,11 @@ function togglesToPayload(toggles: FeatureFlagToggles): Partial<FeatureFlags> {
   payload.requestQuoteVisible = eff("requestQuote");
   const programareEff = eff("programare");
   payload.generalServiceBooking = programareEff;
-  payload.tyreServiceBooking = programareEff;
-  payload.carWashBooking = programareEff;
   payload.generalServiceBookingVisible = programareEff;
-  payload.tyreServiceBookingVisible = programareEff;
-  payload.carWashBookingVisible = programareEff;
+  payload.tyreServiceBooking = eff("tyre");
+  payload.tyreServiceBookingVisible = eff("tyre");
+  payload.carWashBooking = eff("carWash");
+  payload.carWashBookingVisible = eff("carWash");
   payload.authentication = eff("authentication");
   payload.authenticationVisible = eff("authentication");
   payload.showServicePrices = eff("showServicePrices");

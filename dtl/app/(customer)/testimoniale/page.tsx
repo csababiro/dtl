@@ -30,6 +30,8 @@ const DUMMY_TESTIMONIALS = [
   },
 ];
 
+export const dynamic = "force-dynamic";
+
 export default async function TestimonialePage() {
   const flags = await getFeatureFlags();
   const showTestimonials = isTestimonialsEnabled(flags);

@@ -23,6 +23,8 @@ const CATEGORY_META: Record<
   spalatorie: { titleKey: "home.serviceCarWash", icon: Clock },
 };
 
+export const dynamic = "force-dynamic";
+
 export default async function ServiciiToatePage() {
   const flags = await getFeatureFlags();
   const showTyre = isModuleEnabled(flags, "tyre");

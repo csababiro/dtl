@@ -18,6 +18,8 @@ function formatHoursShort(hours: Record<string, string> | undefined): string {
   return `L-V: ${mon}, Sâm: ${sat}`;
 }
 
+export const dynamic = "force-dynamic";
+
 export default async function ContactPage() {
   const settings = await getBusinessSettings();
   const hoursShort = formatHoursShort(settings.hours);
