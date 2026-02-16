@@ -2,26 +2,21 @@ import { NextResponse } from "next/server";
 import { getUserById, updateUser, deleteUser, setUserPassword } from "@/lib/services";
 import type { DummyUserRole } from "@/lib/dummy-users";
 import { getAuthFromRequest } from "@/lib/auth/jwt";
+import { canAuthManageUsers } from "@/lib/db/users";
 import { hashPassword } from "@/lib/password";
-
-function requireSuperAdmin(auth: { role: string } | null) {
-  if (!auth) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  if (auth.role !== "super_admin") {
-    return NextResponse.json(
-      { error: "Forbidden. Doar Super Admin poate gestiona utilizatorii." },
-      { status: 403 }
-    );
-  }
-  return null;
-}
 
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const auth = await getAuthFromRequest(request);
-  const forbidden = requireSuperAdmin(auth);
-  if (forbidden) return forbidden;
+  if (!auth) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!(await canAuthManageUsers(auth))) {
+    return NextResponse.json(
+      { error: "Forbidden. Doar Super Admin sau Admin cu dreptul de a gestiona utilizatorii poate accesa." },
+      { status: 403 }
+    );
+  }
   const { id } = await params;
   const result = await getUserById(id);
   if ("error" in result)
@@ -35,8 +30,13 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const auth = await getAuthFromRequest(request);
-  const forbidden = requireSuperAdmin(auth);
-  if (forbidden) return forbidden;
+  if (!auth) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!(await canAuthManageUsers(auth))) {
+    return NextResponse.json(
+      { error: "Forbidden. Doar Super Admin sau Admin cu dreptul de a gestiona utilizatorii poate accesa." },
+      { status: 403 }
+    );
+  }
   const { id } = await params;
   const userResult = await getUserById(id);
   if ("error" in userResult)
@@ -95,7 +95,8 @@ export async function PATCH(
       }
     }
     const updated = await getUserById(id);
-    return NextResponse.json(updated.data ?? result.data!);
+    const user = "data" in updated && updated.data != null ? updated.data : result.data!;
+    return NextResponse.json(user);
   } catch {
     return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
   }
@@ -106,8 +107,13 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const auth = await getAuthFromRequest(request);
-  const forbidden = requireSuperAdmin(auth);
-  if (forbidden) return forbidden;
+  if (!auth) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!(await canAuthManageUsers(auth))) {
+    return NextResponse.json(
+      { error: "Forbidden. Doar Super Admin sau Admin cu dreptul de a gestiona utilizatorii poate accesa." },
+      { status: 403 }
+    );
+  }
   const { id } = await params;
   const result = await deleteUser(id);
   if ("error" in result)

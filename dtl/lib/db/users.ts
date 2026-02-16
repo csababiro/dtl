@@ -64,6 +64,18 @@ export async function getCurrentUserCanManageUsersFromDb(): Promise<boolean> {
   return Boolean(superAdmin);
 }
 
+/** True if this auth can manage users: super_admin always; admin only if canManageUsers in DB. */
+export async function canAuthManageUsers(auth: {
+  sub: string;
+  role: string;
+} | null): Promise<boolean> {
+  if (!auth) return false;
+  if (auth.role === "super_admin") return true;
+  if (auth.role !== "admin") return false;
+  const user = await getUserByIdFromDb(auth.sub);
+  return user?.role === "Admin" && user?.canManageUsers === true;
+}
+
 function nextUserId(): string {
   return "u" + String(Date.now());
 }

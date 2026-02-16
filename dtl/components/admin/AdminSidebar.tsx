@@ -56,20 +56,26 @@ interface AdminSidebarProps {
 export function AdminSidebar({ mobileOpen = false, onMobileClose }: AdminSidebarProps) {
   const pathname = usePathname();
   const [role, setRole] = useState<AuthRole>(null);
+  const [canManageUsers, setCanManageUsers] = useState(false);
 
   useEffect(() => {
     fetch("/api/auth/me", { credentials: "include", cache: "no-store" })
       .then((r) => (r.ok ? r.json() : null))
-      .then((data) => setRole(data?.role ?? null))
+      .then((data) => {
+        setRole(data?.role ?? null);
+        setCanManageUsers(Boolean(data?.canManageUsers));
+      })
       .catch(() => setRole(null));
   }, []);
 
   const menuItems =
     role === "super_admin"
       ? ALL_MENU_ITEMS
-      : ALL_MENU_ITEMS.filter(
-          (item) => item.path !== "/admin/feature-flags" && item.path !== "/admin/users"
-        );
+      : ALL_MENU_ITEMS.filter((item) => {
+          if (item.path === "/admin/feature-flags") return false;
+          if (item.path === "/admin/users") return canManageUsers;
+          return true;
+        });
 
   const isActive = (path: string) =>
     path === "/admin" ? pathname === "/admin" : pathname.startsWith(path);
