@@ -27,7 +27,12 @@ export default async function AdminUsersPage() {
         </p>
       </div>
 
-      <AdminUsersClient users={users} canManageUsers={canManageUsers} />
+      <AdminUsersClient
+        users={users}
+        canManageUsers={canManageUsers}
+        currentUserId={payload?.sub ?? ""}
+        isSuperAdmin={payload?.role === "super_admin"}
+      />
     </div>
   );
 }

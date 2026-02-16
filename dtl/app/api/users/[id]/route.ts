@@ -62,6 +62,13 @@ export async function PATCH(
         return NextResponse.json({ error: "Parolele nu coincid." }, { status: 400 });
       }
     }
+    if (auth.role === "admin" && body.role === "Super Admin") {
+      return NextResponse.json(
+        { error: "Doar Super Admin poate seta rolul Super Admin." },
+        { status: 400 }
+      );
+    }
+    const isEditingSelf = auth.role === "admin" && id === auth.sub;
     const updates: Partial<{
       name: string;
       email: string;
@@ -81,8 +88,8 @@ export async function PATCH(
       }
       updates.role = body.role as DummyUserRole;
     }
-    if (body.active !== undefined) updates.active = Boolean(body.active);
-    if (body.canManageUsers !== undefined)
+    if (body.active !== undefined && !isEditingSelf) updates.active = Boolean(body.active);
+    if (body.canManageUsers !== undefined && !isEditingSelf)
       updates.canManageUsers = Boolean(body.canManageUsers);
     const result = await updateUser(id, updates);
     if ("error" in result)

@@ -39,13 +39,24 @@ function formatDate(iso: string | undefined): string {
 }
 
 const ROLES: DummyUserRole[] = ["Super Admin", "Admin", "Staff"];
+const ROLES_ADMIN_OR_STAFF: DummyUserRole[] = ["Admin", "Staff"];
 
 interface AdminUsersClientProps {
   users: DummyUser[];
   canManageUsers: boolean;
+  currentUserId?: string;
+  isSuperAdmin?: boolean;
 }
 
-export function AdminUsersClient({ users, canManageUsers }: AdminUsersClientProps) {
+export function AdminUsersClient({
+  users,
+  canManageUsers,
+  currentUserId = "",
+  isSuperAdmin = false,
+}: AdminUsersClientProps) {
+  const allowedRoles = isSuperAdmin ? ROLES : ROLES_ADMIN_OR_STAFF;
+  const isSelf = (user: DummyUser): boolean =>
+    Boolean(currentUserId && user.id === currentUserId);
   const router = useRouter();
   const [formOpen, setFormOpen] = useState<"new" | DummyUser | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
@@ -121,19 +132,20 @@ export function AdminUsersClient({ users, canManageUsers }: AdminUsersClientProp
       setPending(false);
       return;
     }
+    const editingSelf = currentUserId && id === currentUserId;
     const name = (form.querySelector('[name="name"]') as HTMLInputElement)?.value?.trim();
     const email = (form.querySelector('[name="email"]') as HTMLInputElement)?.value?.trim().toLowerCase();
     const role = (form.querySelector('[name="role"]') as HTMLSelectElement)?.value as DummyUserRole | undefined;
     const activeEl = form.querySelector('[name="active"]') as HTMLInputElement;
     const active = activeEl ? activeEl.checked : undefined;
     const canManageEl = form.querySelector('[name="canManageUsers"]') as HTMLInputElement;
-    const canManageUsers = canManageEl ? canManageEl.checked : undefined;
+    const canManageUsersValue = canManageEl ? canManageEl.checked : undefined;
     const updates: Record<string, unknown> = {};
     if (name !== undefined) updates.name = name;
     if (email !== undefined) updates.email = email;
     if (role !== undefined) updates.role = role;
-    if (active !== undefined) updates.active = active;
-    if (canManageUsers !== undefined) updates.canManageUsers = canManageUsers;
+    if (active !== undefined && !editingSelf) updates.active = active;
+    if (canManageUsersValue !== undefined && !editingSelf) updates.canManageUsers = canManageUsersValue;
     const res = await patch<DummyUser>(`/users/${id}`, updates);
     setPending(false);
     if ("error" in res) {
@@ -279,7 +291,8 @@ export function AdminUsersClient({ users, canManageUsers }: AdminUsersClientProp
                   <button
                     type="button"
                     onClick={() => handleToggleActive(user)}
-                    disabled={pending}
+                    disabled={pending || isSelf(user)}
+                    title={isSelf(user) ? t("admin.selfNoEdit") : undefined}
                     className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-slate-100 text-slate-700 font-medium hover:bg-slate-200 disabled:opacity-50"
                   >
                     {user.active ? <UserX size={16} /> : <UserCheck size={16} />}
@@ -400,9 +413,9 @@ export function AdminUsersClient({ users, canManageUsers }: AdminUsersClientProp
                         <button
                           type="button"
                           onClick={() => handleToggleActive(user)}
-                          disabled={pending}
+                          disabled={pending || isSelf(user)}
                           className="p-2 rounded-lg text-slate-600 hover:bg-slate-100 disabled:opacity-50"
-                          title={user.active ? t("admin.userInactive") : t("admin.userActive")}
+                          title={isSelf(user) ? t("admin.selfNoEdit") : (user.active ? t("admin.userInactive") : t("admin.userActive"))}
                         >
                           {user.active ? <UserX size={18} /> : <UserCheck size={18} />}
                         </button>
@@ -543,7 +556,7 @@ export function AdminUsersClient({ users, canManageUsers }: AdminUsersClientProp
                   defaultValue={editUser?.role ?? "Staff"}
                   className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-slate-400 focus:border-transparent"
                 >
-                  {ROLES.map((r) => (
+                  {allowedRoles.map((r) => (
                     <option key={r} value={r}>
                       {r === "Staff" ? t("admin.roleStaff") : r}
                     </option>
@@ -557,10 +570,14 @@ export function AdminUsersClient({ users, canManageUsers }: AdminUsersClientProp
                   id="form-active"
                   defaultChecked={editUser?.active ?? true}
                   value="on"
-                  className="rounded border-slate-300"
+                  disabled={editUser != null && isSelf(editUser)}
+                  className="rounded border-slate-300 disabled:opacity-60"
                 />
                 <label htmlFor="form-active" className="text-sm font-medium text-slate-700">
                   {t("admin.userActive")}
+                  {editUser != null && isSelf(editUser) && (
+                    <span className="text-slate-400 ml-1">({t("admin.selfNoEdit")})</span>
+                  )}
                 </label>
               </div>
               <div className="flex items-center gap-2" id="can-manage-wrap">
@@ -570,10 +587,14 @@ export function AdminUsersClient({ users, canManageUsers }: AdminUsersClientProp
                   id="form-can-manage"
                   defaultChecked={editUser?.canManageUsers ?? false}
                   value="on"
-                  className="rounded border-slate-300"
+                  disabled={editUser != null && isSelf(editUser)}
+                  className="rounded border-slate-300 disabled:opacity-60"
                 />
                 <label htmlFor="form-can-manage" className="text-sm font-medium text-slate-700">
                   {t("admin.canManageUsers")}
+                  {editUser != null && isSelf(editUser) && (
+                    <span className="text-slate-400 ml-1">({t("admin.selfNoEdit")})</span>
+                  )}
                 </label>
               </div>
               <p className="text-xs text-slate-500">

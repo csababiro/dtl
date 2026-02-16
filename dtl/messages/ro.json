@@ -244,6 +244,7 @@
     "userActive": "Activ",
     "userInactive": "Inactiv",
     "canManageUsers": "Poate gestiona admins și staff",
+    "selfNoEdit": "nu poți modifica pentru contul tău",
     "roleStaff": "Staff",
     "lastLogin": "Ultima autentificare",
     "confirmDeleteUser": "Ești sigur că vrei să ștergi acest utilizator?",

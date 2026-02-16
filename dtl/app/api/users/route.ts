@@ -69,6 +69,12 @@ export async function POST(request: Request) {
     };
     const name = String(body.name ?? "").trim();
     const email = String(body.email ?? "").trim().toLowerCase();
+    if (auth.role === "admin" && body.role === "Super Admin") {
+      return NextResponse.json(
+        { error: "Doar Super Admin poate crea conturi Super Admin." },
+        { status: 400 }
+      );
+    }
     const role = (
       body.role === "Admin" || body.role === "Staff" ? body.role : "Staff"
     ) as DummyUserRole;
