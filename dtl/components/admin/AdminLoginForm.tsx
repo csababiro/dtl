@@ -7,14 +7,6 @@ import { Mail, Lock, ChevronRight } from "lucide-react";
 import { t } from "@/lib/i18n";
 import { EMAIL_MAX, PASSWORD_MAX } from "@/lib/field-limits";
 
-const ADMIN_SESSION_COOKIE = "dtl_admin_session";
-const COOKIE_MAX_AGE_DAYS = 1;
-
-function setAdminSessionCookie() {
-  const maxAge = COOKIE_MAX_AGE_DAYS * 24 * 60 * 60;
-  document.cookie = `${ADMIN_SESSION_COOKIE}=mock; path=/; max-age=${maxAge}; SameSite=Lax`;
-}
-
 type AdminLoginFormValues = { email: string; password: string };
 
 const inputBase =
@@ -33,17 +25,30 @@ export function AdminLoginForm() {
     formState: { errors },
   } = useForm<AdminLoginFormValues>({ mode: "onChange" });
 
-  function onSubmit(data: AdminLoginFormValues) {
+  async function onSubmit(data: AdminLoginFormValues) {
     setLoading(true);
-    // Simulated auth failure: show error under email the same way as real auth would
-    if (data.password === "fail") {
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ email: data.email, password: data.password }),
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        setError("email", {
+          type: "server",
+          message: (body as { error?: string })?.error ?? t("errors.invalidCredentials"),
+        });
+        setLoading(false);
+        return;
+      }
+      router.push("/admin");
+      router.refresh();
+    } catch {
       setError("email", { type: "server", message: t("errors.invalidCredentials") });
       setLoading(false);
-      return;
     }
-    setAdminSessionCookie();
-    router.push("/admin");
-    router.refresh();
   }
 
   return (

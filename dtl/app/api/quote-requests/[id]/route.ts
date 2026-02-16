@@ -1,10 +1,13 @@
 import { NextResponse } from "next/server";
 import { getQuoteRequestById, setQuoteRequestStatus } from "@/lib/services";
+import { getAuthFromRequest } from "@/lib/auth/jwt";
 
 export async function GET(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const auth = await getAuthFromRequest(request);
+  if (!auth) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const { id } = await params;
   const result = await getQuoteRequestById(id);
   if ("error" in result)
@@ -17,6 +20,8 @@ export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const auth = await getAuthFromRequest(request);
+  if (!auth) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const { id } = await params;
   const itemResult = await getQuoteRequestById(id);
   if ("error" in itemResult)

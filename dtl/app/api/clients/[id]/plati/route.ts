@@ -1,10 +1,13 @@
 import { NextResponse } from "next/server";
 import { getClientById, getPlatiByClientId } from "@/lib/services";
+import { getAuthFromRequest } from "@/lib/auth/jwt";
 
 export async function GET(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const auth = await getAuthFromRequest(request);
+  if (!auth) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const { id } = await params;
   const clientResult = await getClientById(id);
   if ("error" in clientResult)

@@ -53,8 +53,48 @@ tags:
     description: Cars belonging to a client.
   - name: Admin – Users
     description: Admin users CRUD.
+  - name: Auth
+    description: Authentication (login returns JWT).
+
+security:
+  - bearerAuth: []
 
 paths:
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: Admin login
+      description: Returns JWT and sets httpOnly cookie. Use cookie or Authorization Bearer for protected routes.
+      operationId: authLogin
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+      responses:
+        "200":
+          description: Success; Set-Cookie with JWT, body has token and expiresIn
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                  expiresIn:
+                    type: integer
+        "401":
+          description: Invalid credentials
+
   /clients:
     get:
       tags: [Admin – Clients]
@@ -402,6 +442,7 @@ paths:
       tags: [Frontend – Quote requests]
       summary: Create a quote request
       operationId: createQuoteRequest
+      security: []
       requestBody:
         required: true
         content:
@@ -428,6 +469,7 @@ paths:
       summary: Submit an appointment (booking) request
       description: Stub returns 201 with id and status; no persistence in current implementation.
       operationId: createAppointmentRequest
+      security: []
       requestBody:
         required: true
         content:
@@ -454,6 +496,7 @@ paths:
       summary: Register FCM token for push notifications
       description: Frontend uses with role user (and ref); admin uses with role admin.
       operationId: pushRegister
+      security: []
       requestBody:
         required: true
         content:
@@ -548,6 +591,7 @@ paths:
       summary: FCM service worker script
       description: Returns JavaScript with Firebase config injected. Content-Type application/javascript.
       operationId: pushSw
+      security: []
       responses:
         "200":
           description: Service worker script
@@ -562,6 +606,7 @@ paths:
       summary: Get feature flags
       description: Returns object merged with client defaults. When showUnavailableSlots is true, booking UI should show unavailable slots (e.g. greyed out) to normal users.
       operationId: getFeatureFlags
+      security: []
       responses:
         "200":
           description: Feature flags object
@@ -591,6 +636,7 @@ paths:
       tags: [Frontend – Business settings]
       summary: Get business settings
       operationId: getBusinessSettings
+      security: []
       responses:
         "200":
           description: Business settings
@@ -752,6 +798,7 @@ paths:
       tags: [Admin – Gallery]
       summary: List gallery items
       operationId: adminGetGallery
+      security: []
       responses:
         "200":
           description: List of gallery items
@@ -803,6 +850,7 @@ paths:
       tags: [Admin – Testimonials]
       summary: List testimonials
       operationId: adminGetTestimonials
+      security: []
       responses:
         "200":
           description: List of testimonials
@@ -878,6 +926,7 @@ paths:
       tags: [Admin – Working hours]
       summary: Get working hours (orar)
       operationId: adminGetWorkingHours
+      security: []
       responses:
         "200":
           description: Working hours schedule
@@ -907,6 +956,7 @@ paths:
       tags: [Admin – Contact]
       summary: Get contact settings
       operationId: adminGetContact
+      security: []
       responses:
         "200":
           description: Contact settings
@@ -932,6 +982,11 @@ paths:
                 $ref: "#/components/schemas/ContactSettings"
 
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
   schemas:
     QuoteRequest:
       type: object

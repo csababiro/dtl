@@ -3,7 +3,6 @@ import Link from "next/link";
 import { getQuoteRequestById } from "@/lib/services";
 import { t } from "@/lib/i18n";
 import { AdminQuoteDetailClient } from "@/components/admin/AdminQuoteDetailClient";
-import { markQuotePrepared } from "../actions";
 import { ArrowLeft } from "lucide-react";
 
 interface PageProps {
@@ -29,7 +28,7 @@ export default async function AdminQuoteDetailPage({ params }: PageProps) {
       <h1 className="text-3xl font-black text-slate-900">
         Cerere ofertă · {item.name}
       </h1>
-      <AdminQuoteDetailClient item={item} onMarkPrepared={markQuotePrepared} />
+      <AdminQuoteDetailClient item={item} />
     </div>
   );
 }

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getGalleryItemById, removeGalleryItem } from "@/lib/services";
+import { getAuthFromRequest } from "@/lib/auth/jwt";
 
 export async function GET(
   _request: Request,
@@ -14,9 +15,11 @@ export async function GET(
 }
 
 export async function DELETE(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const auth = await getAuthFromRequest(request);
+  if (!auth) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const { id } = await params;
   const result = await removeGalleryItem(id);
   if ("error" in result)

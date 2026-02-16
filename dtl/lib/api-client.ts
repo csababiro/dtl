@@ -14,6 +14,21 @@ export function getBaseUrl(): string {
   return (process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000").replace(/\/$/, "") + "/api";
 }
 
+/** For server-side fetches: get Cookie header with JWT so protected API routes accept the request. */
+async function getAuthCookieHeader(): Promise<Record<string, string>> {
+  if (typeof window !== "undefined") return {};
+  try {
+    const { cookies } = await import("next/headers");
+    const { JWT_COOKIE } = await import("@/lib/auth/jwt");
+    const cookieStore = await cookies();
+    const token = cookieStore.get(JWT_COOKIE)?.value;
+    if (!token) return {};
+    return { Cookie: `${JWT_COOKIE}=${encodeURIComponent(token)}` };
+  } catch {
+    return {};
+  }
+}
+
 export async function get<T>(path: string): Promise<{ data: T } | { error: ApiError }> {
   const baseUrl = getBaseUrl();
   if (!baseUrl) {
@@ -22,8 +37,12 @@ export async function get<T>(path: string): Promise<{ data: T } | { error: ApiEr
     };
   }
   const url = path.startsWith("/") ? baseUrl + path : baseUrl + "/" + path;
+  const authHeaders = await getAuthCookieHeader();
   try {
-    const res = await fetch(url);
+    const res = await fetch(url, {
+      credentials: "include",
+      headers: authHeaders,
+    });
     if (!res.ok) {
       const body = await res.text();
       return {
@@ -69,10 +88,12 @@ export async function post<T, B = unknown>(
     };
   }
   const url = path.startsWith("/") ? baseUrl + path : baseUrl + "/" + path;
+  const authHeaders = await getAuthCookieHeader();
   try {
     const res = await fetch(url, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      headers: { "Content-Type": "application/json", ...authHeaders },
       body: JSON.stringify(body),
     });
     if (!res.ok) {
@@ -120,10 +141,12 @@ export async function put<T, B = unknown>(
     };
   }
   const url = path.startsWith("/") ? baseUrl + path : baseUrl + "/" + path;
+  const authHeaders = await getAuthCookieHeader();
   try {
     const res = await fetch(url, {
       method: "PUT",
-      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      headers: { "Content-Type": "application/json", ...authHeaders },
       body: JSON.stringify(body),
     });
     if (!res.ok) {
@@ -171,10 +194,12 @@ export async function patch<T, B = unknown>(
     };
   }
   const url = path.startsWith("/") ? baseUrl + path : baseUrl + "/" + path;
+  const authHeaders = await getAuthCookieHeader();
   try {
     const res = await fetch(url, {
       method: "PATCH",
-      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      headers: { "Content-Type": "application/json", ...authHeaders },
       body: JSON.stringify(body),
     });
     if (!res.ok) {
@@ -219,8 +244,9 @@ export async function del<T>(path: string): Promise<{ data: T } | { error: ApiEr
     };
   }
   const url = path.startsWith("/") ? baseUrl + path : baseUrl + "/" + path;
+  const authHeaders = await getAuthCookieHeader();
   try {
-    const res = await fetch(url, { method: "DELETE" });
+    const res = await fetch(url, { method: "DELETE", credentials: "include", headers: authHeaders });
     if (!res.ok) {
       const bodyText = await res.text();
       return {

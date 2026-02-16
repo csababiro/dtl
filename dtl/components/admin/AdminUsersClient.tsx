@@ -17,12 +17,7 @@ import {
 } from "lucide-react";
 import type { DummyUser, DummyUserRole } from "@/lib/dummy-users";
 import { t } from "@/lib/i18n";
-import {
-  createUserAction,
-  updateUserAction,
-  deleteUserAction,
-  setUserActiveAction,
-} from "@/app/admin/(dashboard)/users/actions";
+import { post, patch, del } from "@/lib/api-client";
 
 function formatDate(iso: string | undefined): string {
   if (!iso) return "—";
@@ -64,50 +59,79 @@ export function AdminUsersClient({ users, canManageUsers }: AdminUsersClientProp
     setPending(true);
     setInvitationLink(null);
     const form = e.currentTarget;
-    const fd = new FormData(form);
-    const res = await createUserAction(fd);
+    const name = (form.querySelector('[name="name"]') as HTMLInputElement)?.value?.trim() ?? "";
+    const email = (form.querySelector('[name="email"]') as HTMLInputElement)?.value?.trim().toLowerCase() ?? "";
+    const roleRaw = (form.querySelector('[name="role"]') as HTMLSelectElement)?.value ?? "Staff";
+    const role = (roleRaw === "Admin" || roleRaw === "Staff" ? roleRaw : "Staff") as DummyUserRole;
+    const active = (form.querySelector('[name="active"]') as HTMLInputElement)?.checked ?? true;
+    const canManageUsers = (form.querySelector('[name="canManageUsers"]') as HTMLInputElement)?.checked ?? false;
+    const res = await post<DummyUser>(
+      "/users",
+      { name, email, role, active, canManageUsers: role === "Admin" ? canManageUsers : undefined }
+    );
     setPending(false);
-    if (res.ok) {
-      closeForm();
-      form.reset();
-      router.refresh();
-      if ("invitationLink" in res && res.invitationLink) {
-        setInvitationLink(res.invitationLink);
-      }
+    if ("error" in res) {
+      if (res.error.status === 401) router.push("/admin/login");
+      return;
     }
+    closeForm();
+    form.reset();
+    router.refresh();
   };
 
   const handleUpdate = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setPending(true);
     const form = e.currentTarget;
-    const fd = new FormData(form);
-    const res = await updateUserAction(fd);
-    setPending(false);
-    if (res.ok) {
-      closeForm();
-      router.refresh();
+    const id = (form.querySelector('[name="id"]') as HTMLInputElement)?.value?.trim();
+    if (!id) {
+      setPending(false);
+      return;
     }
+    const name = (form.querySelector('[name="name"]') as HTMLInputElement)?.value?.trim();
+    const email = (form.querySelector('[name="email"]') as HTMLInputElement)?.value?.trim().toLowerCase();
+    const role = (form.querySelector('[name="role"]') as HTMLSelectElement)?.value as DummyUserRole | undefined;
+    const activeEl = form.querySelector('[name="active"]') as HTMLInputElement;
+    const active = activeEl ? activeEl.checked : undefined;
+    const canManageEl = form.querySelector('[name="canManageUsers"]') as HTMLInputElement;
+    const canManageUsers = canManageEl ? canManageEl.checked : undefined;
+    const updates: Record<string, unknown> = {};
+    if (name !== undefined) updates.name = name;
+    if (email !== undefined) updates.email = email;
+    if (role !== undefined) updates.role = role;
+    if (active !== undefined) updates.active = active;
+    if (canManageUsers !== undefined) updates.canManageUsers = canManageUsers;
+    const res = await patch<DummyUser>(`/users/${id}`, updates);
+    setPending(false);
+    if ("error" in res) {
+      if (res.error.status === 401) router.push("/admin/login");
+      return;
+    }
+    closeForm();
+    router.refresh();
   };
 
   const handleDelete = async (id: string) => {
     setPending(true);
-    const fd = new FormData();
-    fd.set("id", id);
-    const res = await deleteUserAction(fd);
+    const res = await del<void>(`/users/${id}`);
     setPending(false);
     setDeleteConfirm(null);
-    if (res.ok) router.refresh();
+    if ("error" in res) {
+      if (res.error.status === 401) router.push("/admin/login");
+      return;
+    }
+    router.refresh();
   };
 
   const handleToggleActive = async (user: DummyUser) => {
     setPending(true);
-    const fd = new FormData();
-    fd.set("id", user.id);
-    fd.set("active", String(!user.active));
-    const res = await setUserActiveAction(fd);
+    const res = await patch<DummyUser>(`/users/${user.id}`, { active: !user.active });
     setPending(false);
-    if (res.ok) router.refresh();
+    if ("error" in res) {
+      if (res.error.status === 401) router.push("/admin/login");
+      return;
+    }
+    router.refresh();
   };
 
   const isEdit = formOpen !== null && formOpen !== "new";

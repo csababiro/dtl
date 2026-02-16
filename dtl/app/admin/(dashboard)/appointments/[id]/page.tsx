@@ -3,12 +3,6 @@ import Link from "next/link";
 import { getAppointmentById } from "@/lib/api/appointments";
 import { t } from "@/lib/i18n";
 import { AdminAppointmentDetailClient } from "@/components/admin/AdminAppointmentDetailClient";
-import {
-  updateAppointmentTime,
-  deleteAppointmentAction,
-  approveAppointment,
-  updateAppointmentNotesAction,
-} from "../actions";
 import { ArrowLeft } from "lucide-react";
 
 interface PageProps {
@@ -33,13 +27,7 @@ export default async function AdminAppointmentDetailPage({ params }: PageProps) 
       <h1 className="text-3xl font-black text-slate-900">
         {t("admin.appointmentDetails")}
       </h1>
-      <AdminAppointmentDetailClient
-        appointment={appointment}
-        onUpdateTime={updateAppointmentTime}
-        onDelete={deleteAppointmentAction}
-        onApprove={approveAppointment}
-        onUpdateNotes={updateAppointmentNotesAction}
-      />
+      <AdminAppointmentDetailClient appointment={appointment} />
     </div>
   );
 }

@@ -9,13 +9,7 @@ import type { DummyAppointment } from "@/lib/dummy-appointments";
 import type { ClientPlata } from "@/lib/dummy-plati";
 import type { ClientCar } from "@/lib/client-cars-store";
 import { APPOINTMENT_TYPE_LABELS } from "@/lib/appointment-constants";
-import { addCarAction, updateCarAction, deleteCarAction } from "@/app/admin/(dashboard)/clients/[id]/actions";
-import {
-  updateAppointmentTime,
-  deleteAppointmentAction,
-  approveAppointment,
-  updateAppointmentNotesAction,
-} from "@/app/admin/(dashboard)/appointments/actions";
+import { post, patch, del } from "@/lib/api-client";
 import { AdminAppointmentDetailClient } from "./AdminAppointmentDetailClient";
 import { X } from "lucide-react";
 
@@ -81,34 +75,59 @@ export function AdminClientDetailClient({ client, appointments, plati, cars: ini
   const handleAddCar = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormError(null);
-    const res = await addCarAction(client.id, new FormData(e.target as HTMLFormElement));
-    if (res.ok) {
-      setAddForm({ carMake: "", carModel: "", carYear: "", chassis: "" });
-      setShowAddCar(false);
-      refreshCars();
-    } else {
-      setFormError(res.error ?? "Eroare la adăugare.");
+    const form = e.target as HTMLFormElement;
+    const carMake = (form.querySelector('[name="carMake"]') as HTMLInputElement)?.value?.trim() ?? "";
+    const carModel = (form.querySelector('[name="carModel"]') as HTMLInputElement)?.value?.trim() ?? "";
+    const carYear = (form.querySelector('[name="carYear"]') as HTMLInputElement)?.value?.trim() ?? "";
+    const chassis = (form.querySelector('[name="chassis"]') as HTMLInputElement)?.value?.trim() || undefined;
+    if (!carMake || !carModel || !carYear) {
+      setFormError("Marca, modelul și anul sunt obligatorii.");
+      return;
     }
+    const res = await post<ClientCar>(`/clients/${client.id}/cars`, { carMake, carModel, carYear, chassis });
+    if ("error" in res) {
+      if (res.error.status === 401) router.push("/admin/login");
+      else setFormError(res.error.message ?? "Eroare la adăugare.");
+      return;
+    }
+    setAddForm({ carMake: "", carModel: "", carYear: "", chassis: "" });
+    setShowAddCar(false);
+    refreshCars();
   };
 
   const handleUpdateCar = async (e: React.FormEvent, carId: string) => {
     e.preventDefault();
     setFormError(null);
-    const res = await updateCarAction(carId, new FormData(e.target as HTMLFormElement));
-    if (res.ok) {
-      setEditingCarId(null);
-      refreshCars();
-    } else {
-      setFormError(res.error ?? "Eroare la actualizare.");
+    const form = e.target as HTMLFormElement;
+    const carMake = (form.querySelector('[name="carMake"]') as HTMLInputElement)?.value?.trim();
+    const carModel = (form.querySelector('[name="carModel"]') as HTMLInputElement)?.value?.trim();
+    const carYear = (form.querySelector('[name="carYear"]') as HTMLInputElement)?.value?.trim();
+    const chassis = (form.querySelector('[name="chassis"]') as HTMLInputElement)?.value?.trim();
+    const updates: Record<string, string> = {};
+    if (carMake !== undefined) updates.carMake = carMake;
+    if (carModel !== undefined) updates.carModel = carModel;
+    if (carYear !== undefined) updates.carYear = carYear;
+    if (chassis !== undefined) updates.chassis = chassis;
+    const res = await patch<ClientCar>(`/clients/${client.id}/cars/${carId}`, updates);
+    if ("error" in res) {
+      if (res.error.status === 401) router.push("/admin/login");
+      else setFormError(res.error.message ?? "Eroare la actualizare.");
+      return;
     }
+    setEditingCarId(null);
+    refreshCars();
   };
 
   const handleDeleteCar = async (carId: string) => {
     if (!confirm("Ștergi această mașină?")) return;
     setFormError(null);
-    const res = await deleteCarAction(carId);
-    if (res.ok) refreshCars();
-    else setFormError(res.error ?? "Eroare la ștergere.");
+    const res = await del<void>(`/clients/${client.id}/cars/${carId}`);
+    if ("error" in res) {
+      if (res.error.status === 401) router.push("/admin/login");
+      else setFormError(res.error.message ?? "Eroare la ștergere.");
+      return;
+    }
+    refreshCars();
   };
 
   const startEdit = (car: ClientCar) => {
@@ -464,10 +483,6 @@ export function AdminClientDetailClient({ client, appointments, plati, cars: ini
               <div className="p-6 max-h-[calc(100vh-12rem)] overflow-y-auto">
                 <AdminAppointmentDetailClient
                   appointment={appt}
-                  onUpdateTime={updateAppointmentTime}
-                  onDelete={deleteAppointmentAction}
-                  onApprove={approveAppointment}
-                  onUpdateNotes={updateAppointmentNotesAction}
                   returnToClientId={client.id}
                 />
               </div>

@@ -1,12 +1,15 @@
 import { NextResponse } from "next/server";
 import { getQuoteRequests, createQuoteRequest } from "@/lib/services";
 import type { QuoteRequest } from "@/lib/quote-requests-store";
+import { getAuthFromRequest } from "@/lib/auth/jwt";
 
 export type { QuoteRequest };
 
 export const dynamic = "force-dynamic";
 
-export async function GET() {
+export async function GET(request: Request) {
+  const auth = await getAuthFromRequest(request);
+  if (!auth) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const result = await getQuoteRequests();
   if ("error" in result)
     return NextResponse.json({ error: result.error.message }, { status: 500 });

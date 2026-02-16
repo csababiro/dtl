@@ -1,12 +1,14 @@
 "use client";
 
-import { useFormStatus } from "react-dom";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { parse, format } from "date-fns";
 import { enUS } from "date-fns/locale";
 import type { DummyAppointment } from "@/lib/dummy-appointments";
 import { t } from "@/lib/i18n";
 import { APPOINTMENT_TYPE_LABELS, APPOINTMENT_TYPE_COLORS } from "@/lib/appointment-constants";
 import { User, Phone, Mail, Calendar, Clock, Car } from "lucide-react";
+import { patch, del } from "@/lib/api-client";
 
 function getTipLabel(tip: string): string {
   return APPOINTMENT_TYPE_LABELS[tip as keyof typeof APPOINTMENT_TYPE_LABELS] ?? tip;
@@ -22,39 +24,17 @@ function toDateInputValue(data: string): string {
   }
 }
 
-function SaveTimeButton() {
-  const { pending } = useFormStatus();
-  return (
-    <button
-      type="submit"
-      disabled={pending}
-      className="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-bold hover:bg-blue-700 disabled:opacity-50"
-    >
-      {pending ? "..." : t("admin.editTime")}
-    </button>
-  );
-}
-
-function DeleteButton() {
-  const { pending } = useFormStatus();
-  return (
-    <button
-      type="submit"
-      disabled={pending}
-      className="px-4 py-2 rounded-lg bg-red-600 text-white text-sm font-bold hover:bg-red-700 disabled:opacity-50"
-    >
-      {pending ? "..." : t("admin.removeAppointment")}
-    </button>
-  );
-}
-
 interface AdminAppointmentDetailClientProps {
   appointment: DummyAppointment;
-  onUpdateTime: (prev: unknown, formData: FormData) => Promise<{ ok: boolean }>;
-  onDelete: (prev: unknown, formData: FormData) => Promise<{ ok: boolean }>;
-  onApprove: (prev: unknown, formData: FormData) => Promise<{ ok: boolean }>;
+  /** @deprecated Use API; kept for type compatibility. */
+  onUpdateTime?: (prev: unknown, formData: FormData) => Promise<{ ok: boolean }>;
+  /** @deprecated Use API; kept for type compatibility. */
+  onDelete?: (prev: unknown, formData: FormData) => Promise<{ ok: boolean }>;
+  /** @deprecated Use API; kept for type compatibility. */
+  onApprove?: (prev: unknown, formData: FormData) => Promise<{ ok: boolean }>;
+  /** When set, notes form is shown and uses API to save. */
   onUpdateNotes?: (formData: FormData) => Promise<{ ok: boolean }>;
-  /** When set (e.g. from client detail page), forms include this so actions revalidate/redirect to client. */
+  /** When set (e.g. from client detail page), redirect after delete goes to client. */
   returnToClientId?: string;
 }
 
@@ -65,13 +45,72 @@ function HiddenReturnToClient({ returnToClientId }: { returnToClientId?: string 
 
 export function AdminAppointmentDetailClient({
   appointment,
-  onUpdateTime,
-  onDelete,
-  onApprove,
+  onUpdateTime: _onUpdateTime,
+  onDelete: _onDelete,
+  onApprove: _onApprove,
   onUpdateNotes,
   returnToClientId,
 }: AdminAppointmentDetailClientProps) {
+  const router = useRouter();
+  const [pending, setPending] = useState<string | null>(null);
   const typeColor = APPOINTMENT_TYPE_COLORS[appointment.tip] ?? "#64748b";
+
+  const handleApprove = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setPending("approve");
+    const res = await patch<DummyAppointment>(`/appointments/${appointment.id}`, { status: "Confirmat" });
+    setPending(null);
+    if ("error" in res) {
+      if (res.error.status === 401) router.push("/admin/login");
+      return;
+    }
+    router.refresh();
+  };
+
+  const handleUpdateTime = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const form = e.currentTarget;
+    const data = (form.querySelector('[name="data"]') as HTMLInputElement)?.value?.trim();
+    const ora = (form.querySelector('[name="ora"]') as HTMLInputElement)?.value?.trim();
+    if (!data || !ora) return;
+    setPending("time");
+    const res = await patch<DummyAppointment>(`/appointments/${appointment.id}`, { data, ora });
+    setPending(null);
+    if ("error" in res) {
+      if (res.error.status === 401) router.push("/admin/login");
+      return;
+    }
+    router.refresh();
+  };
+
+  const handleDelete = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (typeof window !== "undefined" && !window.confirm("Sigur ștergi această programare?")) return;
+    setPending("delete");
+    const res = await del<void>(`/appointments/${appointment.id}`);
+    setPending(null);
+    if ("error" in res) {
+      if (res.error.status === 401) router.push("/admin/login");
+      return;
+    }
+    if (returnToClientId) router.push(`/admin/clients/${returnToClientId}`);
+    else router.push("/admin/appointments");
+  };
+
+  const handleUpdateNotes = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const form = e.currentTarget;
+    const descriere = (form.querySelector('[name="descriere"]') as HTMLTextAreaElement)?.value?.trim();
+    const clientNotes = (form.querySelector('[name="clientNotes"]') as HTMLTextAreaElement)?.value?.trim();
+    setPending("notes");
+    const res = await patch<DummyAppointment>(`/appointments/${appointment.id}`, { descriere, clientNotes });
+    setPending(null);
+    if ("error" in res) {
+      if (res.error.status === 401) router.push("/admin/login");
+      return;
+    }
+    router.refresh();
+  };
 
   return (
     <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
@@ -127,10 +166,8 @@ export function AdminAppointmentDetailClient({
           </div>
         </div>
 
-        {onUpdateNotes ? (
-          <form action={(fd) => void onUpdateNotes(fd)} className="space-y-4 border-t border-slate-100 pt-6">
+        <form onSubmit={handleUpdateNotes} className="space-y-4 border-t border-slate-100 pt-6">
             <input type="hidden" name="id" value={appointment.id} />
-            <HiddenReturnToClient returnToClientId={returnToClientId} />
             <div>
               <label className="block text-sm font-bold text-slate-500 uppercase tracking-wider mb-1">
                 Descriere (serviciu)
@@ -157,35 +194,18 @@ export function AdminAppointmentDetailClient({
             </div>
             <button
               type="submit"
-              className="px-4 py-2 rounded-lg bg-slate-700 text-white text-sm font-bold hover:bg-slate-800"
+              disabled={pending === "notes"}
+              className="px-4 py-2 rounded-lg bg-slate-700 text-white text-sm font-bold hover:bg-slate-800 disabled:opacity-50"
             >
-              Salvează descriere / notițe
+              {pending === "notes" ? "..." : "Salvează descriere / notițe"}
             </button>
           </form>
-        ) : (
-          (appointment.descriere || appointment.clientNotes) && (
-            <div className="border-t border-slate-100 pt-6 space-y-2">
-              {appointment.descriere && (
-                <>
-                  <p className="text-sm font-bold text-slate-500 uppercase tracking-wider">Descriere</p>
-                  <p className="text-slate-700">{appointment.descriere}</p>
-                </>
-              )}
-              {appointment.clientNotes && (
-                <>
-                  <p className="text-sm font-bold text-slate-500 uppercase tracking-wider">Notițe</p>
-                  <p className="text-slate-700">{appointment.clientNotes}</p>
-                </>
-              )}
-            </div>
-          )
-        )}
 
         <div className="border-t border-slate-100 pt-6">
           <p className="text-sm font-bold text-slate-600 mb-3">
             Modifică data și ora
           </p>
-          <form action={(fd) => void onUpdateTime(undefined, fd)} className="flex flex-wrap items-end gap-4">
+          <form onSubmit={handleUpdateTime} className="flex flex-wrap items-end gap-4">
             <input type="hidden" name="id" value={appointment.id} />
             <HiddenReturnToClient returnToClientId={returnToClientId} />
             <div className="flex items-center gap-2">
@@ -208,34 +228,36 @@ export function AdminAppointmentDetailClient({
                 required
               />
             </div>
-            <SaveTimeButton />
+            <button
+              type="submit"
+              disabled={!!pending}
+              className="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-bold hover:bg-blue-700 disabled:opacity-50"
+            >
+              {pending === "time" ? "..." : t("admin.editTime")}
+            </button>
           </form>
         </div>
 
         <div className="flex flex-wrap gap-3 border-t border-slate-100 pt-6">
           {appointment.status === "În așteptare" && (
-            <form action={(fd) => void onApprove(undefined, fd)}>
-              <input type="hidden" name="id" value={appointment.id} />
-              <HiddenReturnToClient returnToClientId={returnToClientId} />
+            <form onSubmit={handleApprove}>
               <button
                 type="submit"
-                className="px-4 py-2 rounded-lg bg-green-600 text-white text-sm font-bold hover:bg-green-700"
+                disabled={!!pending}
+                className="px-4 py-2 rounded-lg bg-green-600 text-white text-sm font-bold hover:bg-green-700 disabled:opacity-50"
               >
-                {t("admin.approveAppointment")}
+                {pending === "approve" ? "..." : t("admin.approveAppointment")}
               </button>
             </form>
           )}
-          <form
-            action={(fd) => void onDelete(undefined, fd)}
-            onSubmit={(e) => {
-              if (typeof window !== "undefined" && !window.confirm("Sigur ștergi această programare?")) {
-                e.preventDefault();
-              }
-            }}
-          >
-            <input type="hidden" name="id" value={appointment.id} />
-            <HiddenReturnToClient returnToClientId={returnToClientId} />
-            <DeleteButton />
+          <form onSubmit={handleDelete}>
+            <button
+              type="submit"
+              disabled={!!pending}
+              className="px-4 py-2 rounded-lg bg-red-600 text-white text-sm font-bold hover:bg-red-700 disabled:opacity-50"
+            >
+              {pending === "delete" ? "..." : t("admin.removeAppointment")}
+            </button>
           </form>
         </div>
       </div>

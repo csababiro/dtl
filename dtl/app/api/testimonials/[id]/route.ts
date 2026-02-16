@@ -4,6 +4,7 @@ import {
   updateTestimonial,
   removeTestimonial,
 } from "@/lib/services";
+import { getAuthFromRequest } from "@/lib/auth/jwt";
 
 export async function GET(
   _request: Request,
@@ -21,6 +22,8 @@ export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const auth = await getAuthFromRequest(request);
+  if (!auth) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const { id } = await params;
   const itemResult = await getTestimonialById(id);
   if ("error" in itemResult)
@@ -56,9 +59,11 @@ export async function PATCH(
 }
 
 export async function DELETE(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const auth = await getAuthFromRequest(request);
+  if (!auth) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const { id } = await params;
   const result = await removeTestimonial(id);
   if ("error" in result)

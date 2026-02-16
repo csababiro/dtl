@@ -29,5 +29,5 @@ export function sql(
   ...values: unknown[]
 ): ReturnType<typeof vercelSql> {
   ensurePostgresUrl();
-  return vercelSql(strings, ...values);
+  return vercelSql(strings, ...(values as (string | number | boolean | undefined | null)[]));
 }

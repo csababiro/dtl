@@ -1,10 +1,13 @@
 import { NextResponse } from "next/server";
 import { getUsers, addUser } from "@/lib/services";
 import type { DummyUserRole } from "@/lib/dummy-users";
+import { getAuthFromRequest } from "@/lib/auth/jwt";
 
 export const dynamic = "force-dynamic";
 
-export async function GET() {
+export async function GET(request: Request) {
+  const auth = await getAuthFromRequest(request);
+  if (!auth) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   // #region agent log
   fetch("http://127.0.0.1:7244/ingest/38291e03-8924-411d-af90-c560fa478f53", {
     method: "POST",
@@ -38,6 +41,8 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  const auth = await getAuthFromRequest(request);
+  if (!auth) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   try {
     const body = (await request.json()) as {
       name?: string;

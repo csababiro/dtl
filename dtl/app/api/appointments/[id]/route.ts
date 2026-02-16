@@ -8,11 +8,14 @@ import {
   updateAppointmentNotes,
   deleteAppointment,
 } from "@/lib/services";
+import { getAuthFromRequest } from "@/lib/auth/jwt";
 
 export async function GET(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const auth = await getAuthFromRequest(request);
+  if (!auth) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const { id } = await params;
   const result = await getAppointmentById(id);
   if ("error" in result)
@@ -25,6 +28,8 @@ export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const auth = await getAuthFromRequest(request);
+  if (!auth) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const { id } = await params;
   const appResult = await getAppointmentById(id);
   if ("error" in appResult)
@@ -78,9 +83,11 @@ export async function PATCH(
 }
 
 export async function DELETE(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const auth = await getAuthFromRequest(request);
+  if (!auth) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const { id } = await params;
   const result = await deleteAppointment(id);
   if ("error" in result)

@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { ShieldAlert } from "lucide-react";
 import { t } from "@/lib/i18n";
@@ -9,7 +10,7 @@ import {
   type FeatureFlags,
   effectiveFlag,
 } from "@/lib/feature-flags";
-import { saveFeatureFlagsAction } from "@/app/admin/(dashboard)/feature-flags/actions";
+import { put } from "@/lib/api-client";
 
 /** Mock role until API provides session role: super_admin sees only Super Admin column, admin sees only Admin column. */
 const MOCK_ADMIN_ROLE = (
@@ -159,6 +160,7 @@ type AdminFeatureFlagsClientProps = {
 };
 
 export function AdminFeatureFlagsClient({ initialToggles }: AdminFeatureFlagsClientProps) {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<TabId>("func");
   const [toggles, setToggles] = useState<FeatureFlagToggles>(initialToggles ?? defaultToggles);
   const [saving, setSaving] = useState(false);
@@ -167,13 +169,20 @@ export function AdminFeatureFlagsClient({ initialToggles }: AdminFeatureFlagsCli
   const handleSave = async () => {
     setSaving(true);
     setSaveMessage(null);
-    const result = await saveFeatureFlagsAction(togglesToPayload(toggles));
+    const result = await put<FeatureFlags, Partial<FeatureFlags>>(
+      "/settings/feature-flags",
+      togglesToPayload(toggles)
+    );
     setSaving(false);
-    if (result.ok) {
-      setSaveMessage({ ok: true, text: t("admin.saveFlagsSuccess") });
-    } else {
-      setSaveMessage({ ok: false, text: result.message });
+    if ("error" in result) {
+      if (result.error.status === 401) {
+        router.push("/admin/login");
+        return;
+      }
+      setSaveMessage({ ok: false, text: result.error.message });
+      return;
     }
+    setSaveMessage({ ok: true, text: t("admin.saveFlagsSuccess") });
   };
 
   const setSuperAdmin = (key: AdminFlagKey, value: boolean) => {

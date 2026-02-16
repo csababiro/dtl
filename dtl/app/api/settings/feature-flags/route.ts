@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type { FeatureFlags } from "@/lib/feature-flags";
 import { getFeatureFlags, putFeatureFlags } from "@/lib/services";
+import { getAuthFromRequest } from "@/lib/auth/jwt";
 
 export const dynamic = "force-dynamic";
 
@@ -14,6 +15,8 @@ export async function GET() {
 }
 
 export async function PUT(request: Request) {
+  const auth = await getAuthFromRequest(request);
+  if (!auth) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   try {
     const body = (await request.json()) as Partial<FeatureFlags>;
     const result = await putFeatureFlags(body);

@@ -1,10 +1,12 @@
 "use client";
 
-import { useFormStatus } from "react-dom";
+import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { t } from "@/lib/i18n";
 import type { QuoteRequest } from "@/lib/quote-requests-store";
 import { User, Phone, Mail, Car, ArrowLeft } from "lucide-react";
+import { patch } from "@/lib/api-client";
 
 function formatDate(iso: string): string {
   try {
@@ -21,26 +23,25 @@ function formatDate(iso: string): string {
   }
 }
 
-function MarkPreparedButton() {
-  const { pending } = useFormStatus();
-  return (
-    <button
-      type="submit"
-      disabled={pending}
-      className="px-4 py-2 rounded-xl bg-green-600 text-white text-sm font-bold hover:bg-green-700 disabled:opacity-50 min-h-[44px]"
-    >
-      {pending ? "..." : t("admin.markPrepared")}
-    </button>
-  );
-}
-
 interface AdminQuoteDetailClientProps {
   item: QuoteRequest;
-  onMarkPrepared: (prev: unknown, formData: FormData) => Promise<{ ok: boolean }>;
 }
 
-export function AdminQuoteDetailClient({ item, onMarkPrepared }: AdminQuoteDetailClientProps) {
+export function AdminQuoteDetailClient({ item }: AdminQuoteDetailClientProps) {
+  const router = useRouter();
+  const [pending, setPending] = useState(false);
   const isPrepared = (item.status ?? "pending") === "prepared";
+
+  const handleMarkPrepared = async () => {
+    setPending(true);
+    const res = await patch<QuoteRequest>(`/quote-requests/${item.id}`, { status: "prepared" });
+    setPending(false);
+    if ("error" in res) {
+      if (res.error.status === 401) router.push("/admin/login");
+      return;
+    }
+    router.refresh();
+  };
 
   return (
     <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
@@ -57,10 +58,14 @@ export function AdminQuoteDetailClient({ item, onMarkPrepared }: AdminQuoteDetai
             <span className="text-sm text-slate-500">{formatDate(item.createdAt)}</span>
           </div>
           {!isPrepared && (
-            <form action={(fd) => void onMarkPrepared(undefined, fd)} className="inline">
-              <input type="hidden" name="id" value={item.id} />
-              <MarkPreparedButton />
-            </form>
+            <button
+              type="button"
+              onClick={handleMarkPrepared}
+              disabled={pending}
+              className="px-4 py-2 rounded-xl bg-green-600 text-white text-sm font-bold hover:bg-green-700 disabled:opacity-50 min-h-[44px]"
+            >
+              {pending ? "..." : t("admin.markPrepared")}
+            </button>
           )}
         </div>
 

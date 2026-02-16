@@ -1,7 +1,6 @@
 import { getQuoteRequests } from "@/lib/api/quote-requests";
 import { t } from "@/lib/i18n";
 import { AdminQuotesClient } from "@/components/admin/AdminQuotesClient";
-import { markQuotePrepared } from "./actions";
 import type { QuoteRequest } from "@/lib/quote-requests-store";
 
 export type { QuoteRequest };
@@ -20,7 +19,7 @@ export default async function AdminQuotesPage() {
           Marchează cererile ca „Pregătit pentru client” după ce oferta e pregătită.
         </p>
       </div>
-      <AdminQuotesClient items={items} onMarkPrepared={markQuotePrepared} />
+      <AdminQuotesClient items={items} />
     </div>
   );
 }

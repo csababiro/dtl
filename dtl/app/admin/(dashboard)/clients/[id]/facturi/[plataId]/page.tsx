@@ -2,7 +2,6 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getClientById, getPlataById } from "@/lib/services";
 import { AdminFacturaDetailClient } from "@/components/admin/AdminFacturaDetailClient";
-import { updatePlataNotesAction } from "./actions";
 import { ArrowLeft } from "lucide-react";
 
 interface PageProps {
@@ -44,7 +43,7 @@ export default async function AdminFacturaDetailPage({ params }: PageProps) {
       <h1 className="text-3xl font-black text-slate-900">
         Factură · {formatDateOnly(plata.data)} · {plata.suma}
       </h1>
-      <AdminFacturaDetailClient plata={plata} onUpdateNotes={updatePlataNotesAction} />
+      <AdminFacturaDetailClient plata={plata} />
     </div>
   );
 }

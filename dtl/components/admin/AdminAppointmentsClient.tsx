@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useFormStatus } from "react-dom";
 import { useRouter } from "next/navigation";
 import { Calendar as CalendarIcon, Clock, User, History } from "lucide-react";
 import { parse, startOfDay } from "date-fns";
@@ -9,6 +8,7 @@ import { enUS } from "date-fns/locale";
 import type { DummyAppointment, DummyAppointmentType } from "@/lib/dummy-appointments";
 import { APPOINTMENT_TYPE_COLORS, APPOINTMENT_TYPE_LABELS, UNCONFIRMED_COLOR } from "@/lib/appointment-constants";
 import { t } from "@/lib/i18n";
+import { patch } from "@/lib/api-client";
 
 type TypeFilter = "all" | DummyAppointmentType;
 type StatusFilter = "all" | "confirmed" | "unconfirmed";
@@ -36,36 +36,32 @@ function groupByDate(appointments: DummyAppointment[]) {
 
 type Tab = "upcoming" | "history";
 
-function ApproveButton() {
-  const { pending } = useFormStatus();
-  return (
-    <button
-      type="submit"
-      disabled={pending}
-      className="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-bold hover:bg-blue-700 disabled:opacity-50 min-h-[44px]"
-    >
-      {pending ? "..." : t("admin.approveAppointment")}
-    </button>
-  );
-}
-
 interface AdminAppointmentsClientProps {
   appointments: DummyAppointment[];
   /** When using dummy data, pass a fixed "today" (e.g. "11 Feb 2025") so Viitoare/Istoric both have examples. */
   referenceToday?: string;
-  /** Server action to approve (confirm) an appointment. Receives (prevState, formData); formData has "id". */
-  onApprove?: (prev: unknown, formData: FormData) => Promise<{ ok: boolean }>;
 }
 
 export function AdminAppointmentsClient({
   appointments,
   referenceToday,
-  onApprove,
 }: AdminAppointmentsClientProps) {
   const router = useRouter();
   const [tab, setTab] = useState<Tab>("upcoming");
   const [typeFilter, setTypeFilter] = useState<TypeFilter>("all");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
+  const [approvingId, setApprovingId] = useState<string | null>(null);
+
+  const handleApprove = async (appt: DummyAppointment) => {
+    setApprovingId(appt.id);
+    const res = await patch<DummyAppointment>(`/appointments/${appt.id}`, { status: "Confirmat" });
+    setApprovingId(null);
+    if ("error" in res) {
+      if (res.error.status === 401) router.push("/admin/login");
+      return;
+    }
+    router.refresh();
+  };
 
   const todayStart = useMemo(
     () =>
@@ -278,11 +274,15 @@ export function AdminAppointmentsClient({
                           ? t("admin.confirmed")
                           : t("admin.pending")}
                       </span>
-                      {appt.status === "În așteptare" && onApprove && (
-                        <form action={(fd) => void onApprove(undefined, fd)} className="ml-auto" onClick={(e) => e.stopPropagation()}>
-                          <input type="hidden" name="id" value={appt.id} />
-                          <ApproveButton />
-                        </form>
+                      {appt.status === "În așteptare" && (
+                        <button
+                          type="button"
+                          onClick={(e) => { e.stopPropagation(); void handleApprove(appt); }}
+                          disabled={approvingId === appt.id}
+                          className="ml-auto px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-bold hover:bg-blue-700 disabled:opacity-50 min-h-[44px]"
+                        >
+                          {approvingId === appt.id ? "..." : t("admin.approveAppointment")}
+                        </button>
                       )}
                     </li>
                   );

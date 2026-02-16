@@ -1,7 +1,10 @@
 import { NextResponse } from "next/server";
 import { getAdminTokens } from "@/lib/services";
+import { getAuthFromRequest } from "@/lib/auth/jwt";
 
 export async function POST(request: Request) {
+  const auth = await getAuthFromRequest(request);
+  if (!auth) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   try {
     const body = (await request.json()) as {
       type?: string;

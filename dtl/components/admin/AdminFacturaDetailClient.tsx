@@ -1,6 +1,9 @@
 "use client";
 
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import type { ClientPlata } from "@/lib/dummy-plati";
+import { patch } from "@/lib/api-client";
 
 function formatDateOnly(dateStr: string): string {
   try {
@@ -17,10 +20,26 @@ function formatDateOnly(dateStr: string): string {
 
 interface AdminFacturaDetailClientProps {
   plata: ClientPlata;
-  onUpdateNotes: (formData: FormData) => Promise<{ ok: boolean }>;
 }
 
-export function AdminFacturaDetailClient({ plata, onUpdateNotes }: AdminFacturaDetailClientProps) {
+export function AdminFacturaDetailClient({ plata }: AdminFacturaDetailClientProps) {
+  const router = useRouter();
+  const [pending, setPending] = useState(false);
+
+  const handleUpdateNotes = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const form = e.currentTarget;
+    const notes = (form.querySelector('[name="notes"]') as HTMLTextAreaElement)?.value ?? "";
+    setPending(true);
+    const res = await patch<ClientPlata>(`/plati/${plata.id}`, { notes });
+    setPending(false);
+    if ("error" in res) {
+      if (res.error.status === 401) router.push("/admin/login");
+      return;
+    }
+    router.refresh();
+  };
+
   return (
     <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
       <div className="p-6 space-y-6">
@@ -43,8 +62,7 @@ export function AdminFacturaDetailClient({ plata, onUpdateNotes }: AdminFacturaD
           </div>
         </dl>
 
-        <form action={(fd) => void onUpdateNotes(fd)} className="border-t border-slate-100 pt-6">
-          <input type="hidden" name="id" value={plata.id} />
+        <form onSubmit={handleUpdateNotes} className="border-t border-slate-100 pt-6">
           <label className="block text-sm font-bold text-slate-500 uppercase tracking-wider mb-2">
             Notițe (client / admin)
           </label>
@@ -57,9 +75,10 @@ export function AdminFacturaDetailClient({ plata, onUpdateNotes }: AdminFacturaD
           />
           <button
             type="submit"
-            className="mt-3 px-4 py-2 rounded-lg bg-slate-700 text-white text-sm font-bold hover:bg-slate-800"
+            disabled={pending}
+            className="mt-3 px-4 py-2 rounded-lg bg-slate-700 text-white text-sm font-bold hover:bg-slate-800 disabled:opacity-50"
           >
-            Salvează notițe
+            {pending ? "..." : "Salvează notițe"}
           </button>
         </form>
       </div>

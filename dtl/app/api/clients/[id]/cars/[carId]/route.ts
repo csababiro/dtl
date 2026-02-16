@@ -5,11 +5,14 @@ import {
   updateClientCar,
   deleteClientCar,
 } from "@/lib/services";
+import { getAuthFromRequest } from "@/lib/auth/jwt";
 
 export async function GET(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ id: string; carId: string }> }
 ) {
+  const auth = await getAuthFromRequest(request);
+  if (!auth) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const { id, carId } = await params;
   const clientResult = await getClientById(id);
   if ("error" in clientResult)
@@ -28,6 +31,8 @@ export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ id: string; carId: string }> }
 ) {
+  const auth = await getAuthFromRequest(request);
+  if (!auth) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const { id, carId } = await params;
   const clientResult = await getClientById(id);
   if ("error" in clientResult)
@@ -66,9 +71,11 @@ export async function PATCH(
 }
 
 export async function DELETE(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ id: string; carId: string }> }
 ) {
+  const auth = await getAuthFromRequest(request);
+  if (!auth) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const { id, carId } = await params;
   const clientResult = await getClientById(id);
   if ("error" in clientResult)
