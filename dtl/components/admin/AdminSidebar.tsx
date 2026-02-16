@@ -27,13 +27,13 @@ type AuthRole = "super_admin" | "admin" | "staff" | null;
 
 const ALL_MENU_ITEMS: { nameKey: string; icon: React.ComponentType<{ size?: number }>; path: string }[] = [
   { nameKey: "admin.dashboard", icon: LayoutDashboard, path: "/admin" },
+  { nameKey: "admin.featureFlags", icon: Flag, path: "/admin/feature-flags" },
   { nameKey: "admin.calendar", icon: Calendar, path: "/admin/calendar" },
   { nameKey: "admin.appointments", icon: ClipboardList, path: "/admin/appointments" },
   { nameKey: "admin.quotes", icon: FileText, path: "/admin/quotes" },
   { nameKey: "admin.services", icon: Wrench, path: "/admin/services" },
   { nameKey: "admin.clients", icon: UsersRound, path: "/admin/clients" },
   { nameKey: "admin.users", icon: Users, path: "/admin/users" },
-  { nameKey: "admin.featureFlags", icon: Flag, path: "/admin/feature-flags" },
   { nameKey: "admin.gallery", icon: ImageIcon, path: "/admin/gallery" },
   { nameKey: "admin.testimonials", icon: MessageCircle, path: "/admin/testimonials" },
   { nameKey: "admin.orar", icon: Clock, path: "/admin/orar" },
