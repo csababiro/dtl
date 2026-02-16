@@ -24,9 +24,10 @@ function ensurePostgresUrl(): void {
 }
 
 /** SQL tag; throws a clear error if POSTGRES_URL/DATABASE_URL is not set. */
-export const sql = new Proxy(vercelSql, {
-  apply(_target, thisArg, args: unknown[]) {
-    ensurePostgresUrl();
-    return (vercelSql as (...a: unknown[]) => unknown).apply(thisArg, args);
-  },
-});
+export function sql(
+  strings: TemplateStringsArray,
+  ...values: unknown[]
+): ReturnType<typeof vercelSql> {
+  ensurePostgresUrl();
+  return vercelSql(strings, ...values);
+}

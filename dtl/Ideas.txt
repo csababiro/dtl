@@ -1,2 +1,15 @@
-1. Prepopulated create account popup when programari or cerere oferta
-2. 
+1. Prepopulated create account popup when programari or cerere oferta DONE
+2. Push DONE
+3. Maps DONE
+4. phone responsive DONE
+5. Security
+6. CI/CD
+7. FB ads
+
+TODO
+0. Email thing
+1. Maps api key
+2. Fcm key
+
+
+demo@dtl.ro

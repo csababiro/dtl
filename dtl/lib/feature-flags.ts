@@ -47,7 +47,24 @@ export function effectiveFlag(superAdmin: boolean, admin: boolean): boolean {
   return superAdmin && admin;
 }
 
-const DEFAULT_FEATURE_FLAGS: FeatureFlags = {
+/** Map stored FeatureFlags (from DB) to admin UI toggles. Both roles get the same value. */
+export function featureFlagsToToggles(flags: Partial<FeatureFlags>): FeatureFlagToggles {
+  const b = (v: boolean | undefined) => v !== false;
+  return {
+    tyre: { superAdmin: b(flags.tyreService), admin: b(flags.tyreService) },
+    carWash: { superAdmin: b(flags.carWash), admin: b(flags.carWash) },
+    requestQuote: { superAdmin: b(flags.requestQuote), admin: b(flags.requestQuote) },
+    programare: { superAdmin: b(flags.generalServiceBooking), admin: b(flags.generalServiceBooking) },
+    authentication: { superAdmin: b(flags.authentication), admin: b(flags.authentication) },
+    showServicePrices: { superAdmin: b(flags.showServicePrices), admin: b(flags.showServicePrices) },
+    showTyrePrices: { superAdmin: b(flags.showTyreServicePrices), admin: b(flags.showTyreServicePrices) },
+    showCarWashPrices: { superAdmin: b(flags.showCarWashPrices), admin: b(flags.showCarWashPrices) },
+    gallery: { superAdmin: b(flags.gallery), admin: b(flags.gallery) },
+    testimonials: { superAdmin: b(flags.testimonials), admin: b(flags.testimonials) },
+  };
+}
+
+export const DEFAULT_FEATURE_FLAGS: FeatureFlags = {
   tyreService: true,
   carWash: true,
   requestQuote: true,

@@ -317,6 +317,7 @@
     "flagShowCarWashPricesDesc": "Prețurile pentru spălătorie pe pagina Servicii.",
     "saveFlags": "Salvează modificările",
     "saveFlagsDisabledHint": "Vom conecta la API ulterior.",
+    "saveFlagsSuccess": "Modificările au fost salvate.",
     "servicesManagement": "Gestiune Servicii",
     "servicesManagementDesc": "Adaugă, editează sau șterge serviciile oferite și prețurile acestora.",
     "servicesTabGeneral": "Servicii",

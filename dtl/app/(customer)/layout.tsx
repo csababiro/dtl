@@ -1,4 +1,5 @@
-import { getFeatureFlags } from "@/lib/feature-flags";
+import { getFeatureFlags as getFeatureFlagsFromService } from "@/lib/services";
+import { DEFAULT_FEATURE_FLAGS } from "@/lib/feature-flags";
 import { getBusinessSettings } from "@/lib/settings";
 import { Header } from "@/components/customer/Header";
 import { Footer } from "@/components/customer/Footer";
@@ -9,7 +10,11 @@ export default async function CustomerLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const flags = await getFeatureFlags();
+  const flagsResult = await getFeatureFlagsFromService();
+  const flags =
+    "error" in flagsResult
+      ? { ...DEFAULT_FEATURE_FLAGS }
+      : { ...DEFAULT_FEATURE_FLAGS, ...flagsResult.data };
   const settings = await getBusinessSettings();
   return (
     <>

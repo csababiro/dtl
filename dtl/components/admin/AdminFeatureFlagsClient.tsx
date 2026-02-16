@@ -6,8 +6,10 @@ import { t } from "@/lib/i18n";
 import {
   type AdminFlagKey,
   type FeatureFlagToggles,
+  type FeatureFlags,
   effectiveFlag,
 } from "@/lib/feature-flags";
+import { saveFeatureFlagsAction } from "@/app/admin/(dashboard)/feature-flags/actions";
 
 /** Mock role until API provides session role: super_admin sees only Super Admin column, admin sees only Admin column. */
 const MOCK_ADMIN_ROLE = (
@@ -92,6 +94,37 @@ const flagMeta: Record<
   },
 };
 
+/** Map admin toggles (per-role) to API payload (effective booleans per FeatureFlags key). */
+function togglesToPayload(toggles: FeatureFlagToggles): Partial<FeatureFlags> {
+  const eff = (key: AdminFlagKey) =>
+    effectiveFlag(
+      toggles[key]?.superAdmin ?? true,
+      toggles[key]?.admin ?? true
+    );
+  const payload: Partial<FeatureFlags> = {};
+  payload.tyreService = eff("tyre");
+  payload.tyreServiceVisible = eff("tyre");
+  payload.carWash = eff("carWash");
+  payload.carWashVisible = eff("carWash");
+  payload.requestQuote = eff("requestQuote");
+  payload.requestQuoteVisible = eff("requestQuote");
+  const programareEff = eff("programare");
+  payload.generalServiceBooking = programareEff;
+  payload.tyreServiceBooking = programareEff;
+  payload.carWashBooking = programareEff;
+  payload.generalServiceBookingVisible = programareEff;
+  payload.tyreServiceBookingVisible = programareEff;
+  payload.carWashBookingVisible = programareEff;
+  payload.authentication = eff("authentication");
+  payload.authenticationVisible = eff("authentication");
+  payload.showServicePrices = eff("showServicePrices");
+  payload.showTyreServicePrices = eff("showTyrePrices");
+  payload.showCarWashPrices = eff("showCarWashPrices");
+  payload.gallery = eff("gallery");
+  payload.testimonials = eff("testimonials");
+  return payload;
+}
+
 function Toggle({
   on,
   onClick,
@@ -121,9 +154,27 @@ function Toggle({
 
 type TabId = "func" | "prices";
 
-export function AdminFeatureFlagsClient() {
+type AdminFeatureFlagsClientProps = {
+  initialToggles?: FeatureFlagToggles;
+};
+
+export function AdminFeatureFlagsClient({ initialToggles }: AdminFeatureFlagsClientProps) {
   const [activeTab, setActiveTab] = useState<TabId>("func");
-  const [toggles, setToggles] = useState<FeatureFlagToggles>(defaultToggles);
+  const [toggles, setToggles] = useState<FeatureFlagToggles>(initialToggles ?? defaultToggles);
+  const [saving, setSaving] = useState(false);
+  const [saveMessage, setSaveMessage] = useState<{ ok: boolean; text: string } | null>(null);
+
+  const handleSave = async () => {
+    setSaving(true);
+    setSaveMessage(null);
+    const result = await saveFeatureFlagsAction(togglesToPayload(toggles));
+    setSaving(false);
+    if (result.ok) {
+      setSaveMessage({ ok: true, text: t("admin.saveFlagsSuccess") });
+    } else {
+      setSaveMessage({ ok: false, text: result.message });
+    }
+  };
 
   const setSuperAdmin = (key: AdminFlagKey, value: boolean) => {
     setToggles((prev) => ({
@@ -526,14 +577,25 @@ export function AdminFeatureFlagsClient() {
 
       </div>
 
-      <div className="flex justify-end gap-4">
+      <div className="flex flex-wrap items-center justify-end gap-4">
+        {saveMessage && (
+          <span
+            className={
+              saveMessage.ok
+                ? "text-green-600 font-medium"
+                : "text-red-600 font-medium"
+            }
+          >
+            {saveMessage.text}
+          </span>
+        )}
         <button
           type="button"
-          disabled
-          title={t("admin.saveFlagsDisabledHint")}
-          className="px-8 py-3 bg-slate-200 text-slate-500 rounded-xl font-bold cursor-not-allowed"
+          disabled={saving}
+          onClick={handleSave}
+          className="px-8 py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
-          {t("admin.saveFlags")}
+          {saving ? "..." : t("admin.saveFlags")}
         </button>
       </div>
     </div>
