@@ -2,6 +2,8 @@ import { AdminFeatureFlagsClient } from "@/components/admin/AdminFeatureFlagsCli
 import { getFeatureFlags } from "@/lib/services/feature-flags";
 import { DEFAULT_FEATURE_FLAGS, featureFlagsToToggles } from "@/lib/feature-flags";
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminFeatureFlagsPage() {
   const result = await getFeatureFlags();
   const flags = "data" in result ? result.data : DEFAULT_FEATURE_FLAGS;

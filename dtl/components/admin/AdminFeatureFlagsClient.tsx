@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ShieldAlert } from "lucide-react";
 import { t } from "@/lib/i18n";
 import {
@@ -9,8 +9,10 @@ import {
   type FeatureFlagToggles,
   type FeatureFlags,
   effectiveFlag,
+  featureFlagsToToggles,
+  DEFAULT_FEATURE_FLAGS,
 } from "@/lib/feature-flags";
-import { put } from "@/lib/api-client";
+import { get, put } from "@/lib/api-client";
 
 /** Mock role until API provides session role: super_admin sees only Super Admin column, admin sees only Admin column. */
 const MOCK_ADMIN_ROLE = (
@@ -166,6 +168,18 @@ export function AdminFeatureFlagsClient({ initialToggles }: AdminFeatureFlagsCli
   const [saving, setSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState<{ ok: boolean; text: string } | null>(null);
 
+  const loadFlagsFromApi = async () => {
+    const result = await get<FeatureFlags>("/settings/feature-flags");
+    if (!("error" in result)) {
+      const next = featureFlagsToToggles({ ...DEFAULT_FEATURE_FLAGS, ...result.data });
+      setToggles(next);
+    }
+  };
+
+  useEffect(() => {
+    loadFlagsFromApi();
+  }, []);
+
   const handleSave = async () => {
     setSaving(true);
     setSaveMessage(null);
@@ -183,18 +197,19 @@ export function AdminFeatureFlagsClient({ initialToggles }: AdminFeatureFlagsCli
       return;
     }
     setSaveMessage({ ok: true, text: t("admin.saveFlagsSuccess") });
+    await loadFlagsFromApi();
   };
 
   const setSuperAdmin = (key: AdminFlagKey, value: boolean) => {
     setToggles((prev) => ({
       ...prev,
-      [key]: { ...prev[key], superAdmin: value },
+      [key]: { superAdmin: value, admin: value },
     }));
   };
   const setAdmin = (key: AdminFlagKey, value: boolean) => {
     setToggles((prev) => ({
       ...prev,
-      [key]: { ...prev[key], admin: value },
+      [key]: { superAdmin: value, admin: value },
     }));
   };
 

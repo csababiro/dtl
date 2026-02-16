@@ -5,12 +5,12 @@ export type ApiError = {
   retriable?: boolean;
 };
 
-/** Base URL for API (e.g. same-origin /api or NEXT_PUBLIC_API_URL). Safe to use from server (RSC) or client. */
+/** Base URL for API. In the browser always same-origin so admin/auth and cookies work. On server uses NEXT_PUBLIC_API_URL or same-origin. */
 export function getBaseUrl(): string {
+  // Browser: always same-origin so PUT/POST from admin hit this app's API (JWT cookie, no "Failed to fetch")
+  if (typeof window !== "undefined") return window.location.origin + "/api";
   const url = process.env.NEXT_PUBLIC_API_URL;
   if (url != null && url !== "") return url.replace(/\/$/, "");
-  // Same-origin fallback: use this app's /api (so form works without external backend)
-  if (typeof window !== "undefined") return window.location.origin + "/api";
   return (process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000").replace(/\/$/, "") + "/api";
 }
 
@@ -42,6 +42,7 @@ export async function get<T>(path: string): Promise<{ data: T } | { error: ApiEr
     const res = await fetch(url, {
       credentials: "include",
       headers: authHeaders,
+      cache: "no-store",
     });
     if (!res.ok) {
       const body = await res.text();

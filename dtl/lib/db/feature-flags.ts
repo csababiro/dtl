@@ -36,6 +36,10 @@ export async function getFeatureFlagsFromDb(): Promise<FeatureFlags> {
 export async function putFeatureFlagsInDb(payload: Partial<FeatureFlags>): Promise<FeatureFlags> {
   const current = await getFeatureFlagsFromDb();
   const stored = { ...current, ...payload };
-  await sql`UPDATE feature_flags SET data = ${JSON.stringify(stored)}::jsonb WHERE id = 1`;
+  // Upsert so save works even if schema INSERT never ran (no row id=1 yet)
+  await sql`
+    INSERT INTO feature_flags (id, data) VALUES (1, ${JSON.stringify(stored)}::jsonb)
+    ON CONFLICT (id) DO UPDATE SET data = EXCLUDED.data
+  `;
   return stored;
 }
