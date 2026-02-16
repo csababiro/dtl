@@ -25,6 +25,13 @@ export async function getUserByIdFromDb(id: string): Promise<DummyUser | null> {
   return rowToUser(rows[0] as Record<string, unknown>);
 }
 
+export async function getUserByEmailFromDb(email: string): Promise<DummyUser | null> {
+  const normalized = email.trim().toLowerCase();
+  const { rows } = await sql`SELECT * FROM users WHERE LOWER(TRIM(email)) = ${normalized}`;
+  if (rows.length === 0) return null;
+  return rowToUser(rows[0] as Record<string, unknown>);
+}
+
 export async function getCurrentUserCanManageUsersFromDb(): Promise<boolean> {
   const mockId = typeof process !== "undefined" ? process.env.NEXT_PUBLIC_MOCK_USER_ID : undefined;
   if (mockId) {

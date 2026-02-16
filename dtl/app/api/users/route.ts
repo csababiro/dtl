@@ -5,9 +5,21 @@ import { getAuthFromRequest } from "@/lib/auth/jwt";
 
 export const dynamic = "force-dynamic";
 
+function requireSuperAdmin(auth: { role: string } | null) {
+  if (!auth) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (auth.role !== "super_admin") {
+    return NextResponse.json(
+      { error: "Forbidden. Doar Super Admin poate gestiona utilizatorii." },
+      { status: 403 }
+    );
+  }
+  return null;
+}
+
 export async function GET(request: Request) {
   const auth = await getAuthFromRequest(request);
-  if (!auth) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const forbidden = requireSuperAdmin(auth);
+  if (forbidden) return forbidden;
   // #region agent log
   fetch("http://127.0.0.1:7244/ingest/38291e03-8924-411d-af90-c560fa478f53", {
     method: "POST",
@@ -42,7 +54,8 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   const auth = await getAuthFromRequest(request);
-  if (!auth) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const forbidden = requireSuperAdmin(auth);
+  if (forbidden) return forbidden;
   try {
     const body = (await request.json()) as {
       name?: string;

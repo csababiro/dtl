@@ -17,6 +17,9 @@ export async function GET() {
 export async function PUT(request: Request) {
   const auth = await getAuthFromRequest(request);
   if (!auth) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (auth.role !== "super_admin") {
+    return NextResponse.json({ error: "Forbidden. Doar Super Admin poate modifica funcționalitățile." }, { status: 403 });
+  }
   try {
     const body = (await request.json()) as Partial<FeatureFlags>;
     const result = await putFeatureFlags(body);

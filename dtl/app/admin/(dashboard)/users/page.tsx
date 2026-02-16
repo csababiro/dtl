@@ -1,9 +1,18 @@
+import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 import { t } from "@/lib/i18n";
 import { getUsers } from "@/lib/api/users";
 import { getCurrentUserCanManageUsers } from "@/lib/services";
 import { AdminUsersClient } from "@/components/admin/AdminUsersClient";
+import { JWT_COOKIE, verifyJwt } from "@/lib/auth/jwt";
 
 export default async function AdminUsersPage() {
+  const cookieStore = await cookies();
+  const jwtToken = cookieStore.get(JWT_COOKIE)?.value;
+  const payload = jwtToken ? await verifyJwt(jwtToken) : null;
+  if (!payload || payload.role !== "super_admin") {
+    redirect("/admin");
+  }
   const result = await getUsers();
   const users = "data" in result ? result.data : [];
   const canResult = await getCurrentUserCanManageUsers();

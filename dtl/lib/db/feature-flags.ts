@@ -25,6 +25,8 @@ const DEFAULTS: FeatureFlags = {
   showCarWashPrices: true,
   gallery: true,
   testimonials: true,
+  adminPanelEnabled: true,
+  publicSiteEnabled: true,
 };
 
 export async function getFeatureFlagsFromDb(): Promise<FeatureFlags> {

@@ -14,13 +14,6 @@ import {
 } from "@/lib/feature-flags";
 import { get, put } from "@/lib/api-client";
 
-/** Mock role until API provides session role: super_admin sees only Super Admin column, admin sees only Admin column. */
-const MOCK_ADMIN_ROLE = (
-  typeof process !== "undefined" && process.env.NEXT_PUBLIC_MOCK_ADMIN_ROLE === "admin"
-    ? "admin"
-    : "super_admin"
-) as "super_admin" | "admin";
-
 const ADMIN_FLAG_KEYS: AdminFlagKey[] = [
   "tyre",
   "carWash",
@@ -32,6 +25,8 @@ const ADMIN_FLAG_KEYS: AdminFlagKey[] = [
   "showCarWashPrices",
   "gallery",
   "testimonials",
+  "adminPanelEnabled",
+  "publicSiteEnabled",
 ];
 
 const PRICE_FLAG_KEYS: AdminFlagKey[] = [
@@ -55,6 +50,8 @@ const defaultToggles: FeatureFlagToggles = {
   showCarWashPrices: { superAdmin: true, admin: true },
   gallery: { superAdmin: true, admin: true },
   testimonials: { superAdmin: true, admin: true },
+  adminPanelEnabled: { superAdmin: true, admin: true },
+  publicSiteEnabled: { superAdmin: true, admin: true },
 };
 
 const flagMeta: Record<
@@ -95,6 +92,14 @@ const flagMeta: Record<
     labelKey: "admin.flagTestimonials",
     descKey: "admin.flagTestimonialsDesc",
   },
+  adminPanelEnabled: {
+    labelKey: "admin.flagAdminPanelEnabled",
+    descKey: "admin.flagAdminPanelEnabledDesc",
+  },
+  publicSiteEnabled: {
+    labelKey: "admin.flagPublicSiteEnabled",
+    descKey: "admin.flagPublicSiteEnabledDesc",
+  },
 };
 
 /** Map admin toggles (per-role) to API payload (effective booleans per FeatureFlags key). */
@@ -125,6 +130,8 @@ function togglesToPayload(toggles: FeatureFlagToggles): Partial<FeatureFlags> {
   payload.showCarWashPrices = eff("showCarWashPrices");
   payload.gallery = eff("gallery");
   payload.testimonials = eff("testimonials");
+  payload.adminPanelEnabled = eff("adminPanelEnabled");
+  payload.publicSiteEnabled = eff("publicSiteEnabled");
   return payload;
 }
 
@@ -305,36 +312,17 @@ export function AdminFeatureFlagsClient({ initialToggles }: AdminFeatureFlagsCli
                   </span>
                 </div>
                 <div className="flex flex-wrap items-center gap-4 pt-2 border-t border-slate-100">
-                  {MOCK_ADMIN_ROLE === "super_admin" && (
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-bold text-slate-500">
-                        {t("admin.superAdmin")}:
-                      </span>
-                      <Toggle
-                        on={superAdmin}
-                        onClick={() => setSuperAdmin(key, !superAdmin)}
-                        ariaLabel={`${t(labelKey)} ${t("admin.superAdmin")}`}
-                      />
-                    </div>
-                  )}
-                  {MOCK_ADMIN_ROLE === "admin" && (
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-bold text-slate-500">
-                        {t("admin.adminRole")}:
-                      </span>
-                      <Toggle
-                        on={admin}
-                        onClick={() => setAdmin(key, !admin)}
-                        ariaLabel={`${t(labelKey)} ${t("admin.adminRole")}`}
-                      />
-                    </div>
-                  )}
+                  <Toggle
+                    on={eff}
+                    onClick={() => setSuperAdmin(key, !eff)}
+                    ariaLabel={t(labelKey)}
+                  />
                 </div>
               </div>
             );
           })}
         </div>
-        {/* Desktop: table */}
+        {/* Desktop: single column ON/OFF */}
         <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left">
             <thead className="bg-slate-50 border-b border-slate-100">
@@ -342,17 +330,7 @@ export function AdminFeatureFlagsClient({ initialToggles }: AdminFeatureFlagsCli
                 <th className="px-8 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">
                   {t("admin.featureColumn")}
                 </th>
-                {MOCK_ADMIN_ROLE === "super_admin" && (
-                  <th className="px-8 py-4 text-xs font-black text-slate-400 uppercase tracking-widest text-center w-32">
-                    {t("admin.superAdmin")}
-                  </th>
-                )}
-                {MOCK_ADMIN_ROLE === "admin" && (
-                  <th className="px-8 py-4 text-xs font-black text-slate-400 uppercase tracking-widest text-center w-32">
-                    {t("admin.adminRole")}
-                  </th>
-                )}
-                <th className="px-8 py-4 text-xs font-black text-slate-400 uppercase tracking-widest text-center w-24">
+                <th className="px-8 py-4 text-xs font-black text-slate-400 uppercase tracking-widest text-center w-32">
                   {t("admin.effective")}
                 </th>
               </tr>
@@ -388,42 +366,21 @@ export function AdminFeatureFlagsClient({ initialToggles }: AdminFeatureFlagsCli
                         </div>
                       </div>
                     </td>
-                    {MOCK_ADMIN_ROLE === "super_admin" && (
-                      <td className="px-8 py-6 text-center">
-                        <div className="flex justify-center">
-                          <Toggle
-                            on={superAdmin}
-                            onClick={() => setSuperAdmin(key, !superAdmin)}
-                            ariaLabel={`${t(labelKey)} ${t("admin.superAdmin")}`}
-                          />
-                        </div>
-                      </td>
-                    )}
-                    {MOCK_ADMIN_ROLE === "admin" && (
-                      <td className="px-8 py-6 text-center">
-                        <div className="flex justify-center">
-                          <Toggle
-                            on={admin}
-                            onClick={() => setAdmin(key, !admin)}
-                            ariaLabel={`${t(labelKey)} ${t("admin.adminRole")}`}
-                          />
-                        </div>
-                      </td>
-                    )}
                     <td className="px-8 py-6 text-center">
-                      <span
-                        className={`inline-flex items-center gap-1.5 text-sm font-bold ${
-                          eff ? "text-green-600" : "text-slate-400"
-                        }`}
-                      >
-                        <span
-                          className={`w-2 h-2 rounded-full ${
-                            eff ? "bg-green-500" : "bg-slate-300"
-                          }`}
-                          aria-hidden
+                      <div className="flex justify-center items-center gap-2">
+                        <Toggle
+                          on={eff}
+                          onClick={() => setSuperAdmin(key, !eff)}
+                          ariaLabel={t(labelKey)}
                         />
-                        {eff ? "ON" : "OFF"}
-                      </span>
+                        <span
+                          className={`text-sm font-bold ${
+                            eff ? "text-green-600" : "text-slate-400"
+                          }`}
+                        >
+                          {eff ? "ON" : "OFF"}
+                        </span>
+                      </div>
                     </td>
                   </tr>
                 );
@@ -470,36 +427,16 @@ export function AdminFeatureFlagsClient({ initialToggles }: AdminFeatureFlagsCli
                     </span>
                   </div>
                   <div className="flex flex-wrap items-center gap-4 pt-2 border-t border-slate-100">
-                    {MOCK_ADMIN_ROLE === "super_admin" && (
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-bold text-slate-500">
-                          {t("admin.superAdmin")}:
-                        </span>
-                        <Toggle
-                          on={superAdmin}
-                          onClick={() => setSuperAdmin(key, !superAdmin)}
-                          ariaLabel={`${t(labelKey)} ${t("admin.superAdmin")}`}
-                        />
-                      </div>
-                    )}
-                    {MOCK_ADMIN_ROLE === "admin" && (
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-bold text-slate-500">
-                          {t("admin.adminRole")}:
-                        </span>
-                        <Toggle
-                          on={admin}
-                          onClick={() => setAdmin(key, !admin)}
-                          ariaLabel={`${t(labelKey)} ${t("admin.adminRole")}`}
-                        />
-                      </div>
-                    )}
+                    <Toggle
+                      on={eff}
+                      onClick={() => setSuperAdmin(key, !eff)}
+                      ariaLabel={t(labelKey)}
+                    />
                   </div>
                 </div>
               );
             })}
           </div>
-          {/* Desktop: table */}
           <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-left">
               <thead className="bg-slate-50 border-b border-slate-100">
@@ -507,17 +444,7 @@ export function AdminFeatureFlagsClient({ initialToggles }: AdminFeatureFlagsCli
                   <th className="px-8 py-4 text-xs font-black text-slate-400 uppercase tracking-widest">
                     {t("admin.featureColumn")}
                   </th>
-                  {MOCK_ADMIN_ROLE === "super_admin" && (
-                    <th className="px-8 py-4 text-xs font-black text-slate-400 uppercase tracking-widest text-center w-32">
-                      {t("admin.superAdmin")}
-                    </th>
-                  )}
-                  {MOCK_ADMIN_ROLE === "admin" && (
-                    <th className="px-8 py-4 text-xs font-black text-slate-400 uppercase tracking-widest text-center w-32">
-                      {t("admin.adminRole")}
-                    </th>
-                  )}
-                  <th className="px-8 py-4 text-xs font-black text-slate-400 uppercase tracking-widest text-center w-24">
+                  <th className="px-8 py-4 text-xs font-black text-slate-400 uppercase tracking-widest text-center w-32">
                     {t("admin.effective")}
                   </th>
                 </tr>
@@ -553,42 +480,21 @@ export function AdminFeatureFlagsClient({ initialToggles }: AdminFeatureFlagsCli
                           </div>
                         </div>
                       </td>
-                      {MOCK_ADMIN_ROLE === "super_admin" && (
-                        <td className="px-8 py-6 text-center">
-                          <div className="flex justify-center">
-                            <Toggle
-                              on={superAdmin}
-                              onClick={() => setSuperAdmin(key, !superAdmin)}
-                              ariaLabel={`${t(labelKey)} ${t("admin.superAdmin")}`}
-                            />
-                          </div>
-                        </td>
-                      )}
-                      {MOCK_ADMIN_ROLE === "admin" && (
-                        <td className="px-8 py-6 text-center">
-                          <div className="flex justify-center">
-                            <Toggle
-                              on={admin}
-                              onClick={() => setAdmin(key, !admin)}
-                              ariaLabel={`${t(labelKey)} ${t("admin.adminRole")}`}
-                            />
-                          </div>
-                        </td>
-                      )}
                       <td className="px-8 py-6 text-center">
-                        <span
-                          className={`inline-flex items-center gap-1.5 text-sm font-bold ${
-                            eff ? "text-green-600" : "text-slate-400"
-                          }`}
-                        >
-                          <span
-                            className={`w-2 h-2 rounded-full ${
-                              eff ? "bg-green-500" : "bg-slate-300"
-                            }`}
-                            aria-hidden
+                        <div className="flex justify-center items-center gap-2">
+                          <Toggle
+                            on={eff}
+                            onClick={() => setSuperAdmin(key, !eff)}
+                            ariaLabel={t(labelKey)}
                           />
-                          {eff ? "ON" : "OFF"}
-                        </span>
+                          <span
+                            className={`text-sm font-bold ${
+                              eff ? "text-green-600" : "text-slate-400"
+                            }`}
+                          >
+                            {eff ? "ON" : "OFF"}
+                          </span>
+                        </div>
                       </td>
                     </tr>
                   );

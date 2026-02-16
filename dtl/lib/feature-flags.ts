@@ -24,9 +24,13 @@ export interface FeatureFlags {
   showCarWashPrices?: boolean;
   gallery?: boolean;
   testimonials?: boolean;
+  /** When false, only super_admin can access admin panel; others see "Panel dezactivat". */
+  adminPanelEnabled?: boolean;
+  /** When false, public site shows maintenance page (super_admin still has access). */
+  publicSiteEnabled?: boolean;
 }
 
-/** Admin-only: per-role toggles. Effective = superAdmin && admin. */
+/** Admin-only: one toggle per flag (super_admin only). */
 export type AdminFlagKey =
   | "tyre"
   | "carWash"
@@ -37,8 +41,11 @@ export type AdminFlagKey =
   | "showTyrePrices"
   | "showCarWashPrices"
   | "gallery"
-  | "testimonials";
+  | "testimonials"
+  | "adminPanelEnabled"
+  | "publicSiteEnabled";
 
+/** Single boolean per flag (no per-role). */
 export interface FeatureFlagToggles {
   [key: string]: { superAdmin: boolean; admin: boolean };
 }
@@ -47,7 +54,7 @@ export function effectiveFlag(superAdmin: boolean, admin: boolean): boolean {
   return superAdmin && admin;
 }
 
-/** Map stored FeatureFlags (from DB) to admin UI toggles. Both roles get the same value. */
+/** Map stored FeatureFlags (from DB) to admin UI toggles. Single value for both columns. */
 export function featureFlagsToToggles(flags: Partial<FeatureFlags>): FeatureFlagToggles {
   const b = (v: boolean | undefined) => v !== false;
   return {
@@ -61,6 +68,8 @@ export function featureFlagsToToggles(flags: Partial<FeatureFlags>): FeatureFlag
     showCarWashPrices: { superAdmin: b(flags.showCarWashPrices), admin: b(flags.showCarWashPrices) },
     gallery: { superAdmin: b(flags.gallery), admin: b(flags.gallery) },
     testimonials: { superAdmin: b(flags.testimonials), admin: b(flags.testimonials) },
+    adminPanelEnabled: { superAdmin: b(flags.adminPanelEnabled), admin: b(flags.adminPanelEnabled) },
+    publicSiteEnabled: { superAdmin: b(flags.publicSiteEnabled), admin: b(flags.publicSiteEnabled) },
   };
 }
 
@@ -88,6 +97,8 @@ export const DEFAULT_FEATURE_FLAGS: FeatureFlags = {
   showCarWashPrices: true,
   gallery: true,
   testimonials: true,
+  adminPanelEnabled: true,
+  publicSiteEnabled: true,
 };
 
 export async function getFeatureFlags(): Promise<FeatureFlags> {

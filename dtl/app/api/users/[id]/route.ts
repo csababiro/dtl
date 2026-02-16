@@ -3,12 +3,24 @@ import { getUserById, updateUser, deleteUser } from "@/lib/services";
 import type { DummyUserRole } from "@/lib/dummy-users";
 import { getAuthFromRequest } from "@/lib/auth/jwt";
 
+function requireSuperAdmin(auth: { role: string } | null) {
+  if (!auth) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (auth.role !== "super_admin") {
+    return NextResponse.json(
+      { error: "Forbidden. Doar Super Admin poate gestiona utilizatorii." },
+      { status: 403 }
+    );
+  }
+  return null;
+}
+
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const auth = await getAuthFromRequest(request);
-  if (!auth) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const forbidden = requireSuperAdmin(auth);
+  if (forbidden) return forbidden;
   const { id } = await params;
   const result = await getUserById(id);
   if ("error" in result)
@@ -22,7 +34,8 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const auth = await getAuthFromRequest(request);
-  if (!auth) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const forbidden = requireSuperAdmin(auth);
+  if (forbidden) return forbidden;
   const { id } = await params;
   const userResult = await getUserById(id);
   if ("error" in userResult)
@@ -72,7 +85,8 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const auth = await getAuthFromRequest(request);
-  if (!auth) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const forbidden = requireSuperAdmin(auth);
+  if (forbidden) return forbidden;
   const { id } = await params;
   const result = await deleteUser(id);
   if ("error" in result)

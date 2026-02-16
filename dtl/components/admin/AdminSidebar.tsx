@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -22,7 +23,9 @@ import {
 } from "lucide-react";
 import { t } from "@/lib/i18n";
 
-const menuItems: { nameKey: string; icon: React.ComponentType<{ size?: number }>; path: string }[] = [
+type AuthRole = "super_admin" | "admin" | "staff" | null;
+
+const ALL_MENU_ITEMS: { nameKey: string; icon: React.ComponentType<{ size?: number }>; path: string }[] = [
   { nameKey: "admin.dashboard", icon: LayoutDashboard, path: "/admin" },
   { nameKey: "admin.calendar", icon: Calendar, path: "/admin/calendar" },
   { nameKey: "admin.appointments", icon: ClipboardList, path: "/admin/appointments" },
@@ -38,6 +41,13 @@ const menuItems: { nameKey: string; icon: React.ComponentType<{ size?: number }>
   { nameKey: "admin.apiDocs", icon: BookOpen, path: "/admin/api-docs" },
 ];
 
+function roleLabel(role: AuthRole): string {
+  if (role === "super_admin") return t("admin.superAdmin");
+  if (role === "admin") return t("admin.adminRole");
+  if (role === "staff") return t("admin.roleStaff");
+  return "—";
+}
+
 interface AdminSidebarProps {
   mobileOpen?: boolean;
   onMobileClose?: () => void;
@@ -45,6 +55,21 @@ interface AdminSidebarProps {
 
 export function AdminSidebar({ mobileOpen = false, onMobileClose }: AdminSidebarProps) {
   const pathname = usePathname();
+  const [role, setRole] = useState<AuthRole>(null);
+
+  useEffect(() => {
+    fetch("/api/auth/me", { credentials: "include", cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => setRole(data?.role ?? null))
+      .catch(() => setRole(null));
+  }, []);
+
+  const menuItems =
+    role === "super_admin"
+      ? ALL_MENU_ITEMS
+      : ALL_MENU_ITEMS.filter(
+          (item) => item.path !== "/admin/feature-flags" && item.path !== "/admin/users"
+        );
 
   const isActive = (path: string) =>
     path === "/admin" ? pathname === "/admin" : pathname.startsWith(path);
@@ -114,11 +139,13 @@ export function AdminSidebar({ mobileOpen = false, onMobileClose }: AdminSidebar
         <div className="bg-slate-800/50 p-4 rounded-xl mb-4">
           <div className="flex items-center gap-3 mb-1">
             <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-white text-xs font-bold">
-              AD
+              {role === "super_admin" ? "SA" : role === "admin" ? "AD" : "ST"}
             </div>
             <div>
-              <p className="text-sm font-semibold text-white leading-none">Admin DTL</p>
-              <p className="text-[10px] text-slate-500">Super Admin</p>
+              <p className="text-sm font-semibold text-white leading-none">{roleLabel(role)}</p>
+              <p className="text-[10px] text-slate-500">
+                {role === "super_admin" ? "Proprietar" : role === "admin" ? "Administrator" : "Personal"}
+              </p>
             </div>
           </div>
         </div>
