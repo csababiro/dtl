@@ -14,7 +14,7 @@ import { t } from "@/lib/i18n";
 import { getMapsUrl } from "@/lib/maps";
 import { InteractiveMap } from "@/components/customer/InteractiveMap";
 import { ImageWithFallback } from "@/components/shared/ImageWithFallback";
-import { isAnyBookingEnabled, isModuleEnabled } from "@/lib/feature-flags";
+import { isBookingEnabled, isModuleEnabled } from "@/lib/feature-flags";
 
 const HERO_IMAGE =
   "https://images.unsplash.com/photo-1581092160562-40aa08e78837?q=80&w=1080";
@@ -63,7 +63,7 @@ export const dynamic = "force-dynamic";
 export default async function HomePage() {
   const flags = await getFeatureFlags();
   const settings = await getBusinessSettings();
-  const showBooking = isAnyBookingEnabled(flags);
+  const showBooking = isBookingEnabled(flags, "general");
   const showTyre = isModuleEnabled(flags, "tyre");
   const showCarWash = isModuleEnabled(flags, "carWash");
 

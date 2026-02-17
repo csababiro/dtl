@@ -9,7 +9,7 @@ import { t } from "@/lib/i18n";
 import { ContactStrip } from "./ContactStrip";
 import type { FeatureFlags } from "@/lib/feature-flags";
 import {
-  isAnyBookingEnabled,
+  isBookingEnabled,
   isRequestQuoteEnabled,
   isAuthenticationEnabled,
   isGalleryEnabled,
@@ -45,7 +45,7 @@ export function Header({
     const height = headerRef.current?.getBoundingClientRect().bottom ?? 0;
     setMenuTop(height);
   }, [isOpen]);
-  const showBooking = isAnyBookingEnabled(flags);
+  const showBooking = isBookingEnabled(flags, "general");
   const showQuote = isRequestQuoteEnabled(flags);
   const showAuth = isAuthenticationEnabled(flags);
   const showGallery = isGalleryEnabled(flags);

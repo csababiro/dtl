@@ -4,7 +4,7 @@ import { t } from "@/lib/i18n";
 import { getMapsUrl } from "@/lib/maps";
 import type { FeatureFlags } from "@/lib/feature-flags";
 import {
-  isAnyBookingEnabled,
+  isBookingEnabled,
   isRequestQuoteEnabled,
   isAuthenticationEnabled,
   isGalleryEnabled,
@@ -38,7 +38,7 @@ export function Footer({
   hours,
 }: FooterProps) {
   const hoursText = formatHours(hours ?? undefined);
-  const showBooking = isAnyBookingEnabled(flags);
+  const showBooking = isBookingEnabled(flags, "general");
   const showQuote = isRequestQuoteEnabled(flags);
   const showGallery = isGalleryEnabled(flags);
   const showTestimonials = isTestimonialsEnabled(flags);

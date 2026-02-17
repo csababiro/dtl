@@ -57,6 +57,7 @@ export function AdminSidebar({ mobileOpen = false, onMobileClose }: AdminSidebar
   const pathname = usePathname();
   const [role, setRole] = useState<AuthRole>(null);
   const [canManageUsers, setCanManageUsers] = useState(false);
+  const [programareEnabled, setProgramareEnabled] = useState(true);
 
   useEffect(() => {
     fetch("/api/auth/me", { credentials: "include", cache: "no-store" })
@@ -68,12 +69,25 @@ export function AdminSidebar({ mobileOpen = false, onMobileClose }: AdminSidebar
       .catch(() => setRole(null));
   }, []);
 
+  useEffect(() => {
+    fetch("/api/settings/feature-flags", { credentials: "include", cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => setProgramareEnabled(data?.generalServiceBooking !== false))
+      .catch(() => {});
+  }, []);
+
   const menuItems =
     role === "super_admin"
-      ? ALL_MENU_ITEMS
+      ? ALL_MENU_ITEMS.filter(
+          (item) =>
+            programareEnabled ||
+            (item.path !== "/admin/calendar" && item.path !== "/admin/appointments")
+        )
       : ALL_MENU_ITEMS.filter((item) => {
           if (item.path === "/admin/feature-flags") return false;
           if (item.path === "/admin/users") return canManageUsers;
+          if (!programareEnabled && (item.path === "/admin/calendar" || item.path === "/admin/appointments"))
+            return false;
           return true;
         });
 

@@ -5,7 +5,7 @@ import { t } from "@/lib/i18n";
 import { ImageWithFallback } from "@/components/shared/ImageWithFallback";
 import {
   isModuleEnabled,
-  isAnyBookingEnabled,
+  isBookingEnabled,
   isServicePriceVisible,
   isTyrePriceVisible,
   isCarWashPriceVisible,
@@ -28,7 +28,7 @@ export default async function ServiciiPage() {
   const flags = await getFeatureFlags();
   const showTyre = isModuleEnabled(flags, "tyre");
   const showCarWash = isModuleEnabled(flags, "carWash");
-  const showBooking = isAnyBookingEnabled(flags);
+  const showBooking = isBookingEnabled(flags, "general");
   const showServicePrices = isServicePriceVisible(flags);
   const showTyrePrices = isTyrePriceVisible(flags);
   const showCarWashPrices = isCarWashPriceVisible(flags);
