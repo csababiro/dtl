@@ -37,6 +37,7 @@ export default async function ServiciiPage() {
     getServicesForDisplay("spalatorie"),
   ]);
 
+  const maxServicesPerCategory = 4;
   const categories = [
     {
       id: "general" as const,
@@ -45,7 +46,7 @@ export default async function ServiciiPage() {
       img: SERVICE_GENERAL_IMG,
       show: true,
       showPrice: showServicePrices,
-      items: generalItems,
+      items: generalItems.slice(0, maxServicesPerCategory),
     },
     {
       id: "anvelope" as const,
@@ -54,7 +55,7 @@ export default async function ServiciiPage() {
       img: SERVICE_TYRE_IMG,
       show: showTyre,
       showPrice: showTyrePrices,
-      items: anvelopeItems,
+      items: anvelopeItems.slice(0, maxServicesPerCategory),
     },
     {
       id: "spalatorie" as const,
@@ -63,7 +64,7 @@ export default async function ServiciiPage() {
       img: SERVICE_WASH_IMG,
       show: showCarWash,
       showPrice: showCarWashPrices,
-      items: spalatorieItems,
+      items: spalatorieItems.slice(0, maxServicesPerCategory),
     },
   ].filter((c) => c.show);
 
