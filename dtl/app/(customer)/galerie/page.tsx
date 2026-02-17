@@ -2,17 +2,7 @@ import Link from "next/link";
 import { getFeatureFlags, isGalleryEnabled } from "@/lib/feature-flags";
 import { t } from "@/lib/i18n";
 import { GalleryWithLightbox } from "@/components/customer/GalleryWithLightbox";
-
-const GALLERY_IMAGES = [
-  "https://images.unsplash.com/photo-1581092160562-40aa08e78837?q=80&w=600",
-  "https://images.unsplash.com/photo-1675034743126-0f250a5fee51?q=80&w=600",
-  "https://images.unsplash.com/photo-1607860108855-64acf2078ed9?q=80&w=600",
-  "https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?q=80&w=600",
-  "https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?q=80&w=600",
-  "https://images.unsplash.com/photo-1502877338535-766e1452684a?q=80&w=600",
-  "https://images.unsplash.com/photo-1619642751034-765dfdf7c58e?q=80&w=600",
-  "https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?q=80&w=600",
-];
+import { getGalleryItems } from "@/lib/services";
 
 export const dynamic = "force-dynamic";
 
@@ -34,6 +24,10 @@ export default async function GaleriePage() {
     );
   }
 
+  const result = await getGalleryItems();
+  const items = "data" in result ? result.data : [];
+  const images = items.map((i) => i.imageUrl);
+
   return (
     <div className="flex flex-col">
       <section className="bg-slate-900 pt-32 pb-20 px-4">
@@ -47,7 +41,7 @@ export default async function GaleriePage() {
         </div>
       </section>
       <section className="py-20 max-w-7xl mx-auto px-4 w-full">
-        <GalleryWithLightbox images={GALLERY_IMAGES} />
+        <GalleryWithLightbox images={images} />
       </section>
     </div>
   );
