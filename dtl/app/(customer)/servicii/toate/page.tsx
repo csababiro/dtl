@@ -9,10 +9,8 @@ import {
   isTyrePriceVisible,
   isCarWashPriceVisible,
 } from "@/lib/feature-flags";
-import {
-  type ServiceCategoryId,
-  SERVICES_BY_CATEGORY,
-} from "@/lib/services-data";
+import type { ServiceCategoryId } from "@/lib/services-data";
+import { getServicesForDisplay } from "@/lib/get-services-for-display";
 
 const CATEGORY_META: Record<
   ServiceCategoryId,
@@ -41,6 +39,13 @@ export default async function ServiciiToatePage() {
   ];
   const categories = allCategories.filter((c) => c.show);
 
+  const categoryItems = await Promise.all(
+    categories.map((cat) => getServicesForDisplay(cat.id))
+  );
+  const itemsByCategory = Object.fromEntries(
+    categories.map((cat, i) => [cat.id, categoryItems[i]])
+  );
+
   return (
     <div className="flex flex-col">
       <section className="bg-slate-900 pt-32 pb-20 px-4">
@@ -63,7 +68,7 @@ export default async function ServiciiToatePage() {
       <section className="py-20 max-w-4xl mx-auto px-4 w-full space-y-16">
         {categories.map((cat) => {
           const meta = CATEGORY_META[cat.id];
-          const items = SERVICES_BY_CATEGORY[cat.id];
+          const items = itemsByCategory[cat.id] ?? [];
           return (
             <div key={cat.id}>
               <div className="flex items-center gap-3 mb-6">
@@ -77,7 +82,7 @@ export default async function ServiciiToatePage() {
               <ul className="space-y-3 border border-slate-200 rounded-2xl overflow-hidden divide-y divide-slate-100">
                 {items.map((item, i) => (
                   <li
-                    key={i}
+                    key={`${cat.id}-${i}`}
                     className="flex items-center justify-between gap-4 px-6 py-4 bg-white hover:bg-slate-50 transition-colors"
                   >
                     <span className="font-medium text-slate-800">

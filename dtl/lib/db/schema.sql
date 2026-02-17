@@ -125,8 +125,29 @@ CREATE TABLE IF NOT EXISTS push_tokens (
   token text NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS services (
+  id text PRIMARY KEY,
+  category text NOT NULL CHECK (category IN ('general', 'anvelope', 'spalatorie')),
+  name text NOT NULL,
+  price text NOT NULL,
+  "order" int NOT NULL DEFAULT 0
+);
+
 -- Ensure single row for settings
 INSERT INTO feature_flags (id, data) VALUES (1, '{}') ON CONFLICT (id) DO NOTHING;
 INSERT INTO business_settings (id, data) VALUES (1, '{}') ON CONFLICT (id) DO NOTHING;
 INSERT INTO contact_settings (id, data) VALUES (1, '{}') ON CONFLICT (id) DO NOTHING;
 INSERT INTO working_hours (id, data) VALUES (1, '{}') ON CONFLICT (id) DO NOTHING;
+
+-- Seed default services (same as original frontend list); safe to re-run (ON CONFLICT skip)
+INSERT INTO services (id, category, name, price, "order") VALUES
+  ('srv-seed-general-1', 'general', 'Revizie periodică (Ulei + Filtre)', 'de la 450 RON', 0),
+  ('srv-seed-general-2', 'general', 'Sistem de frânare (Plăcuțe/Discuri)', 'de la 150 RON', 1),
+  ('srv-seed-general-3', 'general', 'Diagnoză computerizată', 'de la 100 RON', 2),
+  ('srv-seed-anvelope-1', 'anvelope', 'Schimb anvelope (set 4)', 'de la 160 RON', 0),
+  ('srv-seed-anvelope-2', 'anvelope', 'Echilibrare roți', 'de la 60 RON', 1),
+  ('srv-seed-anvelope-3', 'anvelope', 'Geometrie roți 3D', 'de la 150 RON', 2),
+  ('srv-seed-spalatorie-1', 'spalatorie', 'Spălare exterior + interior', 'de la 60 RON', 0),
+  ('srv-seed-spalatorie-2', 'spalatorie', 'Ceară lichidă profesională', '30 RON', 1),
+  ('srv-seed-spalatorie-3', 'spalatorie', 'Cosmetizare interior completă', 'de la 450 RON', 2)
+ON CONFLICT (id) DO NOTHING;

@@ -10,10 +10,8 @@ import {
   isTyrePriceVisible,
   isCarWashPriceVisible,
 } from "@/lib/feature-flags";
-import {
-  type ServiceCategoryId,
-  SERVICES_BY_CATEGORY,
-} from "@/lib/services-data";
+import type { ServiceCategoryId } from "@/lib/services-data";
+import { getServicesForDisplay } from "@/lib/get-services-for-display";
 
 const SERVICE_GENERAL_IMG =
   "https://images.unsplash.com/photo-1581092160562-40aa08e78837?q=80&w=1080";
@@ -33,6 +31,12 @@ export default async function ServiciiPage() {
   const showTyrePrices = isTyrePriceVisible(flags);
   const showCarWashPrices = isCarWashPriceVisible(flags);
 
+  const [generalItems, anvelopeItems, spalatorieItems] = await Promise.all([
+    getServicesForDisplay("general"),
+    getServicesForDisplay("anvelope"),
+    getServicesForDisplay("spalatorie"),
+  ]);
+
   const categories = [
     {
       id: "general" as const,
@@ -41,7 +45,7 @@ export default async function ServiciiPage() {
       img: SERVICE_GENERAL_IMG,
       show: true,
       showPrice: showServicePrices,
-      items: SERVICES_BY_CATEGORY.general,
+      items: generalItems,
     },
     {
       id: "anvelope" as const,
@@ -50,7 +54,7 @@ export default async function ServiciiPage() {
       img: SERVICE_TYRE_IMG,
       show: showTyre,
       showPrice: showTyrePrices,
-      items: SERVICES_BY_CATEGORY.anvelope,
+      items: anvelopeItems,
     },
     {
       id: "spalatorie" as const,
@@ -59,7 +63,7 @@ export default async function ServiciiPage() {
       img: SERVICE_WASH_IMG,
       show: showCarWash,
       showPrice: showCarWashPrices,
-      items: SERVICES_BY_CATEGORY.spalatorie,
+      items: spalatorieItems,
     },
   ].filter((c) => c.show);
 

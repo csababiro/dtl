@@ -10,10 +10,8 @@ import {
   isTyrePriceVisible,
   isCarWashPriceVisible,
 } from "@/lib/feature-flags";
-import {
-  type ServiceCategoryId,
-  SERVICES_BY_CATEGORY,
-} from "@/lib/services-data";
+import type { ServiceCategoryId } from "@/lib/services-data";
+import { getServicesForDisplay } from "@/lib/get-services-for-display";
 
 const CATEGORY_IDS: ServiceCategoryId[] = ["general", "anvelope", "spalatorie"];
 
@@ -58,7 +56,7 @@ export default async function ServiciiToateCategoryPage({
         ? showTyrePrices
         : showCarWashPrices;
   const meta = CATEGORY_META[category];
-  const items = SERVICES_BY_CATEGORY[category];
+  const items = await getServicesForDisplay(category);
 
   return (
     <div className="flex flex-col">
