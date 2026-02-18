@@ -1,7 +1,10 @@
 {
   "test": {
     "adminLink": "Panou Admin",
-    "qrLabel": "Scanează pentru a deschide site-ul pe mobil"
+    "qrLabel": "Scanează pentru a deschide site-ul pe mobil",
+    "share": "Distribuie",
+    "shareHint": "Copiază linkul pentru a-l trimite mai departe",
+    "linkCopied": "Link copiat!"
   },
   "nav": {
     "home": "Acasă",

@@ -2,16 +2,29 @@
 
 import { useState, useEffect } from "react";
 import { QRCodeSVG } from "qrcode.react";
+import { Share2 } from "lucide-react";
 import { t } from "@/lib/i18n";
 
 export function TestPageClient() {
   const [siteUrl, setSiteUrl] = useState<string>("");
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
       setSiteUrl(window.location.origin);
     }
   }, []);
+
+  const copyPageLink = async () => {
+    const url = typeof window !== "undefined" ? window.location.href : siteUrl || "";
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      setCopied(false);
+    }
+  };
 
   if (!siteUrl) {
     return (
@@ -32,6 +45,15 @@ export function TestPageClient() {
       <p className="text-xs text-slate-500 break-all max-w-[280px] text-center">
         {siteUrl}
       </p>
+      <button
+        type="button"
+        onClick={copyPageLink}
+        className="inline-flex items-center gap-2 px-4 py-3 rounded-xl font-medium bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors"
+        title={t("test.shareHint")}
+      >
+        <Share2 size={18} aria-hidden />
+        {copied ? t("test.linkCopied") : t("test.share")}
+      </button>
     </div>
   );
 }
