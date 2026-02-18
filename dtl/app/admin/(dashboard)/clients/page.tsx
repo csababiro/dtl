@@ -1,11 +1,7 @@
 import { t } from "@/lib/i18n";
-import { getClients } from "@/lib/api/clients";
 import { AdminClientsClient } from "@/components/admin/AdminClientsClient";
 
-export default async function AdminClientsPage() {
-  const result = await getClients();
-  const clients = "data" in result ? result.data : [];
-
+export default function AdminClientsPage() {
   return (
     <div className="space-y-6">
       <div>
@@ -17,7 +13,7 @@ export default async function AdminClientsPage() {
         </p>
       </div>
 
-      <AdminClientsClient clients={clients} />
+      <AdminClientsClient />
     </div>
   );
 }

@@ -1,15 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { Lock, Wrench, Eye, EyeOff } from "lucide-react";
 import { t } from "@/lib/i18n";
-import { getInvitationInfo } from "./actions";
-import { setPasswordFromInvitationAction } from "./actions";
 
 export function SetPasswordClient() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const token = searchParams.get("token");
   const [info, setInfo] = useState<{
     ok: true;
@@ -26,22 +25,40 @@ export function SetPasswordClient() {
       setInfo({ ok: false, error: "invalid" });
       return;
     }
-    getInvitationInfo(token).then(setInfo);
+    fetch(`/api/invitation-info?token=${encodeURIComponent(token)}`)
+      .then((r) => r.json())
+      .then((data) => {
+        if (data?.ok === true && data?.email != null && data?.userName != null) {
+          setInfo({ ok: true, email: data.email, userName: data.userName });
+        } else {
+          setInfo({ ok: false, error: data?.error === "expired" ? "expired" : "invalid" });
+        }
+      })
+      .catch(() => setInfo({ ok: false, error: "invalid" }));
   }, [token]);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setSubmitError(null);
     const form = e.currentTarget;
-    const fd = new FormData(form);
+    const password = (form.elements.namedItem("password") as HTMLInputElement)?.value ?? "";
+    const confirmPassword = (form.elements.namedItem("confirmPassword") as HTMLInputElement)?.value ?? "";
     setPending(true);
     try {
-      const res = await setPasswordFromInvitationAction(fd);
-      if (!res?.ok && res?.error) {
-        setSubmitError(res.error);
-        setPending(false);
+      const res = await fetch("/api/set-password-from-invitation", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token: token ?? "", password, confirmPassword }),
+      });
+      const data = await res.json();
+      if (data?.ok === true) {
+        router.replace("/admin/login?set=1");
+        return;
       }
+      setSubmitError(data?.error ?? "invalid");
     } catch {
+      setSubmitError("invalid");
+    } finally {
       setPending(false);
     }
   }

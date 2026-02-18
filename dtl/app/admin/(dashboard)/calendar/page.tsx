@@ -1,19 +1,9 @@
 import { t } from "@/lib/i18n";
-import { getAppointments } from "@/lib/api/appointments";
-import { getWorkingHours } from "@/lib/api/settings";
-import { DEFAULT_SCHEDULE } from "@/lib/working-hours";
 import { AdminCalendarClient } from "@/components/admin/AdminCalendarClient";
 import { Calendar as CalendarIcon } from "lucide-react";
 import Link from "next/link";
 
-export default async function AdminCalendarPage() {
-  const [appointmentsResult, workingHoursResult] = await Promise.all([
-    getAppointments(),
-    getWorkingHours(),
-  ]);
-  const appointments = "data" in appointmentsResult ? appointmentsResult.data : [];
-  const workingHoursSchedule =
-    "data" in workingHoursResult ? workingHoursResult.data : DEFAULT_SCHEDULE;
+export default function AdminCalendarPage() {
   return (
     <div className="space-y-8">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -40,7 +30,7 @@ export default async function AdminCalendarPage() {
           </div>
           <span className="font-bold text-slate-800">Lună / Săptămână / Zi</span>
         </div>
-        <AdminCalendarClient appointments={appointments} workingHoursSchedule={workingHoursSchedule} />
+        <AdminCalendarClient />
       </div>
     </div>
   );

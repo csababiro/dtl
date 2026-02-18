@@ -25,9 +25,10 @@ function formatDate(iso: string): string {
 
 interface AdminQuoteDetailClientProps {
   item: QuoteRequest;
+  onRefetch?: () => void | Promise<void>;
 }
 
-export function AdminQuoteDetailClient({ item }: AdminQuoteDetailClientProps) {
+export function AdminQuoteDetailClient({ item, onRefetch }: AdminQuoteDetailClientProps) {
   const router = useRouter();
   const [pending, setPending] = useState(false);
   const isPrepared = (item.status ?? "pending") === "prepared";
@@ -40,7 +41,8 @@ export function AdminQuoteDetailClient({ item }: AdminQuoteDetailClientProps) {
       if (res.error.status === 401) router.push("/admin/login");
       return;
     }
-    router.refresh();
+    if (onRefetch) await onRefetch();
+    else router.refresh();
   };
 
   return (

@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { t } from "@/lib/i18n";
 import type { QuoteRequest } from "@/lib/quote-requests-store";
 import { patch } from "@/lib/api-client";
+import { getQuoteRequests } from "@/lib/api/quote-requests";
 
 function formatDate(iso: string): string {
   try {
@@ -21,11 +22,31 @@ function formatDate(iso: string): string {
 }
 
 interface AdminQuotesClientProps {
-  items: QuoteRequest[];
+  items?: QuoteRequest[];
+  onRefetch?: () => void | Promise<void>;
 }
 
-export function AdminQuotesClient({ items }: AdminQuotesClientProps) {
+export function AdminQuotesClient({ items: itemsProp, onRefetch }: AdminQuotesClientProps) {
   const router = useRouter();
+  const [items, setItems] = useState<QuoteRequest[]>(itemsProp ?? []);
+  const [loading, setLoading] = useState(itemsProp == null);
+
+  useEffect(() => {
+    if (itemsProp != null) {
+      setLoading(false);
+      return;
+    }
+    let cancelled = false;
+    getQuoteRequests().then((result) => {
+      if (cancelled) return;
+      setItems("data" in result ? result.data : []);
+      setLoading(false);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [itemsProp]);
+
   const [preparingId, setPreparingId] = useState<string | null>(null);
 
   const handleMarkPrepared = async (item: QuoteRequest) => {
@@ -36,8 +57,16 @@ export function AdminQuotesClient({ items }: AdminQuotesClientProps) {
       if (res.error.status === 401) router.push("/admin/login");
       return;
     }
-    router.refresh();
+    if (onRefetch) await onRefetch();
+    else if (itemsProp == null) {
+      const next = await getQuoteRequests();
+      setItems("data" in next ? next.data : []);
+    } else router.refresh();
   };
+
+  if (loading) {
+    return <p className="text-slate-500 py-4">{t("common.loading")}</p>;
+  }
 
   return (
     <>

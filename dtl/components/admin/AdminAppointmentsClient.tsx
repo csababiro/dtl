@@ -1,14 +1,16 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { format } from "date-fns";
+import { enUS } from "date-fns/locale";
 import { Calendar as CalendarIcon, Clock, User, History } from "lucide-react";
 import { parse, startOfDay } from "date-fns";
-import { enUS } from "date-fns/locale";
 import type { DummyAppointment, DummyAppointmentType } from "@/lib/dummy-appointments";
 import { APPOINTMENT_TYPE_COLORS, APPOINTMENT_TYPE_LABELS, UNCONFIRMED_COLOR } from "@/lib/appointment-constants";
 import { t } from "@/lib/i18n";
 import { patch } from "@/lib/api-client";
+import { getAppointments } from "@/lib/api/appointments";
 
 type TypeFilter = "all" | DummyAppointmentType;
 type StatusFilter = "all" | "confirmed" | "unconfirmed";
@@ -37,16 +39,41 @@ function groupByDate(appointments: DummyAppointment[]) {
 type Tab = "upcoming" | "history";
 
 interface AdminAppointmentsClientProps {
-  appointments: DummyAppointment[];
+  appointments?: DummyAppointment[];
   /** When using dummy data, pass a fixed "today" (e.g. "11 Feb 2025") so Viitoare/Istoric both have examples. */
   referenceToday?: string;
+  onRefetch?: () => void | Promise<void>;
 }
 
 export function AdminAppointmentsClient({
-  appointments,
-  referenceToday,
+  appointments: appointmentsProp,
+  referenceToday: referenceTodayProp,
+  onRefetch,
 }: AdminAppointmentsClientProps) {
   const router = useRouter();
+  const [appointments, setAppointments] = useState<DummyAppointment[]>(appointmentsProp ?? []);
+  const [referenceToday, setReferenceToday] = useState(
+    referenceTodayProp ?? format(new Date(), "d MMM yyyy", { locale: enUS })
+  );
+  const [loading, setLoading] = useState(appointmentsProp == null);
+
+  useEffect(() => {
+    if (appointmentsProp != null) {
+      setLoading(false);
+      return;
+    }
+    let cancelled = false;
+    getAppointments().then((result) => {
+      if (cancelled) return;
+      setAppointments("data" in result ? result.data : []);
+      setReferenceToday(format(new Date(), "d MMM yyyy", { locale: enUS }));
+      setLoading(false);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [appointmentsProp]);
+
   const [tab, setTab] = useState<Tab>("upcoming");
   const [typeFilter, setTypeFilter] = useState<TypeFilter>("all");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
@@ -60,7 +87,11 @@ export function AdminAppointmentsClient({
       if (res.error.status === 401) router.push("/admin/login");
       return;
     }
-    router.refresh();
+    if (onRefetch) await onRefetch();
+    else if (appointmentsProp == null) {
+      const next = await getAppointments();
+      setAppointments("data" in next ? next.data : []);
+    } else router.refresh();
   };
 
   const todayStart = useMemo(
@@ -97,6 +128,14 @@ export function AdminAppointmentsClient({
   const { byDate, sortedDates } = useMemo(() => {
     return groupByDate(filteredList);
   }, [filteredList]);
+
+  if (loading) {
+    return (
+      <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-8">
+        <p className="text-slate-500">{t("common.loading")}</p>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">

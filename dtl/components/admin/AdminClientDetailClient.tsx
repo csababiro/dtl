@@ -51,9 +51,11 @@ interface AdminClientDetailClientProps {
   appointments: DummyAppointment[];
   plati: ClientPlata[];
   cars: ClientCar[];
+  /** When provided (e.g. client-fetched page), called after car add/update/delete instead of router.refresh. */
+  onRefetchCars?: () => void | Promise<void>;
 }
 
-export function AdminClientDetailClient({ client, appointments, plati, cars: initialCars }: AdminClientDetailClientProps) {
+export function AdminClientDetailClient({ client, appointments, plati, cars: initialCars, onRefetchCars }: AdminClientDetailClientProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [cars, setCars] = useState(initialCars);
@@ -65,7 +67,11 @@ export function AdminClientDetailClient({ client, appointments, plati, cars: ini
   const [selectedAppointmentId, setSelectedAppointmentId] = useState<string | null>(null);
 
   const refreshCars = () => {
-    startTransition(() => router.refresh());
+    if (onRefetchCars) {
+      void onRefetchCars();
+    } else {
+      startTransition(() => router.refresh());
+    }
   };
 
   useEffect(() => {

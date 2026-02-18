@@ -46,6 +46,8 @@ interface AdminUsersClientProps {
   canManageUsers: boolean;
   currentUserId?: string;
   isSuperAdmin?: boolean;
+  /** When provided (e.g. client-fetched page), called after mutations instead of router.refresh(). */
+  onRefetch?: () => void | Promise<void>;
 }
 
 export function AdminUsersClient({
@@ -53,6 +55,7 @@ export function AdminUsersClient({
   canManageUsers,
   currentUserId = "",
   isSuperAdmin = false,
+  onRefetch,
 }: AdminUsersClientProps) {
   const allowedRoles = isSuperAdmin ? ROLES : ROLES_ADMIN_OR_STAFF;
   const isSelf = (user: DummyUser): boolean =>
@@ -120,7 +123,8 @@ export function AdminUsersClient({
     }
     closeForm();
     form.reset();
-    router.refresh();
+    if (onRefetch) await onRefetch();
+    else router.refresh();
   };
 
   const handleUpdate = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -153,7 +157,8 @@ export function AdminUsersClient({
       return;
     }
     closeForm();
-    router.refresh();
+    if (onRefetch) await onRefetch();
+    else router.refresh();
   };
 
   const handleDelete = async (id: string) => {
@@ -165,7 +170,8 @@ export function AdminUsersClient({
       if (res.error.status === 401) router.push("/admin/login");
       return;
     }
-    router.refresh();
+    if (onRefetch) await onRefetch();
+    else router.refresh();
   };
 
   const handleToggleActive = async (user: DummyUser) => {
@@ -176,7 +182,8 @@ export function AdminUsersClient({
       if (res.error.status === 401) router.push("/admin/login");
       return;
     }
-    router.refresh();
+    if (onRefetch) await onRefetch();
+    else router.refresh();
   };
 
   const handleResetPassword = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -207,7 +214,8 @@ export function AdminUsersClient({
     }
     setResetPasswordUser(null);
     form.reset();
-    router.refresh();
+    if (onRefetch) await onRefetch();
+    else router.refresh();
   };
 
   const isEdit = formOpen !== null && formOpen !== "new";

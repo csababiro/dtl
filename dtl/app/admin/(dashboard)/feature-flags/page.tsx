@@ -1,21 +1,33 @@
-import { redirect } from "next/navigation";
-import { cookies } from "next/headers";
+"use client";
+
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { AdminFeatureFlagsClient } from "@/components/admin/AdminFeatureFlagsClient";
-import { getFeatureFlags } from "@/lib/services/feature-flags";
-import { DEFAULT_FEATURE_FLAGS, featureFlagsToToggles } from "@/lib/feature-flags";
-import { JWT_COOKIE, verifyJwt } from "@/lib/auth/jwt";
+import { t } from "@/lib/i18n";
 
-export const dynamic = "force-dynamic";
+export default function AdminFeatureFlagsPage() {
+  const router = useRouter();
+  const [allowed, setAllowed] = useState<boolean | null>(null);
 
-export default async function AdminFeatureFlagsPage() {
-  const cookieStore = await cookies();
-  const jwtToken = cookieStore.get(JWT_COOKIE)?.value;
-  const payload = jwtToken ? await verifyJwt(jwtToken) : null;
-  if (!payload || payload.role !== "super_admin") {
-    redirect("/admin");
+  useEffect(() => {
+    fetch("/api/auth/me", { credentials: "include", cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (data?.role !== "super_admin") {
+          router.replace("/admin");
+          return;
+        }
+        setAllowed(true);
+      })
+      .catch(() => router.replace("/admin"));
+  }, [router]);
+
+  if (allowed !== true) {
+    return (
+      <div className="min-h-[40vh] flex items-center justify-center">
+        <p className="text-slate-500">{t("common.loading")}</p>
+      </div>
+    );
   }
-  const result = await getFeatureFlags();
-  const flags = "data" in result ? result.data : DEFAULT_FEATURE_FLAGS;
-  const initialToggles = featureFlagsToToggles({ ...DEFAULT_FEATURE_FLAGS, ...flags });
-  return <AdminFeatureFlagsClient initialToggles={initialToggles} />;
+  return <AdminFeatureFlagsClient />;
 }

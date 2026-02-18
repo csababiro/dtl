@@ -2,8 +2,8 @@ import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import { AdminPushSetup } from "@/components/admin/AdminPushSetup";
 import { AdminDashboardShell } from "@/components/admin/AdminDashboardShell";
+import { AdminPanelGate } from "@/components/admin/AdminPanelGate";
 import { JWT_COOKIE, verifyJwt } from "@/lib/auth/jwt";
-import { getFeatureFlagsFromDb } from "@/lib/db/feature-flags";
 
 export default async function DashboardLayout({
   children,
@@ -25,17 +25,12 @@ export default async function DashboardLayout({
     redirect("/admin/login");
   }
 
-  if (payload.role !== "super_admin") {
-    const flags = await getFeatureFlagsFromDb();
-    if (flags.adminPanelEnabled === false) {
-      redirect("/admin/disabled");
-    }
-  }
-
   return (
     <>
       <AdminPushSetup />
-      <AdminDashboardShell>{children}</AdminDashboardShell>
+      <AdminPanelGate role={payload.role}>
+        <AdminDashboardShell>{children}</AdminDashboardShell>
+      </AdminPanelGate>
     </>
   );
 }

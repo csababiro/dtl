@@ -1,14 +1,7 @@
-import { getQuoteRequests } from "@/lib/api/quote-requests";
 import { t } from "@/lib/i18n";
 import { AdminQuotesClient } from "@/components/admin/AdminQuotesClient";
-import type { QuoteRequest } from "@/lib/quote-requests-store";
 
-export type { QuoteRequest };
-
-export default async function AdminQuotesPage() {
-  const result = await getQuoteRequests();
-  const items = "data" in result ? result.data : [];
-
+export default function AdminQuotesPage() {
   return (
     <div className="space-y-8">
       <div>
@@ -19,7 +12,7 @@ export default async function AdminQuotesPage() {
           Marchează cererile ca „Pregătit pentru client” după ce oferta e pregătită.
         </p>
       </div>
-      <AdminQuotesClient items={items} />
+      <AdminQuotesClient />
     </div>
   );
 }

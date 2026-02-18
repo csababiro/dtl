@@ -1,9 +1,11 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Mail, User, Phone, Car, Calendar, Search } from "lucide-react";
 import type { DummyClient } from "@/lib/dummy-clients";
+import { getClients } from "@/lib/api/clients";
+import { t } from "@/lib/i18n";
 
 function formatDate(iso: string | undefined): string {
   if (!iso) return "—";
@@ -27,11 +29,30 @@ function getFirstLetter(name: string): string {
 }
 
 interface AdminClientsClientProps {
-  clients: DummyClient[];
+  clients?: DummyClient[];
 }
 
-export function AdminClientsClient({ clients }: AdminClientsClientProps) {
+export function AdminClientsClient({ clients: clientsProp }: AdminClientsClientProps) {
   const router = useRouter();
+  const [clients, setClients] = useState<DummyClient[]>(clientsProp ?? []);
+  const [loading, setLoading] = useState(clientsProp == null);
+
+  useEffect(() => {
+    if (clientsProp != null) {
+      setLoading(false);
+      return;
+    }
+    let cancelled = false;
+    getClients().then((result) => {
+      if (cancelled) return;
+      setClients("data" in result ? result.data : []);
+      setLoading(false);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [clientsProp]);
+
   const [search, setSearch] = useState("");
 
   const sortedFiltered = useMemo(() => {
@@ -52,6 +73,10 @@ export function AdminClientsClient({ clients }: AdminClientsClientProps) {
     const letters = Object.keys(map).sort((a, b) => a.localeCompare(b, "ro"));
     return letters.map((letter) => ({ letter, list: map[letter]! }));
   }, [sortedFiltered]);
+
+  if (loading) {
+    return <p className="text-slate-500 py-4">{t("common.loading")}</p>;
+  }
 
   return (
     <div className="space-y-6">

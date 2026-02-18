@@ -20,9 +20,10 @@ function formatDateOnly(dateStr: string): string {
 
 interface AdminFacturaDetailClientProps {
   plata: ClientPlata;
+  onRefetch?: () => void | Promise<void>;
 }
 
-export function AdminFacturaDetailClient({ plata }: AdminFacturaDetailClientProps) {
+export function AdminFacturaDetailClient({ plata, onRefetch }: AdminFacturaDetailClientProps) {
   const router = useRouter();
   const [pending, setPending] = useState(false);
 
@@ -37,7 +38,8 @@ export function AdminFacturaDetailClient({ plata }: AdminFacturaDetailClientProp
       if (res.error.status === 401) router.push("/admin/login");
       return;
     }
-    router.refresh();
+    if (onRefetch) await onRefetch();
+    else router.refresh();
   };
 
   return (

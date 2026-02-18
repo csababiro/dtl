@@ -1,14 +1,8 @@
-import { format } from "date-fns";
-import { enUS } from "date-fns/locale";
 import { t } from "@/lib/i18n";
-import { getAppointments } from "@/lib/api/appointments";
 import { AdminAppointmentsClient } from "@/components/admin/AdminAppointmentsClient";
 import Link from "next/link";
 
-export default async function AdminAppointmentsPage() {
-  const result = await getAppointments();
-  const appointments = "data" in result ? result.data : [];
-  const referenceToday = format(new Date(), "d MMM yyyy", { locale: enUS });
+export default function AdminAppointmentsPage() {
   return (
     <div className="space-y-8">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -28,10 +22,7 @@ export default async function AdminAppointmentsPage() {
         </Link>
       </div>
 
-      <AdminAppointmentsClient
-        appointments={appointments}
-        referenceToday={referenceToday}
-      />
+      <AdminAppointmentsClient />
     </div>
   );
 }

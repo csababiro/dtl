@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Calendar, dateFnsLocalizer, type View } from "react-big-calendar";
 import { format, parse, startOfWeek, getDay, addHours } from "date-fns";
 import { enUS } from "date-fns/locale";
@@ -8,7 +8,10 @@ import { useRouter } from "next/navigation";
 import type { DummyAppointment, DummyAppointmentType } from "@/lib/dummy-appointments";
 import { APPOINTMENT_TYPE_COLORS, UNCONFIRMED_COLOR } from "@/lib/appointment-constants";
 import type { WorkingHoursSchedule } from "@/lib/working-hours";
-import { getMinMaxForDay } from "@/lib/working-hours";
+import { getMinMaxForDay, DEFAULT_SCHEDULE } from "@/lib/working-hours";
+import { getAppointments } from "@/lib/api/appointments";
+import { getWorkingHours } from "@/lib/api/settings";
+import { t } from "@/lib/i18n";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 
 const locales = { "ro-RO": enUS };
@@ -64,19 +67,41 @@ function appointmentsToEvents(appointments: DummyAppointment[]): CalendarEvent[]
 }
 
 interface AdminCalendarClientProps {
-  appointments: DummyAppointment[];
-  workingHoursSchedule: WorkingHoursSchedule;
+  appointments?: DummyAppointment[];
+  workingHoursSchedule?: WorkingHoursSchedule;
 }
 
 export function AdminCalendarClient({
-  appointments,
-  workingHoursSchedule,
+  appointments: appointmentsProp,
+  workingHoursSchedule: workingHoursScheduleProp,
 }: AdminCalendarClientProps) {
   const router = useRouter();
+  const [appointments, setAppointments] = useState<DummyAppointment[]>(appointmentsProp ?? []);
+  const [workingHoursSchedule, setWorkingHoursSchedule] = useState<WorkingHoursSchedule | undefined>(workingHoursScheduleProp);
+  const [loading, setLoading] = useState(!appointmentsProp || !workingHoursScheduleProp);
+
+  useEffect(() => {
+    if (appointmentsProp != null && workingHoursScheduleProp != null) {
+      setLoading(false);
+      return;
+    }
+    let cancelled = false;
+    Promise.all([getAppointments(), getWorkingHours()]).then(([appRes, hoursRes]) => {
+      if (cancelled) return;
+      setAppointments("data" in appRes ? appRes.data : []);
+      setWorkingHoursSchedule("data" in hoursRes ? hoursRes.data : DEFAULT_SCHEDULE);
+      setLoading(false);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [appointmentsProp, workingHoursScheduleProp]);
+
   const [filter, setFilter] = useState<CalendarFilter>("all");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [view, setView] = useState<View>("day");
   const [date, setDate] = useState(() => new Date());
+  const schedule = workingHoursSchedule ?? DEFAULT_SCHEDULE;
   const allEvents = useMemo(
     () => appointmentsToEvents(appointments),
     [appointments]
@@ -108,9 +133,13 @@ export function AdminCalendarClient({
   };
 
   const { min, max } = useMemo(
-    () => getMinMaxForDay(date, workingHoursSchedule),
-    [date, workingHoursSchedule]
+    () => getMinMaxForDay(date, schedule),
+    [date, schedule]
   );
+
+  if (loading) {
+    return <p className="text-slate-500 py-4">{t("common.loading")}</p>;
+  }
 
   return (
     <div className="space-y-4">
