@@ -25,6 +25,7 @@ const ADMIN_FLAG_KEYS: AdminFlagKey[] = [
   "showCarWashPrices",
   "gallery",
   "testimonials",
+  "testPage",
   "adminPanelEnabled",
   "publicSiteEnabled",
 ];
@@ -50,6 +51,7 @@ const defaultToggles: FeatureFlagToggles = {
   showCarWashPrices: { superAdmin: true, admin: true },
   gallery: { superAdmin: true, admin: true },
   testimonials: { superAdmin: true, admin: true },
+  testPage: { superAdmin: true, admin: true },
   adminPanelEnabled: { superAdmin: true, admin: true },
   publicSiteEnabled: { superAdmin: true, admin: true },
 };
@@ -92,6 +94,10 @@ const flagMeta: Record<
     labelKey: "admin.flagTestimonials",
     descKey: "admin.flagTestimonialsDesc",
   },
+  testPage: {
+    labelKey: "admin.flagTestPage",
+    descKey: "admin.flagTestPageDesc",
+  },
   adminPanelEnabled: {
     labelKey: "admin.flagAdminPanelEnabled",
     descKey: "admin.flagAdminPanelEnabledDesc",
@@ -130,6 +136,7 @@ function togglesToPayload(toggles: FeatureFlagToggles): Partial<FeatureFlags> {
   payload.showCarWashPrices = eff("showCarWashPrices");
   payload.gallery = eff("gallery");
   payload.testimonials = eff("testimonials");
+  payload.testPage = eff("testPage");
   payload.adminPanelEnabled = eff("adminPanelEnabled");
   payload.publicSiteEnabled = eff("publicSiteEnabled");
   return payload;

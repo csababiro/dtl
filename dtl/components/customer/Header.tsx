@@ -14,6 +14,7 @@ import {
   isAuthenticationEnabled,
   isGalleryEnabled,
   isTestimonialsEnabled,
+  isTestPageEnabled,
 } from "@/lib/feature-flags";
 
 interface HeaderProps {
@@ -50,6 +51,7 @@ export function Header({
   const showAuth = isAuthenticationEnabled(flags);
   const showGallery = isGalleryEnabled(flags);
   const showTestimonials = isTestimonialsEnabled(flags);
+  const showTest = isTestPageEnabled(flags);
 
   const navLinks: { name: string; path: string; show: boolean }[] = [
     { name: t("nav.home"), path: "/", show: true },
@@ -100,6 +102,17 @@ export function Header({
                 }`}
               >
                 {t("cont.title")}
+              </Link>
+            )}
+            {showTest && (
+              <Link
+                href="/test"
+                onClick={closeMenu}
+                className={`text-lg font-medium px-4 py-3 rounded-lg ${
+                  isActive("/test") ? "bg-blue-50 text-blue-600" : "text-slate-700"
+                }`}
+              >
+                {t("nav.test")}
               </Link>
             )}
             {showBooking && (
@@ -171,6 +184,18 @@ export function Header({
                 }`}
               >
                 <User size={20} />
+              </Link>
+            )}
+            {showTest && (
+              <Link
+                href="/test"
+                className={`font-medium transition-colors ${
+                  isActive("/test")
+                    ? "text-blue-600"
+                    : "text-slate-600 hover:text-blue-500"
+                }`}
+              >
+                {t("nav.test")}
               </Link>
             )}
             {showBooking && (

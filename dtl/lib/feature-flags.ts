@@ -24,6 +24,8 @@ export interface FeatureFlags {
   showCarWashPrices?: boolean;
   gallery?: boolean;
   testimonials?: boolean;
+  /** When true, nav shows Test tab and /test page is accessible (super_admin only). */
+  testPage?: boolean;
   /** When false, only super_admin can access admin panel; others see "Panel dezactivat". */
   adminPanelEnabled?: boolean;
   /** When false, public site shows maintenance page (super_admin still has access). */
@@ -42,6 +44,7 @@ export type AdminFlagKey =
   | "showCarWashPrices"
   | "gallery"
   | "testimonials"
+  | "testPage"
   | "adminPanelEnabled"
   | "publicSiteEnabled";
 
@@ -68,6 +71,7 @@ export function featureFlagsToToggles(flags: Partial<FeatureFlags>): FeatureFlag
     showCarWashPrices: { superAdmin: b(flags.showCarWashPrices), admin: b(flags.showCarWashPrices) },
     gallery: { superAdmin: b(flags.gallery), admin: b(flags.gallery) },
     testimonials: { superAdmin: b(flags.testimonials), admin: b(flags.testimonials) },
+    testPage: { superAdmin: b(flags.testPage), admin: b(flags.testPage) },
     adminPanelEnabled: { superAdmin: b(flags.adminPanelEnabled), admin: b(flags.adminPanelEnabled) },
     publicSiteEnabled: { superAdmin: b(flags.publicSiteEnabled), admin: b(flags.publicSiteEnabled) },
   };
@@ -97,6 +101,7 @@ export const DEFAULT_FEATURE_FLAGS: FeatureFlags = {
   showCarWashPrices: true,
   gallery: true,
   testimonials: true,
+  testPage: true,
   adminPanelEnabled: true,
   publicSiteEnabled: true,
 };
@@ -188,4 +193,8 @@ export function isGalleryEnabled(flags: FeatureFlags): boolean {
 
 export function isTestimonialsEnabled(flags: FeatureFlags): boolean {
   return flags.testimonials !== false;
+}
+
+export function isTestPageEnabled(flags: FeatureFlags): boolean {
+  return flags.testPage !== false;
 }

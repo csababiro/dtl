@@ -25,6 +25,7 @@ const DEFAULTS: FeatureFlags = {
   showCarWashPrices: true,
   gallery: true,
   testimonials: true,
+  testPage: true,
   adminPanelEnabled: true,
   publicSiteEnabled: true,
 };

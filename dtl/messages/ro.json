@@ -1,4 +1,8 @@
 {
+  "test": {
+    "adminLink": "Panou Admin",
+    "qrLabel": "Scanează pentru a deschide site-ul pe mobil"
+  },
   "nav": {
     "home": "Acasă",
     "servicii": "Servicii",
@@ -8,6 +12,7 @@
     "gallery": "Galerie",
     "testimonials": "Testimoniale",
     "cont": "Cont",
+    "test": "Test",
     "login": "Autentificare",
     "logout": "Deconectare"
   },
@@ -352,6 +357,8 @@
     "flagGalleryDesc": "Nav și pagina /galerie.",
     "flagTestimonials": "Testimoniale",
     "flagTestimonialsDesc": "Nav și pagina /testimoniale.",
+    "flagTestPage": "Pagină Test",
+    "flagTestPageDesc": "Tab Test în nav și pagina /test (link admin + QR cod site).",
     "flagAdminPanelEnabled": "Panou admin",
     "flagAdminPanelEnabledDesc": "Când este dezactivat, doar Super Admin poate accesa panoul; alții văd „Panel dezactivat”.",
     "flagPublicSiteEnabled": "Site public",
