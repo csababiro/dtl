@@ -6,6 +6,7 @@ const DEFAULTS: ContactSettings = {
   phone: "",
   email: "",
   address: "",
+  whatsapp: "",
 };
 
 export async function getContactSettingsFromDb(): Promise<ContactSettings> {

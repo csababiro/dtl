@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Phone, Mail, MapPin, Building2 } from "lucide-react";
+import { Phone, Mail, MapPin, Building2, MessageCircle } from "lucide-react";
 import { useContactSettings } from "@/lib/hooks/useContactSettings";
 import { t } from "@/lib/i18n";
 
@@ -65,6 +65,26 @@ export function AdminContactClient() {
                   setSettings((f) => ({ ...f, phone: e.target.value }))
                 }
                 className="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+              />
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm font-bold text-slate-700 mb-2">
+              {t("admin.contactWhatsApp") || "WhatsApp (număr pentru link)"}
+            </label>
+            <div className="relative">
+              <MessageCircle
+                size={18}
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+              />
+              <input
+                type="tel"
+                value={settings.whatsapp}
+                onChange={(e) =>
+                  setSettings((f) => ({ ...f, whatsapp: e.target.value }))
+                }
+                className="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                placeholder="+40 744 927 038 (opțional; dacă gol, se folosește telefonul)"
               />
             </div>
           </div>

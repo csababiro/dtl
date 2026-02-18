@@ -10,6 +10,7 @@ const DEFAULT_FORM: ContactSettings = {
   phone: "",
   email: "",
   address: "",
+  whatsapp: "",
 };
 
 export function useContactSettings() {

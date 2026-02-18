@@ -70,8 +70,8 @@ export function AdminCalendarClient({ appointments }: AdminCalendarClientProps) 
   const router = useRouter();
   const [filter, setFilter] = useState<CalendarFilter>("all");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
-  const [view, setView] = useState<View>("month");
-  const [date, setDate] = useState(() => new Date(2025, 1, 1));
+  const [view, setView] = useState<View>("day");
+  const [date, setDate] = useState(() => new Date());
   const allEvents = useMemo(
     () => appointmentsToEvents(appointments),
     [appointments]
@@ -185,7 +185,7 @@ export function AdminCalendarClient({ appointments }: AdminCalendarClientProps) 
           date={date}
           onNavigate={setDate}
           defaultDate={new Date(2025, 1, 1)}
-          views={["month", "week", "day"]}
+          views={["day", "month", "week"]}
           min={min}
           max={max}
           popup

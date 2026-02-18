@@ -9,7 +9,7 @@ import {
   Mail,
 } from "lucide-react";
 import { getFeatureFlags } from "@/lib/feature-flags";
-import { getBusinessSettings } from "@/lib/settings";
+import { getPublicSiteSettings } from "@/lib/settings";
 import { t } from "@/lib/i18n";
 import { getMapsUrl } from "@/lib/maps";
 import { InteractiveMap } from "@/components/customer/InteractiveMap";
@@ -62,7 +62,7 @@ export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
   const flags = await getFeatureFlags();
-  const settings = await getBusinessSettings();
+  const settings = await getPublicSiteSettings();
   const showBooking = isBookingEnabled(flags, "general");
   const showTyre = isModuleEnabled(flags, "tyre");
   const showCarWash = isModuleEnabled(flags, "carWash");

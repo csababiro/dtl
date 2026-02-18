@@ -10,6 +10,8 @@ export interface ContactSettings {
   phone: string;
   email: string;
   address: string;
+  /** Phone number for WhatsApp link; if empty, frontend uses phone. */
+  whatsapp: string;
 }
 
 const DEFAULTS: ContactSettings = {
@@ -17,6 +19,7 @@ const DEFAULTS: ContactSettings = {
   phone: "",
   email: "",
   address: "",
+  whatsapp: "",
 };
 
 export function getContactSettings(): ContactSettings {

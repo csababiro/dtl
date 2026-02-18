@@ -23,6 +23,16 @@ export async function getBusinessSettings(): Promise<
   return get<BusinessSettings>("/settings/business");
 }
 
+/**
+ * Public site settings (phone, address, email, whatsapp from admin Contact + business).
+ * No auth required. Use for customer layout and pages.
+ */
+export async function getPublicSiteSettings(): Promise<
+  { data: BusinessSettings } | { error: ApiError }
+> {
+  return get<BusinessSettings>("/settings/public");
+}
+
 export async function putBusinessSettings(
   body: Partial<BusinessSettings>
 ): Promise<{ data: BusinessSettings } | { error: ApiError }> {

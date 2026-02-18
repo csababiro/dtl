@@ -16,3 +16,4 @@ export * from "./testimonials";
 export * from "./push-tokens";
 export * from "./services";
 export * from "./stats";
+export * from "./public-settings";
