@@ -36,6 +36,9 @@ import {
   updateAppointmentNotesForClient,
   updatePlataNotesForClient,
   registerClient,
+  getClientWithCars,
+  addClientCarAction,
+  deleteClientCarAction,
 } from "@/app/(customer)/cont/actions";
 import type { DummyAppointment } from "@/lib/dummy-appointments";
 import type { ClientPlata } from "@/lib/dummy-plati";
@@ -194,6 +197,8 @@ export function ContPageClient() {
   const [cereri, setCereri] = useState<QuoteRequest[]>([]);
   const [notesPending, setNotesPending] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [clientId, setClientId] = useState<string | null>(null);
+  const [carsLoading, setCarsLoading] = useState(false);
 
   const loginForm = useForm<LoginFormValues>({ mode: "onChange" });
   const registerForm = useForm<RegisterFormValues>({
@@ -237,6 +242,29 @@ export function ContPageClient() {
     getAppointmentsForClient(email).then(setAppointments);
     getPlatiForClient(email).then(setPlati);
     getCereriForClient(email).then(setCereri);
+  }, [isLoggedIn, email]);
+
+  useEffect(() => {
+    if (!isLoggedIn || !email?.trim()) return;
+    setCarsLoading(true);
+    getClientWithCars(email)
+      .then(({ client, cars }) => {
+        if (client) {
+          setClientId(client.id);
+          const mapped: UserCar[] = cars.map((c) => ({
+            id: c.id,
+            carMake: c.carMake,
+            carModel: c.carModel,
+            carYear: c.carYear,
+            chassis: c.chassis,
+            photoFileName: undefined,
+          }));
+          setUserCars(mapped);
+          if (typeof window !== "undefined")
+            sessionStorage.setItem(CARS_STORAGE_KEY, JSON.stringify(mapped));
+        }
+      })
+      .finally(() => setCarsLoading(false));
   }, [isLoggedIn, email]);
 
   useEffect(() => {
@@ -294,7 +322,7 @@ export function ContPageClient() {
     sessionStorage.setItem(PHONE_STORAGE_KEY, userPhone.trim());
   }
 
-  function handleAddCar() {
+  async function handleAddCar() {
     const make = newCarMake.trim();
     const model = newCarModel.trim();
     const year = newCarYear.trim();
@@ -307,28 +335,60 @@ export function ContPageClient() {
     }
     setNewCarYearError(null);
     if (!make && !model && !year) return;
-    const next: UserCar[] = [...userCars, {
-      id: String(Date.now()),
-      carMake: make || "-",
-      carModel: model || "-",
-      carYear: year || "-",
-      chassis: newCarChassis.trim() || undefined,
-      photoFileName: newCarPhoto?.name,
-    }];
-    setUserCars(next);
+    if (clientId) {
+      const result = await addClientCarAction(clientId, {
+        carMake: make || "-",
+        carModel: model || "-",
+        carYear: year || "-",
+        chassis: newCarChassis.trim() || undefined,
+      });
+      if (result.ok && result.car) {
+        const newCar: UserCar = {
+          id: result.car.id,
+          carMake: result.car.carMake,
+          carModel: result.car.carModel,
+          carYear: result.car.carYear,
+          chassis: result.car.chassis,
+          photoFileName: newCarPhoto?.name,
+        };
+        const next = [...userCars, newCar];
+        setUserCars(next);
+        if (typeof window !== "undefined")
+          sessionStorage.setItem(CARS_STORAGE_KEY, JSON.stringify(next));
+      }
+    } else {
+      const next: UserCar[] = [
+        ...userCars,
+        {
+          id: String(Date.now()),
+          carMake: make || "-",
+          carModel: model || "-",
+          carYear: year || "-",
+          chassis: newCarChassis.trim() || undefined,
+          photoFileName: newCarPhoto?.name,
+        },
+      ];
+      setUserCars(next);
+      if (typeof window !== "undefined")
+        sessionStorage.setItem(CARS_STORAGE_KEY, JSON.stringify(next));
+    }
     setNewCarMake("");
     setNewCarModel("");
     setNewCarYear("");
     setNewCarChassis("");
     setNewCarPhoto(null);
     setShowAddCarForm(false);
-    if (typeof window !== "undefined") sessionStorage.setItem(CARS_STORAGE_KEY, JSON.stringify(next));
   }
 
-  function handleRemoveCar(id: string) {
+  async function handleRemoveCar(id: string) {
+    if (clientId) {
+      const ok = await deleteClientCarAction(id);
+      if (!ok.ok) return;
+    }
     const next = userCars.filter((c) => c.id !== id);
     setUserCars(next);
-    if (typeof window !== "undefined") sessionStorage.setItem(CARS_STORAGE_KEY, JSON.stringify(next));
+    if (typeof window !== "undefined")
+      sessionStorage.setItem(CARS_STORAGE_KEY, JSON.stringify(next));
   }
 
   function handleLogout() {
@@ -720,7 +780,10 @@ export function ContPageClient() {
                 <h2 className="text-2xl font-black text-slate-900">
                   {t("cont.myCars")}
                 </h2>
-                {userCars.length > 0 && (
+                {carsLoading && (
+                  <p className="text-slate-500">{t("common.loading")}</p>
+                )}
+                {!carsLoading && userCars.length > 0 && (
                   <div className="space-y-3">
                     {userCars.map((car) => (
                       <div
@@ -837,7 +900,7 @@ export function ContPageClient() {
                       </button>
                     </div>
                   </div>
-                ) : (
+                ) : !carsLoading ? (
                   <div className="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm">
                     {userCars.length === 0 && (
                       <>
@@ -862,7 +925,7 @@ export function ContPageClient() {
                       {t("cont.addCar")}
                     </button>
                   </div>
-                )}
+                ) : null}
               </section>
             )}
 

@@ -7,6 +7,7 @@ import { enUS } from "date-fns/locale";
 import { useRouter } from "next/navigation";
 import type { DummyAppointment, DummyAppointmentType } from "@/lib/dummy-appointments";
 import { APPOINTMENT_TYPE_COLORS, UNCONFIRMED_COLOR } from "@/lib/appointment-constants";
+import type { WorkingHoursSchedule } from "@/lib/working-hours";
 import { getMinMaxForDay } from "@/lib/working-hours";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 
@@ -64,9 +65,13 @@ function appointmentsToEvents(appointments: DummyAppointment[]): CalendarEvent[]
 
 interface AdminCalendarClientProps {
   appointments: DummyAppointment[];
+  workingHoursSchedule: WorkingHoursSchedule;
 }
 
-export function AdminCalendarClient({ appointments }: AdminCalendarClientProps) {
+export function AdminCalendarClient({
+  appointments,
+  workingHoursSchedule,
+}: AdminCalendarClientProps) {
   const router = useRouter();
   const [filter, setFilter] = useState<CalendarFilter>("all");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
@@ -102,7 +107,10 @@ export function AdminCalendarClient({ appointments }: AdminCalendarClientProps) 
     };
   };
 
-  const { min, max } = useMemo(() => getMinMaxForDay(date), [date]);
+  const { min, max } = useMemo(
+    () => getMinMaxForDay(date, workingHoursSchedule),
+    [date, workingHoursSchedule]
+  );
 
   return (
     <div className="space-y-4">

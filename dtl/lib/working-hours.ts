@@ -1,6 +1,7 @@
 /**
  * Working hours (orar) for calendar and booking.
- * Stored in localStorage (key: dtl-working-hours) when set from admin; no API yet.
+ * Admin Calendar reads from DB (schedule passed from server). Admin Orar saves via API → DB.
+ * localStorage (key: dtl-working-hours) is legacy fallback when getMinMaxForDay is called without a schedule (e.g. client-only usage).
  * Supports per-day schedule: Luni–Sâmbătă (index 0–5).
  */
 
@@ -28,7 +29,8 @@ const DEFAULT_RANGE: WorkingHoursRange = {
 
 const DEFAULT_DAY_OPEN: DaySchedule = { start: "08:00", end: "17:00" };
 
-const DEFAULT_SCHEDULE: WorkingHoursSchedule = {
+/** Default schedule when DB/localStorage has none. Exported for server-side fallback. */
+export const DEFAULT_SCHEDULE: WorkingHoursSchedule = {
   days: [
     DEFAULT_DAY_OPEN,
     DEFAULT_DAY_OPEN,
@@ -109,16 +111,20 @@ function dayToIndex(day: Date): number {
   return js - 1;
 }
 
-/** Return min and max Date for a given day using that day's working hours. */
-export function getMinMaxForDay(day: Date): { min: Date; max: Date } {
-  const schedule = getWorkingHoursSchedule();
+/** Return min and max Date for a given day using that day's working hours. Pass schedule from API when available (e.g. admin calendar); otherwise reads from localStorage. */
+export function getMinMaxForDay(
+  day: Date,
+  schedule?: WorkingHoursSchedule
+): { min: Date; max: Date } {
+  const resolved =
+    schedule ?? (typeof window !== "undefined" ? getWorkingHoursSchedule() : DEFAULT_SCHEDULE);
   const index = dayToIndex(day);
   if (index < 0) {
     const d = new Date(day);
     d.setHours(0, 0, 0, 0);
     return { min: d, max: d };
   }
-  const daySchedule = schedule.days[index];
+  const daySchedule = resolved.days[index];
   if (isClosed(daySchedule)) {
     const d = new Date(day);
     d.setHours(0, 0, 0, 0);

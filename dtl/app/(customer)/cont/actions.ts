@@ -10,7 +10,12 @@ import {
   getQuoteRequestsByEmail,
   getClientByEmail,
   ensureClient,
+  getCarsByClientId,
+  addClientCar,
+  updateClientCar,
+  deleteClientCar,
 } from "@/lib/services";
+import type { ClientCar } from "@/lib/client-cars-store";
 
 /** Register a new client (sign-up on Cont). Creates or updates the client so they appear in admin Clienți. */
 export async function registerClient(name: string, email: string, phone: string) {
@@ -22,6 +27,62 @@ export async function registerClient(name: string, email: string, phone: string)
   });
   if ("error" in result) return { ok: false as const, error: "server" as const };
   return { ok: true as const };
+}
+
+/** Get client and their cars by email (for Cont when "logged in"). Uses DB. */
+export async function getClientWithCars(email: string): Promise<{
+  client: { id: string; name: string; email: string; phone: string } | null;
+  cars: ClientCar[];
+}> {
+  if (!email?.trim()) return { client: null, cars: [] };
+  const clientResult = await getClientByEmail(email.trim());
+  if ("error" in clientResult || !clientResult.data)
+    return { client: null, cars: [] };
+  const client = clientResult.data;
+  const carsResult = await getCarsByClientId(client.id);
+  const cars = "data" in carsResult ? carsResult.data : [];
+  return {
+    client: {
+      id: client.id,
+      name: client.name,
+      email: client.email,
+      phone: client.phone,
+    },
+    cars,
+  };
+}
+
+/** Add a car for the current client (Cont). */
+export async function addClientCarAction(
+  clientId: string,
+  data: { carMake: string; carModel: string; carYear: string; chassis?: string }
+): Promise<{ ok: boolean; car?: ClientCar; error?: string }> {
+  const result = await addClientCar({
+    clientId,
+    carMake: data.carMake.trim(),
+    carModel: data.carModel.trim(),
+    carYear: data.carYear.trim(),
+    chassis: data.chassis?.trim() || undefined,
+  });
+  if ("error" in result) return { ok: false, error: result.error.message };
+  return { ok: true, car: result.data };
+}
+
+/** Update a client car (Cont). */
+export async function updateClientCarAction(
+  carId: string,
+  data: Partial<{ carMake: string; carModel: string; carYear: string; chassis: string }>
+): Promise<{ ok: boolean; car?: ClientCar }> {
+  const result = await updateClientCar(carId, data);
+  if ("error" in result) return { ok: false };
+  return { ok: true, car: result.data ?? undefined };
+}
+
+/** Delete a client car (Cont). */
+export async function deleteClientCarAction(carId: string): Promise<{ ok: boolean }> {
+  const result = await deleteClientCar(carId);
+  if ("error" in result) return { ok: false };
+  return { ok: !!result.data };
 }
 
 /** Get appointments for the logged-in client (by email). */
