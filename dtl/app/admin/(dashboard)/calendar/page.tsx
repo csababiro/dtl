@@ -1,6 +1,6 @@
 import { t } from "@/lib/i18n";
 import { getAppointments } from "@/lib/api/appointments";
-import { getWorkingHours } from "@/lib/services";
+import { getWorkingHours } from "@/lib/api/settings";
 import { DEFAULT_SCHEDULE } from "@/lib/working-hours";
 import { AdminCalendarClient } from "@/components/admin/AdminCalendarClient";
 import { Calendar as CalendarIcon } from "lucide-react";

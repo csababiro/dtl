@@ -20,6 +20,21 @@ export async function getClientById(
   return get<DummyClient>(`/clients/${id}`);
 }
 
+/** Get client by email. Use from server (e.g. Cont actions); requires INTERNAL_API_SECRET or admin JWT. */
+export async function getClientByEmail(
+  email: string
+): Promise<{ data: DummyClient | null } | { error: ApiError }> {
+  const result = await get<DummyClient>(
+    "/clients/by-email?email=" + encodeURIComponent(email),
+    { internal: true }
+  );
+  if ("error" in result) {
+    if (result.error.status === 404) return { data: null };
+    return { error: result.error };
+  }
+  return { data: result.data };
+}
+
 export async function getClientPlati(
   clientId: string
 ): Promise<{ data: ClientPlata[] } | { error: ApiError }> {

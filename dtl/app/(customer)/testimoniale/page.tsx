@@ -2,7 +2,7 @@ import Link from "next/link";
 import { getFeatureFlags, isTestimonialsEnabled } from "@/lib/feature-flags";
 import { t } from "@/lib/i18n";
 import { Quote } from "lucide-react";
-import { getTestimonials } from "@/lib/services";
+import { getTestimonials } from "@/lib/api/testimonials";
 
 export const dynamic = "force-dynamic";
 

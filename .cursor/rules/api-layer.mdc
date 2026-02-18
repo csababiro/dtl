@@ -1,0 +1,53 @@
+---
+description: All data/DB access goes through the API layer; server code uses lib/api, not lib/services
+globs: ["**/app/**/*.ts", "**/app/**/*.tsx", "**/lib/api/**/*.ts", "**/lib/services/**/*.ts"]
+alwaysApply: false
+---
+
+# Purpose
+Keep data access uniform: only API route handlers call the DB (via lib/services). Server components and server actions use the API layer (lib/api) so all calls go through HTTP to /api/*.
+
+## Do / Don't
+
+### DO
+DO add **new** data access via the API layer:
+  1. **Implement the API route** in `app/api/**/route.ts`; the handler calls **lib/services** (e.g. `getXFromDb` or service wrappers).
+  2. **Add the client function** in `lib/api/<domain>.ts` (e.g. `getX()`, `postX()`) using `get`/`post`/`patch`/`del` from `lib/api-client`.
+  3. **Use from server components or server actions** by importing from `lib/api/*`, not from `lib/services`.
+
+DO use **lib/services** only inside **API route handlers** (`app/api/**/route.ts`). No other files should import from lib/services for read/write data.
+
+DO use **lib/api** (and thus the same `/api` routes) from:
+  - Server components (e.g. pages that need data).
+  - Server actions ("use server" that need to load or mutate data).
+
+For **internal-only** routes (no admin JWT available, e.g. Cont actions):
+  - Protect the route with `X-Internal-Secret` === `process.env.INTERNAL_API_SECRET` (or admin JWT).
+  - Call from server with `get(path, { internal: true })` so api-client sends the header when `INTERNAL_API_SECRET` is set.
+
+### DON'T
+MUST NOT import **lib/services** in server components, server actions, or client components for data access. Use **lib/api** instead.
+
+MUST NOT add new DB-backed behavior by only calling lib/services from a page or action. Add (or reuse) an API route and a lib/api function first.
+
+MUST NOT bypass the API layer for “convenience” (e.g. “this is server-only so I’ll call services”) — keep the pattern uniform.
+
+## Quick reference
+
+| Caller                    | Uses           | Example                          |
+|---------------------------|----------------|----------------------------------|
+| API route handler         | lib/services   | `app/api/clients/route.ts`       |
+| Server component / action | lib/api        | `getClients()` from `lib/api/clients` |
+| Client component          | lib/api (fetch)| same, or hooks that call lib/api |
+
+## Adding a new “get by X” or mutation
+
+1. **Route:** `app/api/<resource>/route.ts` or `app/api/<resource>/[id]/route.ts` (or by-email, etc.). Handler calls `lib/services` and returns JSON.
+2. **lib/api:** Add `getX()` / `postX()` in `lib/api/<domain>.ts` that calls the route (use `{ internal: true }` only for server-only routes that accept `X-Internal-Secret`).
+3. **Usage:** In pages/actions, `import { getX } from "@/lib/api/<domain>"` and await it.
+
+## Completion checklist (new data access)
+
+[ ] New behavior has an API route that uses lib/services.
+[ ] lib/api has a function that calls that route.
+[ ] Server components/actions use the lib/api function; no direct lib/services import for this data.

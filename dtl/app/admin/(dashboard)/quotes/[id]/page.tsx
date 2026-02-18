@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { getQuoteRequestById } from "@/lib/services";
+import { getQuoteRequestById } from "@/lib/api/quote-requests";
 import { t } from "@/lib/i18n";
 import { AdminQuoteDetailClient } from "@/components/admin/AdminQuoteDetailClient";
 import { ArrowLeft } from "lucide-react";

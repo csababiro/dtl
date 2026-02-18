@@ -29,7 +29,20 @@ async function getAuthCookieHeader(): Promise<Record<string, string>> {
   }
 }
 
-export async function get<T>(path: string): Promise<{ data: T } | { error: ApiError }> {
+/** For server-side calls to internal-only routes (e.g. by-email). Send X-Internal-Secret when set. */
+async function getInternalSecretHeader(): Promise<Record<string, string>> {
+  if (typeof window !== "undefined") return {};
+  const secret = process.env.INTERNAL_API_SECRET;
+  if (!secret) return {};
+  return { "X-Internal-Secret": secret };
+}
+
+export type GetOptions = { internal?: boolean };
+
+export async function get<T>(
+  path: string,
+  options?: GetOptions
+): Promise<{ data: T } | { error: ApiError }> {
   const baseUrl = getBaseUrl();
   if (!baseUrl) {
     return {
@@ -38,10 +51,11 @@ export async function get<T>(path: string): Promise<{ data: T } | { error: ApiEr
   }
   const url = path.startsWith("/") ? baseUrl + path : baseUrl + "/" + path;
   const authHeaders = await getAuthCookieHeader();
+  const internalHeaders = options?.internal ? await getInternalSecretHeader() : {};
   try {
     const res = await fetch(url, {
       credentials: "include",
-      headers: authHeaders,
+      headers: { ...authHeaders, ...internalHeaders },
       cache: "no-store",
     });
     if (!res.ok) {

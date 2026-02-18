@@ -13,6 +13,12 @@ This document is the source of truth for current and planned API behavior. It is
 - **Base URL:** From `process.env.NEXT_PUBLIC_API_URL`. If unset or empty, the client falls back to same-origin `/api` (e.g. `window.location.origin + "/api"` or `NEXT_PUBLIC_APP_URL + "/api"`). Trailing slashes are stripped.
 - **Client:** `lib/api-client.ts` exposes `get`, `post`, `put`, `patch`, `del`. All return `{ data: T }` on success or `{ error: ApiError }` on failure. Paths are appended to the base URL (leading slash is preserved).
 
+## Data flow (uniform approach)
+
+- **API route handlers** (`app/api/**/route.ts`) are the only place that call **lib/services** (and thus lib/db). They implement the HTTP contract.
+- **Server components and server actions** use the **API layer** (**lib/api/**) to read/write data: they call `get`, `post`, etc. from `lib/api-client`, which hits the same `/api` routes. This keeps all DB access behind the API and avoids mixing direct service calls in pages/actions.
+- **Internal-only routes** (e.g. `GET /api/clients/by-email`) can be called from the server with `get(path, { internal: true })`; when `INTERNAL_API_SECRET` is set, the client sends `X-Internal-Secret` so the route accepts the request without admin JWT (e.g. Cont actions looking up client by email).
+
 ## Existing routes
 
 ### Quote requests

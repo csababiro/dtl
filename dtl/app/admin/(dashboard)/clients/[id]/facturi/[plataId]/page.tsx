@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { getClientById, getPlataById } from "@/lib/services";
+import { getClientById } from "@/lib/api/clients";
+import { getPlataById } from "@/lib/api/plati";
 import { AdminFacturaDetailClient } from "@/components/admin/AdminFacturaDetailClient";
 import { ArrowLeft } from "lucide-react";
 

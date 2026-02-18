@@ -382,7 +382,7 @@ export function ContPageClient() {
 
   async function handleRemoveCar(id: string) {
     if (clientId) {
-      const ok = await deleteClientCarAction(id);
+      const ok = await deleteClientCarAction(clientId, id);
       if (!ok.ok) return;
     }
     const next = userCars.filter((c) => c.id !== id);
