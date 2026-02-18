@@ -83,7 +83,7 @@ function RevenueLineChart({ data }: { data: { name: string; venit: number }[] })
 }
 
 export function AdminDashboardClient() {
-  const [period, setPeriod] = useState<Period>("7days");
+  const [period, setPeriod] = useState<Period>("today");
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -188,61 +188,26 @@ export function AdminDashboardClient() {
           )}
         </div>
 
-        <div className="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm">
-          <h3 className="text-xl font-bold text-slate-900 mb-8">
-            {t("admin.recentAppointments")}
+        <Link
+          href="/admin/appointments"
+          className="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm flex flex-col hover:bg-slate-50/50 transition-colors block"
+        >
+          <h3 className="text-xl font-bold text-slate-900 mb-4">
+            {t("admin.appointments")}
           </h3>
           {loading && !stats ? (
-            <div className="flex justify-center py-8">
+            <div className="flex justify-center py-8 flex-1">
               <Loader2 className="animate-spin text-slate-400" size={24} />
             </div>
-          ) : stats && stats.recentAppointments.length > 0 ? (
-            <div className="space-y-6">
-              {stats.recentAppointments.map((item) => (
-                <Link
-                  key={item.id}
-                  href={`/admin/appointments/${item.id}`}
-                  className="flex items-center justify-between gap-4 hover:bg-slate-50 -mx-2 px-2 py-2 rounded-xl transition-colors"
-                >
-                  <div className="flex items-center gap-4 min-w-0">
-                    <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center font-bold text-slate-600 shrink-0">
-                      {(item.nume || "?")[0]}
-                    </div>
-                    <div className="min-w-0">
-                      <h4 className="font-bold text-slate-900 text-sm truncate">
-                        {item.nume}
-                      </h4>
-                      <p className="text-xs text-slate-500">
-                        {item.marca} • {item.data}
-                      </p>
-                    </div>
-                  </div>
-                  <span
-                    className={`px-2 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider shrink-0 ${
-                      item.status === "Confirmat"
-                        ? "bg-green-100 text-green-700"
-                        : "bg-amber-100 text-amber-700"
-                    }`}
-                  >
-                    {item.status === "Confirmat"
-                      ? t("admin.confirmed")
-                      : t("admin.pending")}
-                  </span>
-                </Link>
-              ))}
-            </div>
           ) : (
-            <p className="text-slate-500 text-sm py-4">
-              {t("admin.noRecentAppointments")}
+            <p className="text-4xl font-black text-slate-900 mb-6">
+              {stats ? stats.appointmentsCount : 0}
             </p>
           )}
-          <Link
-            href="/admin/appointments"
-            className="block w-full mt-8 py-3 bg-slate-50 text-slate-500 font-bold rounded-xl text-center text-sm hover:bg-slate-100 transition-colors"
-          >
+          <span className="mt-auto py-3 bg-slate-50 text-slate-600 font-bold rounded-xl text-center text-sm">
             {t("admin.viewAllAppointments")}
-          </Link>
-        </div>
+          </span>
+        </Link>
       </div>
     </div>
   );
