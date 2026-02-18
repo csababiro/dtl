@@ -138,6 +138,16 @@ export function Header({
         email={email}
         whatsapp={whatsapp}
         address={address}
+        centerContent={
+          <Link
+            href="/oferte-dtl.html"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-bold text-lg text-white hover:underline"
+          >
+            {t("nav.oferta")}
+          </Link>
+        }
       />
       <nav className="relative bg-white border-b border-slate-200 sticky top-0 overflow-visible">
         <div className="max-w-7xl mx-auto px-4 h-20 flex items-center justify-between">

@@ -11,10 +11,17 @@
     "contact": "Contact",
     "gallery": "Galerie",
     "testimonials": "Testimoniale",
+    "oferta": "Vezi oferta",
     "cont": "Cont",
     "test": "Test",
     "login": "Autentificare",
     "logout": "Deconectare"
+  },
+  "oferta": {
+    "title": "Oferte site",
+    "cta": "Vezi oferta",
+    "description": "Pachete site de prezentare, cu programări și cont client. Descarcă documentul pentru detalii.",
+    "openDoc": "Deschide documentul ofertă"
   },
   "common": {
     "submit": "Trimite",
