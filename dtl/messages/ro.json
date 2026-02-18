@@ -115,7 +115,7 @@
     "requiredCarYear": "Anul este obligatoriu",
     "requiredDescription": "Descrierea este obligatorie",
     "requiredChassis": "Șasiul este obligatoriu",
-    "chassisFormat": "Șasiul poate conține doar litere mari (A-Z), cifre și liniuță"
+    "chassisFormat": "VIN: 17 caractere, doar litere A–H, J–N, P–R, Z și cifre 0–9 (fără I, O, Q)"
   },
   "galerie": {
     "title": "Galerie",

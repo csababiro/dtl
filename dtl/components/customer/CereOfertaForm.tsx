@@ -21,8 +21,11 @@ import {
   PHONE_MAX,
   CAR_MAKE_MODEL_MAX,
   DESCRIPTION_MAX,
-  CHASSIS_MAX,
 } from "@/lib/field-limits";
+
+/** VIN: exactly 17 chars; A–H, J–N, P–R, Z and 0–9 (no I, O, Q per ISO 3779). */
+const VIN_REGEX = /^[A-HJ-NPR-Z0-9]{17}$/;
+const VIN_MAX_LENGTH = 17;
 import { CreateAccountPromptModal } from "./CreateAccountPromptModal";
 import { notifyOnQuoteSuccess } from "@/lib/push-notify";
 
@@ -342,18 +345,29 @@ export function CereOfertaForm() {
               <input
                 type="text"
                 placeholder={t("cereOferta.chassisPlaceholder")}
-                maxLength={CHASSIS_MAX}
+                maxLength={VIN_MAX_LENGTH}
+                autoComplete="off"
                 className={`w-full p-4 bg-slate-50 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 transition-all border ${errors.chassis ? inputError : inputNormal}`}
                 {...((): ReturnType<typeof register> => {
                   const { ref, onChange, ...rest } = register("chassis", {
                     required: t("cereOferta.requiredChassis"),
-                    pattern: { value: /^[A-Z0-9\-]*$/, message: t("cereOferta.chassisFormat") },
+                    validate: (value) => {
+                      const normalized = String(value ?? "").replace(/[\s\-]/g, "").toUpperCase();
+                      if (normalized.length !== VIN_MAX_LENGTH)
+                        return t("cereOferta.chassisFormat");
+                      if (!VIN_REGEX.test(normalized)) return t("cereOferta.chassisFormat");
+                      return true;
+                    },
                   });
                   return {
                     ...rest,
                     ref,
                     onChange: (e: { target: { value: string } }) => {
-                      e.target.value = e.target.value.toUpperCase().replace(/[^A-Z0-9\-]/g, "");
+                      const next = e.target.value
+                        .toUpperCase()
+                        .replace(/[^A-HJ-NPR-Z0-9]/g, "")
+                        .slice(0, VIN_MAX_LENGTH);
+                      e.target.value = next;
                       return onChange(e);
                     },
                   };

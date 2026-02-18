@@ -101,6 +101,7 @@ export function BookingForm({ tabs, defaultTab }: BookingFormProps) {
   const [optionalServices, setOptionalServices] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [showCreateAccountPrompt, setShowCreateAccountPrompt] = useState(false);
 
   const {
@@ -159,12 +160,41 @@ export function BookingForm({ tabs, defaultTab }: BookingFormProps) {
     );
   }
 
-  const onSubmit = (data: BookingFormValues) => {
+  const onSubmit = async (data: BookingFormValues) => {
     setLoading(true);
-    setSuccess(true);
-    setShowCreateAccountPrompt(true);
-    setLoading(false);
-    notifyOnBookingSuccess({ name: data.name, date: data.date, time: data.time });
+    setSubmitError(null);
+    const type = activeTab === "tyre" ? "tyre" : activeTab === "carWash" ? "carWash" : "general";
+    try {
+      const res = await fetch("/api/appointment-requests", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: data.name,
+          phone: data.phone,
+          email: data.email,
+          carMake: data.carMake,
+          carModel: data.carModel,
+          carYear: data.carYear,
+          description: data.description,
+          date: data.date,
+          time: data.time,
+          type,
+        }),
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setSubmitError((json.error as string) || t("errors.submitError"));
+        setLoading(false);
+        return;
+      }
+      setSuccess(true);
+      setShowCreateAccountPrompt(true);
+      notifyOnBookingSuccess({ name: data.name, date: data.date, time: data.time });
+    } catch {
+      setSubmitError(t("errors.submitError"));
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (success) {
@@ -471,6 +501,12 @@ export function BookingForm({ tabs, defaultTab }: BookingFormProps) {
             </div>
           </div>
         </div>
+
+        {submitError && (
+          <p className="text-sm text-red-600 mb-4" role="alert">
+            {submitError}
+          </p>
+        )}
 
         <button
           type="submit"
