@@ -94,6 +94,11 @@ export function Footer({
                 {t("nav.contact")}
               </Link>
             </li>
+            <li>
+              <Link href="/contract" className="inline-block py-3 hover:text-blue-400 transition-colors min-h-[44px] leading-tight flex items-center">
+                {t("nav.contract")}
+              </Link>
+            </li>
             {showGallery && (
               <li>
                 <Link href="/galerie" className="inline-block py-3 hover:text-blue-400 transition-colors min-h-[44px] leading-tight flex items-center">
