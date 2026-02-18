@@ -7,13 +7,10 @@ export type JwtPayload = { sub: string; role: string };
 
 function getSecret(): Uint8Array {
   const secret = process.env.JWT_SECRET;
-  if (secret && secret.length >= 16) {
-    return new TextEncoder().encode(secret);
+  if (!secret || secret.length < 16) {
+    throw new Error("JWT_SECRET must be set and at least 16 characters. See .env.example.");
   }
-  if (process.env.NODE_ENV === "production") {
-    throw new Error("JWT_SECRET must be set and at least 16 characters in production");
-  }
-  return new TextEncoder().encode("dtl-dev-jwt-secret-min-16-chars");
+  return new TextEncoder().encode(secret);
 }
 
 export async function signJwt(payload: JwtPayload, expiresInSec = DEFAULT_EXPIRY_SEC): Promise<string> {
