@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import {
   TrendingUp,
@@ -8,8 +8,11 @@ import {
   ClipboardCheck,
   Calendar,
   Eye,
+  Loader2,
 } from "lucide-react";
 import { t } from "@/lib/i18n";
+import { getDashboardStats } from "@/lib/api/stats";
+import type { DashboardStats } from "@/lib/api/stats";
 
 type Period = "today" | "7days" | "month" | "year" | "all";
 
@@ -21,32 +24,12 @@ const PERIOD_OPTIONS: { value: Period; labelKey: string }[] = [
   { value: "all", labelKey: "admin.periodAll" },
 ];
 
-const REVENUE_LINE_DATA = [
-  { name: "Lun", venit: 4000 },
-  { name: "Mar", venit: 3000 },
-  { name: "Mie", venit: 2000 },
-  { name: "Joi", venit: 2780 },
-  { name: "Vin", venit: 1890 },
-  { name: "Sâm", venit: 2390 },
-  { name: "Dum", venit: 0 },
-];
+function formatRevenue(n: number): string {
+  if (n === 0) return "0 RON";
+  return n % 1 === 0 ? `${n} RON` : `${n.toLocaleString("ro-RO", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} RON`;
+}
 
-const DUMMY_RECENT_APPOINTMENTS = [
-  { id: "1", nume: "Maria Popescu", marca: "VW Golf", data: "12 Feb 2025", status: "Confirmat" as const },
-  { id: "2", nume: "Ion Ionescu", marca: "Dacia Duster", data: "11 Feb 2025", status: "Solicitat" as const },
-  { id: "3", nume: "Elena Marin", marca: "BMW 320", data: "10 Feb 2025", status: "Confirmat" as const },
-  { id: "4", nume: "Andrei Stan", marca: "Skoda Octavia", data: "9 Feb 2025", status: "Solicitat" as const },
-];
-
-const STAT_CARDS_BASE = [
-  { labelKey: "admin.revenueToday", val: "4.250 RON", icon: TrendingUp, color: "text-green-600", bg: "bg-green-100" },
-  { labelKey: "admin.newClients", val: "12", icon: UsersIcon, color: "text-blue-600", bg: "bg-blue-100" },
-  { labelKey: "admin.appointmentsCount", val: "28", icon: ClipboardCheck, color: "text-purple-600", bg: "bg-purple-100" },
-  { labelKey: "admin.visitors", val: "—", icon: Eye, color: "text-slate-600", bg: "bg-slate-100", noApi: true },
-];
-
-function RevenueLineChart() {
-  const data = REVENUE_LINE_DATA;
+function RevenueLineChart({ data }: { data: { name: string; venit: number }[] }) {
   const maxVenit = Math.max(...data.map((d) => d.venit), 1);
   const width = 100;
   const height = 80;
@@ -101,8 +84,35 @@ function RevenueLineChart() {
 
 export function AdminDashboardClient() {
   const [period, setPeriod] = useState<Period>("7days");
+  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const periodLabel = PERIOD_OPTIONS.find((p) => p.value === period)?.labelKey ?? "admin.period7Days";
+  const fetchStats = useCallback(async (p: Period) => {
+    setLoading(true);
+    setError(null);
+    const result = await getDashboardStats(p);
+    if ("data" in result) {
+      setStats(result.data);
+    } else {
+      setError(result.error?.message ?? "Eroare la încărcare");
+      setStats(null);
+    }
+    setLoading(false);
+  }, []);
+
+  useEffect(() => {
+    fetchStats(period);
+  }, [period, fetchStats]);
+
+  const statCards = stats
+    ? [
+        { labelKey: "admin.revenueToday" as const, val: formatRevenue(stats.revenueToday), icon: TrendingUp, color: "text-green-600", bg: "bg-green-100" },
+        { labelKey: "admin.newClients" as const, val: String(stats.newClients), icon: UsersIcon, color: "text-blue-600", bg: "bg-blue-100" },
+        { labelKey: "admin.appointmentsCount" as const, val: String(stats.appointmentsCount), icon: ClipboardCheck, color: "text-purple-600", bg: "bg-purple-100" },
+        { labelKey: "admin.visitors" as const, val: "—", icon: Eye, color: "text-slate-600", bg: "bg-slate-100" },
+      ]
+    : [];
 
   return (
     <div className="space-y-8">
@@ -121,11 +131,12 @@ export function AdminDashboardClient() {
               key={opt.value}
               type="button"
               onClick={() => setPeriod(opt.value)}
+              disabled={loading}
               className={`px-4 py-2 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${
                 period === opt.value
                   ? "bg-blue-600 text-white shadow-md"
                   : "bg-white border border-slate-200 text-slate-600 hover:bg-slate-50"
-              }`}
+              } disabled:opacity-60`}
             >
               {opt.value === "7days" && <Calendar size={14} />}
               {t(opt.labelKey)}
@@ -134,23 +145,33 @@ export function AdminDashboardClient() {
         </div>
       </div>
 
+      {error && (
+        <p className="text-sm text-red-600">{error}</p>
+      )}
+
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {STAT_CARDS_BASE.map((stat, i) => (
-          <div
-            key={i}
-            className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm"
-          >
-            <div className="flex items-center justify-between mb-4">
-              <div className={`p-3 rounded-2xl ${stat.bg} ${stat.color}`}>
-                <stat.icon size={24} />
-              </div>
-            </div>
-            <h4 className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-1">
-              {t(stat.labelKey)}
-            </h4>
-            <p className="text-3xl font-black text-slate-900">{stat.val}</p>
+        {loading && !stats ? (
+          <div className="col-span-full flex items-center justify-center py-12">
+            <Loader2 className="animate-spin text-slate-400" size={32} />
           </div>
-        ))}
+        ) : (
+          statCards.map((stat, i) => (
+            <div
+              key={i}
+              className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <div className={`p-3 rounded-2xl ${stat.bg} ${stat.color}`}>
+                  <stat.icon size={24} />
+                </div>
+              </div>
+              <h4 className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-1">
+                {t(stat.labelKey)}
+              </h4>
+              <p className="text-3xl font-black text-slate-900">{stat.val}</p>
+            </div>
+          ))
+        )}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -158,46 +179,63 @@ export function AdminDashboardClient() {
           <h3 className="text-xl font-bold text-slate-900 mb-8">
             {t("admin.revenueEvolution")}
           </h3>
-          <RevenueLineChart />
+          {stats ? (
+            <RevenueLineChart data={stats.revenueByDay} />
+          ) : (
+            <div className="h-[280px] flex items-center justify-center text-slate-400">
+              {loading ? <Loader2 className="animate-spin" size={28} /> : "—"}
+            </div>
+          )}
         </div>
 
         <div className="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm">
           <h3 className="text-xl font-bold text-slate-900 mb-8">
             {t("admin.recentAppointments")}
           </h3>
-          <div className="space-y-6">
-            {DUMMY_RECENT_APPOINTMENTS.map((item) => (
-              <div
-                key={item.id}
-                className="flex items-center justify-between gap-4"
-              >
-                <div className="flex items-center gap-4 min-w-0">
-                  <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center font-bold text-slate-600 shrink-0">
-                    {item.nume[0]}
-                  </div>
-                  <div className="min-w-0">
-                    <h4 className="font-bold text-slate-900 text-sm truncate">
-                      {item.nume}
-                    </h4>
-                    <p className="text-xs text-slate-500">
-                      {item.marca} • {item.data}
-                    </p>
-                  </div>
-                </div>
-                <span
-                  className={`px-2 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider shrink-0 ${
-                    item.status === "Confirmat"
-                      ? "bg-green-100 text-green-700"
-                      : "bg-amber-100 text-amber-700"
-                  }`}
+          {loading && !stats ? (
+            <div className="flex justify-center py-8">
+              <Loader2 className="animate-spin text-slate-400" size={24} />
+            </div>
+          ) : stats && stats.recentAppointments.length > 0 ? (
+            <div className="space-y-6">
+              {stats.recentAppointments.map((item) => (
+                <Link
+                  key={item.id}
+                  href={`/admin/appointments/${item.id}`}
+                  className="flex items-center justify-between gap-4 hover:bg-slate-50 -mx-2 px-2 py-2 rounded-xl transition-colors"
                 >
-                  {item.status === "Confirmat"
-                    ? t("admin.confirmed")
-                    : t("admin.pending")}
-                </span>
-              </div>
-            ))}
-          </div>
+                  <div className="flex items-center gap-4 min-w-0">
+                    <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center font-bold text-slate-600 shrink-0">
+                      {(item.nume || "?")[0]}
+                    </div>
+                    <div className="min-w-0">
+                      <h4 className="font-bold text-slate-900 text-sm truncate">
+                        {item.nume}
+                      </h4>
+                      <p className="text-xs text-slate-500">
+                        {item.marca} • {item.data}
+                      </p>
+                    </div>
+                  </div>
+                  <span
+                    className={`px-2 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider shrink-0 ${
+                      item.status === "Confirmat"
+                        ? "bg-green-100 text-green-700"
+                        : "bg-amber-100 text-amber-700"
+                    }`}
+                  >
+                    {item.status === "Confirmat"
+                      ? t("admin.confirmed")
+                      : t("admin.pending")}
+                  </span>
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <p className="text-slate-500 text-sm py-4">
+              {t("admin.noRecentAppointments")}
+            </p>
+          )}
           <Link
             href="/admin/appointments"
             className="block w-full mt-8 py-3 bg-slate-50 text-slate-500 font-bold rounded-xl text-center text-sm hover:bg-slate-100 transition-colors"

@@ -6,3 +6,4 @@ export * from "./users";
 export * from "./quote-requests";
 export * from "./plati";
 export * from "./settings";
+export * from "./stats";
