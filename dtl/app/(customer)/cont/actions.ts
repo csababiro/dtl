@@ -9,7 +9,20 @@ import {
   updatePlataNotes,
   getQuoteRequestsByEmail,
   getClientByEmail,
+  ensureClient,
 } from "@/lib/services";
+
+/** Register a new client (sign-up on Cont). Creates or updates the client so they appear in admin Clienți. */
+export async function registerClient(name: string, email: string, phone: string) {
+  if (!name?.trim() || !email?.trim()) return { ok: false as const, error: "validation" as const };
+  const result = await ensureClient({
+    name: name.trim(),
+    email: email.trim(),
+    phone: (phone ?? "").trim(),
+  });
+  if ("error" in result) return { ok: false as const, error: "server" as const };
+  return { ok: true as const };
+}
 
 /** Get appointments for the logged-in client (by email). */
 export async function getAppointmentsForClient(email: string) {

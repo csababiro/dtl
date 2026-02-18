@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { format, parse } from "date-fns";
 import { enUS } from "date-fns/locale";
-import { createAppointment } from "@/lib/services";
+import { createAppointment, ensureClient } from "@/lib/services";
 
 export async function POST(request: Request) {
   try {
@@ -36,6 +36,8 @@ export async function POST(request: Request) {
     } catch {
       dataFormatted = dateInput;
     }
+    const marca = String(body.carMake ?? "").trim();
+    const model = String(body.carModel ?? "").trim();
     const id = "apt-" + Date.now() + "-" + Math.random().toString(36).slice(2, 8);
     const result = await createAppointment({
       id,
@@ -44,14 +46,16 @@ export async function POST(request: Request) {
       email,
       data: dataFormatted,
       ora: time,
-      marca: String(body.carMake ?? "").trim(),
-      model: String(body.carModel ?? "").trim(),
+      marca,
+      model,
       tip,
       status: "În așteptare",
       descriere: body.description != null ? String(body.description).trim() : undefined,
     });
     if ("error" in result)
       return NextResponse.json({ error: result.error.message }, { status: 500 });
+    const car = [marca, model].filter(Boolean).join(" ") || undefined;
+    await ensureClient({ name, email, phone, car });
     return NextResponse.json(
       { id: result.data.id, status: "requested" },
       { status: 201 }

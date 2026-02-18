@@ -35,6 +35,7 @@ import {
   getCereriForClient,
   updateAppointmentNotesForClient,
   updatePlataNotesForClient,
+  registerClient,
 } from "@/app/(customer)/cont/actions";
 import type { DummyAppointment } from "@/lib/dummy-appointments";
 import type { ClientPlata } from "@/lib/dummy-plati";
@@ -272,7 +273,8 @@ export function ContPageClient() {
     setIsLoggedIn(true);
   }
 
-  function onRegisterSubmit(data: RegisterFormValues) {
+  async function onRegisterSubmit(data: RegisterFormValues) {
+    await registerClient(data.name.trim(), data.email.trim(), (data.phone ?? "").trim());
     if (typeof window !== "undefined") {
       sessionStorage.setItem(STORAGE_KEY, "true");
       sessionStorage.setItem(NAME_STORAGE_KEY, data.name.trim());
