@@ -8,7 +8,7 @@ export default function AdminContentPage() {
           {t("admin.content")}
         </h1>
         <p className="text-slate-500 mt-1">
-          Conținut – placeholder.
+          {t("admin.contentPageDesc")}
         </p>
       </div>
     </div>
