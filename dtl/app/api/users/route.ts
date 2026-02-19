@@ -16,33 +16,7 @@ export async function GET(request: Request) {
       { status: 403 }
     );
   }
-  // #region agent log
-  fetch("http://127.0.0.1:7244/ingest/38291e03-8924-411d-af90-c560fa478f53", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      location: "app/api/users/route.ts:GET",
-      message: "GET /api/users entry",
-      data: {},
-      timestamp: Date.now(),
-      hypothesisId: "C",
-    }),
-  }).catch(() => {});
-  // #endregion
   const result = await getUsers();
-  // #region agent log
-  fetch("http://127.0.0.1:7244/ingest/38291e03-8924-411d-af90-c560fa478f53", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      location: "app/api/users/route.ts:GET",
-      message: "after getUsers()",
-      data: { hasError: "error" in result, hasData: "data" in result },
-      timestamp: Date.now(),
-      hypothesisId: "C",
-    }),
-  }).catch(() => {});
-  // #endregion
   if ("error" in result)
     return NextResponse.json({ error: result.error.message }, { status: 500 });
   return NextResponse.json({ items: result.data });

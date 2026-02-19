@@ -135,10 +135,21 @@ export function AdminSidebar({ mobileOpen = false, onMobileClose }: AdminSidebar
         <ul className="space-y-1">
           {menuItems.map((item) => (
             <li key={item.path}>
-              <Link
+              <a
                 href={item.path}
-                onClick={onMobileClose}
-                className={`flex items-center justify-between px-4 py-3 rounded-xl transition-all group ${
+                onClick={(e) => {
+                  if (item.path === "/admin/users") {
+                    e.preventDefault();
+                    fetch("/api/debug-log", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ event: "sidebar_utilizatori_click", pathname: window.location.pathname }),
+                    }).catch(() => {});
+                    window.location.assign("/admin/users");
+                  }
+                  onMobileClose?.();
+                }}
+                className={`flex items-center justify-between px-4 py-3 rounded-xl transition-all group no-underline text-inherit ${
                   isActive(item.path)
                     ? "bg-blue-600 text-white shadow-lg shadow-blue-900/20"
                     : "hover:bg-slate-800 hover:text-slate-200"
@@ -149,7 +160,7 @@ export function AdminSidebar({ mobileOpen = false, onMobileClose }: AdminSidebar
                   <span className="font-medium">{t(item.nameKey)}</span>
                 </div>
                 {isActive(item.path) && <ChevronRight size={16} />}
-              </Link>
+              </a>
             </li>
           ))}
         </ul>
@@ -171,6 +182,7 @@ export function AdminSidebar({ mobileOpen = false, onMobileClose }: AdminSidebar
         </div>
         <Link
           href="/admin/logout"
+          prefetch={false}
           onClick={onMobileClose}
           className="flex items-center gap-3 px-4 py-3 w-full text-slate-400 hover:text-red-400 transition-colors"
         >

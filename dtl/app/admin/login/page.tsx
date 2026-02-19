@@ -3,7 +3,11 @@ import { Wrench } from "lucide-react";
 import { t } from "@/lib/i18n";
 import { AdminLoginForm } from "@/components/admin/AdminLoginForm";
 
-export default function AdminLoginPage() {
+type Props = { searchParams: Promise<{ error?: string | string[] }> };
+
+export default async function AdminLoginPage({ searchParams }: Props) {
+  const params = await searchParams;
+  const error = typeof params.error === "string" ? params.error : params.error?.[0] ?? null;
   return (
     <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
@@ -18,7 +22,7 @@ export default function AdminLoginPage() {
         </div>
 
         <div className="bg-white p-10 rounded-3xl shadow-2xl">
-          <AdminLoginForm />
+          <AdminLoginForm error={error} />
           <div className="mt-8 text-center">
             <Link
               href="/"

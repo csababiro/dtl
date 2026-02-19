@@ -22,6 +22,28 @@ import type { DummyUser, DummyUserRole } from "@/lib/dummy-users";
 import { t } from "@/lib/i18n";
 import { post, patch, del } from "@/lib/api-client";
 
+export type AdminUsersActions = {
+  createUser: (input: {
+    name: string;
+    email: string;
+    role: DummyUserRole;
+    active: boolean;
+    canManageUsers?: boolean;
+    password?: string;
+    passwordConfirm?: string;
+  }) => Promise<{ data: DummyUser } | { error: string }>;
+  updateUser: (
+    id: string,
+    input: Partial<{ name: string; email: string; role: DummyUserRole; active: boolean; canManageUsers: boolean }>
+  ) => Promise<{ data: DummyUser } | { error: string }>;
+  deleteUser: (id: string) => Promise<{ ok: boolean } | { error: string }>;
+  setUserPassword: (
+    id: string,
+    password: string,
+    passwordConfirm: string
+  ) => Promise<{ data: DummyUser } | { error: string }>;
+};
+
 function formatDate(iso: string | undefined): string {
   if (!iso) return "—";
   try {
@@ -48,6 +70,8 @@ interface AdminUsersClientProps {
   isSuperAdmin?: boolean;
   /** When provided (e.g. client-fetched page), called after mutations instead of router.refresh(). */
   onRefetch?: () => void | Promise<void>;
+  /** Server actions for Vercel - avoids cookie issues with client-side fetch */
+  actions?: AdminUsersActions;
 }
 
 export function AdminUsersClient({
@@ -56,6 +80,7 @@ export function AdminUsersClient({
   currentUserId = "",
   isSuperAdmin = false,
   onRefetch,
+  actions,
 }: AdminUsersClientProps) {
   const allowedRoles = isSuperAdmin ? ROLES : ROLES_ADMIN_OR_STAFF;
   const isSelf = (user: DummyUser): boolean =>
@@ -103,23 +128,39 @@ export function AdminUsersClient({
         return;
       }
     }
-    const payload: Record<string, unknown> = {
-      name,
-      email,
-      role,
-      active,
-      canManageUsers: role === "Admin" ? canManageUsers : undefined,
-    };
-    if (password) {
-      payload.password = password;
-      payload.passwordConfirm = passwordConfirm;
-    }
-    const res = await post<DummyUser>("/users", payload);
-    setPending(false);
-    if ("error" in res) {
-      if (res.error.status === 401) router.push("/admin/login");
-      else setFormError(res.error.message);
-      return;
+    if (actions) {
+      const res = await actions.createUser({
+        name,
+        email,
+        role,
+        active,
+        canManageUsers: role === "Admin" ? canManageUsers : undefined,
+        ...(password ? { password, passwordConfirm } : {}),
+      });
+      setPending(false);
+      if ("error" in res) {
+        setFormError(res.error);
+        return;
+      }
+    } else {
+      const payload: Record<string, unknown> = {
+        name,
+        email,
+        role,
+        active,
+        canManageUsers: role === "Admin" ? canManageUsers : undefined,
+      };
+      if (password) {
+        payload.password = password;
+        payload.passwordConfirm = passwordConfirm;
+      }
+      const res = await post<DummyUser>("/users", payload);
+      setPending(false);
+      if ("error" in res) {
+        if (res.error.status === 401) router.push("/admin/login");
+        else setFormError(res.error.message);
+        return;
+      }
     }
     closeForm();
     form.reset();
@@ -150,11 +191,17 @@ export function AdminUsersClient({
     if (role !== undefined) updates.role = role;
     if (active !== undefined && !editingSelf) updates.active = active;
     if (canManageUsersValue !== undefined && !editingSelf) updates.canManageUsers = canManageUsersValue;
-    const res = await patch<DummyUser>(`/users/${id}`, updates);
-    setPending(false);
-    if ("error" in res) {
-      if (res.error.status === 401) router.push("/admin/login");
-      return;
+    if (actions) {
+      const res = await actions.updateUser(id, updates);
+      setPending(false);
+      if ("error" in res) return;
+    } else {
+      const res = await patch<DummyUser>(`/users/${id}`, updates);
+      setPending(false);
+      if ("error" in res) {
+        if (res.error.status === 401) router.push("/admin/login");
+        return;
+      }
     }
     closeForm();
     if (onRefetch) await onRefetch();
@@ -163,12 +210,21 @@ export function AdminUsersClient({
 
   const handleDelete = async (id: string) => {
     setPending(true);
-    const res = await del<void>(`/users/${id}`);
-    setPending(false);
-    setDeleteConfirm(null);
-    if ("error" in res) {
-      if (res.error.status === 401) router.push("/admin/login");
-      return;
+    if (actions) {
+      const res = await actions.deleteUser(id);
+      if ("error" in res) {
+        setPending(false);
+        setDeleteConfirm(null);
+        return;
+      }
+    } else {
+      const res = await del<void>(`/users/${id}`);
+      if ("error" in res) {
+        if (res.error.status === 401) router.push("/admin/login");
+        setPending(false);
+        setDeleteConfirm(null);
+        return;
+      }
     }
     if (onRefetch) await onRefetch();
     else router.refresh();
@@ -176,11 +232,17 @@ export function AdminUsersClient({
 
   const handleToggleActive = async (user: DummyUser) => {
     setPending(true);
-    const res = await patch<DummyUser>(`/users/${user.id}`, { active: !user.active });
-    setPending(false);
-    if ("error" in res) {
-      if (res.error.status === 401) router.push("/admin/login");
-      return;
+    if (actions) {
+      const res = await actions.updateUser(user.id, { active: !user.active });
+      setPending(false);
+      if ("error" in res) return;
+    } else {
+      const res = await patch<DummyUser>(`/users/${user.id}`, { active: !user.active });
+      setPending(false);
+      if ("error" in res) {
+        if (res.error.status === 401) router.push("/admin/login");
+        return;
+      }
     }
     if (onRefetch) await onRefetch();
     else router.refresh();
@@ -202,15 +264,28 @@ export function AdminUsersClient({
       return;
     }
     setPending(true);
-    const res = await patch<DummyUser>(`/users/${resetPasswordUser.id}`, {
-      password,
-      passwordConfirm,
-    });
-    setPending(false);
-    if ("error" in res) {
-      if (res.error.status === 401) router.push("/admin/login");
-      else setFormError(res.error.message);
-      return;
+    if (actions?.setUserPassword) {
+      const res = await actions.setUserPassword(
+        resetPasswordUser.id,
+        password,
+        passwordConfirm
+      );
+      setPending(false);
+      if ("error" in res) {
+        setFormError(res.error);
+        return;
+      }
+    } else {
+      const res = await patch<DummyUser>(`/users/${resetPasswordUser.id}`, {
+        password,
+        passwordConfirm,
+      });
+      setPending(false);
+      if ("error" in res) {
+        if (res.error.status === 401) router.push("/admin/login");
+        else setFormError(res.error.message);
+        return;
+      }
     }
     setResetPasswordUser(null);
     form.reset();

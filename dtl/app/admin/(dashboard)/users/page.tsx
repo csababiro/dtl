@@ -3,44 +3,61 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { t } from "@/lib/i18n";
-import { getUsers } from "@/lib/api/users";
 import { AdminUsersClient } from "@/components/admin/AdminUsersClient";
+import { useAdminAuth } from "@/components/admin/AdminAuthContext";
+import {
+  getUsersAction,
+  createUserAction,
+  updateUserAction,
+  deleteUserAction,
+  setUserPasswordAction,
+} from "./actions";
 import type { DummyUser } from "@/lib/dummy-users";
 
 export default function AdminUsersPage() {
   const router = useRouter();
+  const auth = useAdminAuth();
   const [users, setUsers] = useState<DummyUser[]>([]);
-  const [canManageUsers, setCanManageUsers] = useState(false);
-  const [currentUserId, setCurrentUserId] = useState("");
-  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    fetch("/api/debug-log", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        event: "users_page_mount",
+        hasAuth: Boolean(auth),
+        canManageUsers: auth?.canManageUsers,
+        role: auth?.role,
+      }),
+    }).catch(() => {});
+    if (!auth) return;
+    if (!auth.canManageUsers) {
+      router.replace("/admin");
+      return;
+    }
     let cancelled = false;
-    Promise.all([
-      fetch("/api/auth/me", { credentials: "include", cache: "no-store" }).then((r) =>
-        r.ok ? r.json() : null
-      ),
-      getUsers(),
-    ]).then(([me, usersResult]) => {
+    getUsersAction().then((result) => {
       if (cancelled) return;
-      if (!me?.canManageUsers) {
-        router.replace("/admin");
-        return;
-      }
-      setCanManageUsers(Boolean(me.canManageUsers));
-      setCurrentUserId(me.sub ?? "");
-      setIsSuperAdmin(me.role === "super_admin");
-      setUsers("data" in usersResult ? usersResult.data : []);
+      setUsers("data" in result ? result.data : []);
       setLoading(false);
     });
     return () => {
       cancelled = true;
     };
-  }, [router]);
+  }, [auth, router]);
 
-  const refetchUsers = () =>
-    getUsers().then((r) => setUsers("data" in r ? r.data : []));
+  const refetch = async () => {
+    const result = await getUsersAction();
+    if ("data" in result) setUsers(result.data);
+  };
+
+  const actions = {
+    createUser: createUserAction,
+    updateUser: updateUserAction,
+    deleteUser: deleteUserAction,
+    setUserPassword: setUserPasswordAction,
+  };
 
   if (loading) {
     return (
@@ -62,10 +79,11 @@ export default function AdminUsersPage() {
       </div>
       <AdminUsersClient
         users={users}
-        canManageUsers={canManageUsers}
-        currentUserId={currentUserId}
-        isSuperAdmin={isSuperAdmin}
-        onRefetch={refetchUsers}
+        canManageUsers={auth?.canManageUsers ?? false}
+        currentUserId={auth?.sub ?? ""}
+        isSuperAdmin={auth?.role === "super_admin"}
+        onRefetch={refetch}
+        actions={actions}
       />
     </div>
   );

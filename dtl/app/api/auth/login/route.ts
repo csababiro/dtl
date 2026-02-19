@@ -15,17 +15,35 @@ function resolveRole(email: string, dbRole: string | undefined): JwtRole {
   return "admin"; // "Super Admin" and "Admin" both get JWT role admin
 }
 
+function redirectToLogin(request: Request, error: string) {
+  const base = new URL(request.url).origin;
+  return NextResponse.redirect(`${base}/admin/login?error=${encodeURIComponent(error)}`);
+}
+
+function redirectToAdmin(request: Request) {
+  return NextResponse.redirect(new URL("/admin", request.url));
+}
+
 export async function POST(request: Request) {
   try {
     const adminEmail = process.env.ADMIN_EMAIL?.trim().toLowerCase();
     const adminPassword = process.env.ADMIN_PASSWORD?.trim();
 
-    const body = (await request.json()) as { email?: string; password?: string };
-    const email = String(body.email ?? "").trim().toLowerCase();
-    const password = String(body.password ?? "").trim();
+    let email: string;
+    let password: string;
+    const ct = request.headers.get("content-type") ?? "";
+    if (ct.includes("application/x-www-form-urlencoded")) {
+      const form = await request.formData();
+      email = String(form.get("email") ?? "").trim().toLowerCase();
+      password = String(form.get("password") ?? "").trim();
+    } else {
+      const body = (await request.json()) as { email?: string; password?: string };
+      email = String(body.email ?? "").trim().toLowerCase();
+      password = String(body.password ?? "").trim();
+    }
 
     if (!email) {
-      return NextResponse.json({ error: "Email required" }, { status: 400 });
+      return redirectToLogin(request, "Email required");
     }
 
     let role: JwtRole;
@@ -39,14 +57,10 @@ export async function POST(request: Request) {
       const isDev = process.env.NODE_ENV === "development";
       if (!user) {
         if (isDev) console.log("[login] DB user not found for email:", email);
-        const body: { error: string; reason?: string } = { error: "Invalid credentials" };
-        if (isDev) body.reason = "user_not_found";
-        return NextResponse.json(body, { status: 401 });
+        return redirectToLogin(request, "Invalid credentials");
       }
       if (!user.active) {
-        const body: { error: string; reason?: string } = { error: "Cont dezactivat" };
-        if (isDev) body.reason = "account_disabled";
-        return NextResponse.json(body, { status: 401 });
+        return redirectToLogin(request, "Cont dezactivat");
       }
       const passwordRow = await getPasswordHashByEmailFromDb(email);
       const storedHash = passwordRow?.passwordHash;
@@ -56,18 +70,12 @@ export async function POST(request: Request) {
         storedHash.startsWith("scrypt:v1:");
       if (!hasValidHash || !passwordRow) {
         if (isDev) console.log("[login] User found but no valid password hash (id:", user.id, ")");
-        const body: { error: string; reason?: string } = {
-          error: "Parola nu a fost setată. Verifică emailul pentru invitație.",
-        };
-        if (isDev) body.reason = "no_password_hash";
-        return NextResponse.json(body, { status: 401 });
+        return redirectToLogin(request, "Parola nu a fost setată. Verifică emailul pentru invitație.");
       }
       const ok = await verifyPassword(password, storedHash);
       if (!ok) {
         if (isDev) console.log("[login] DB user found, password verify failed for:", user.email);
-        const body: { error: string; reason?: string } = { error: "Invalid credentials" };
-        if (isDev) body.reason = "password_verify_failed";
-        return NextResponse.json(body, { status: 401 });
+        return redirectToLogin(request, "Invalid credentials");
       }
       role = resolveRole(email, user.role);
       sub = user.id;
@@ -75,7 +83,7 @@ export async function POST(request: Request) {
 
     const token = await signJwt({ sub, role }, COOKIE_MAX_AGE_SEC);
 
-    const res = NextResponse.json({ token, expiresIn: COOKIE_MAX_AGE_SEC });
+    const res = redirectToAdmin(request);
     res.cookies.set(JWT_COOKIE, token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
@@ -83,6 +91,7 @@ export async function POST(request: Request) {
       path: "/",
       maxAge: COOKIE_MAX_AGE_SEC,
     });
+    res.headers.set("Cache-Control", "no-store");
     return res;
   } catch (e) {
     if (e instanceof Error && e.message.includes("JWT_SECRET")) {
