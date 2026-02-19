@@ -2,7 +2,7 @@ import Link from "next/link";
 import { getFeatureFlags, isGalleryEnabled } from "@/lib/feature-flags";
 import { t } from "@/lib/i18n";
 import { GalleryWithLightbox } from "@/components/customer/GalleryWithLightbox";
-import { getGalleryItems } from "@/lib/api/gallery";
+import { getGalleryItems } from "@/lib/services";
 
 export const dynamic = "force-dynamic";
 
