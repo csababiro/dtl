@@ -21,16 +21,6 @@ export default function AdminUsersPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("/api/debug-log", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        event: "users_page_mount",
-        hasAuth: Boolean(auth),
-        canManageUsers: auth?.canManageUsers,
-        role: auth?.role,
-      }),
-    }).catch(() => {});
     if (!auth) return;
     if (!auth.canManageUsers) {
       router.replace("/admin");

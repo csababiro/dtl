@@ -135,21 +135,10 @@ export function AdminSidebar({ mobileOpen = false, onMobileClose }: AdminSidebar
         <ul className="space-y-1">
           {menuItems.map((item) => (
             <li key={item.path}>
-              <a
+              <Link
                 href={item.path}
-                onClick={(e) => {
-                  if (item.path === "/admin/users") {
-                    e.preventDefault();
-                    fetch("/api/debug-log", {
-                      method: "POST",
-                      headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify({ event: "sidebar_utilizatori_click", pathname: window.location.pathname }),
-                    }).catch(() => {});
-                    window.location.assign("/admin/users");
-                  }
-                  onMobileClose?.();
-                }}
-                className={`flex items-center justify-between px-4 py-3 rounded-xl transition-all group no-underline text-inherit ${
+                onClick={onMobileClose}
+                className={`flex items-center justify-between px-4 py-3 rounded-xl transition-all group ${
                   isActive(item.path)
                     ? "bg-blue-600 text-white shadow-lg shadow-blue-900/20"
                     : "hover:bg-slate-800 hover:text-slate-200"
@@ -160,7 +149,7 @@ export function AdminSidebar({ mobileOpen = false, onMobileClose }: AdminSidebar
                   <span className="font-medium">{t(item.nameKey)}</span>
                 </div>
                 {isActive(item.path) && <ChevronRight size={16} />}
-              </a>
+              </Link>
             </li>
           ))}
         </ul>

@@ -207,3 +207,5 @@
 {"location":"lib/db/index.ts:ensurePostgresUrl","message":"ensurePostgresUrl check","data":{"hasPostgresUrl":true,"hasDatabaseUrl":true,"willThrow":false},"timestamp":1771492156218,"hypothesisId":"A"}
 {"location":"lib/db/index.ts:ensurePostgresUrl","message":"ensurePostgresUrl check","data":{"hasPostgresUrl":true,"hasDatabaseUrl":true,"willThrow":false},"timestamp":1771492162059,"hypothesisId":"A"}
 {"location":"lib/db/index.ts:ensurePostgresUrl","message":"ensurePostgresUrl check","data":{"hasPostgresUrl":true,"hasDatabaseUrl":true,"willThrow":false},"timestamp":1771492162120,"hypothesisId":"A"}
+{"location":"lib/db/index.ts:ensurePostgresUrl","message":"ensurePostgresUrl check","data":{"hasPostgresUrl":true,"hasDatabaseUrl":true,"willThrow":false},"timestamp":1771493622770,"hypothesisId":"A"}
+{"location":"lib/db/index.ts:ensurePostgresUrl","message":"ensurePostgresUrl check","data":{"hasPostgresUrl":true,"hasDatabaseUrl":true,"willThrow":false},"timestamp":1771493622781,"hypothesisId":"A"}
