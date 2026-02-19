@@ -1,8 +1,10 @@
 import { unstable_noStore } from "next/cache";
 import { cookies } from "next/headers";
-import { getFeatureFlags as getFeatureFlagsFromService } from "@/lib/services";
+import {
+  getFeatureFlags as getFeatureFlagsFromService,
+  getPublicSiteSettings,
+} from "@/lib/services";
 import { DEFAULT_FEATURE_FLAGS } from "@/lib/feature-flags";
-import { getPublicSiteSettings } from "@/lib/settings";
 import { Header } from "@/components/customer/Header";
 import { Footer } from "@/components/customer/Footer";
 import { WhatsAppButton } from "@/components/customer/WhatsAppButton";
@@ -32,7 +34,8 @@ export default async function CustomerLayout({
     }
   }
 
-  const settings = await getPublicSiteSettings();
+  const settingsResult = await getPublicSiteSettings();
+  const settings = "data" in settingsResult ? settingsResult.data : {};
   return (
     <>
       <Header

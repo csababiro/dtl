@@ -9,14 +9,12 @@ import {
   updatePlataNotes,
   getQuoteRequestsByEmail,
   ensureClient,
-} from "@/lib/services";
-import {
   getClientByEmail,
-  getClientCars,
-  addClientCar,
-  updateClientCar,
-  deleteClientCar,
-} from "@/lib/api/clients";
+  getCarsByClientId,
+  addClientCar as addClientCarService,
+  updateClientCar as updateClientCarService,
+  deleteClientCar as deleteClientCarService,
+} from "@/lib/services";
 import type { ClientCar } from "@/lib/client-cars-store";
 
 /** Register a new client (sign-up on Cont). Creates or updates the client so they appear in admin Clienți. */
@@ -41,7 +39,7 @@ export async function getClientWithCars(email: string): Promise<{
   if ("error" in clientResult || clientResult.data == null)
     return { client: null, cars: [] };
   const client = clientResult.data;
-  const carsResult = await getClientCars(client.id);
+  const carsResult = await getCarsByClientId(client.id);
   const cars = "data" in carsResult ? carsResult.data : [];
   return {
     client: {
@@ -59,7 +57,8 @@ export async function addClientCarAction(
   clientId: string,
   data: { carMake: string; carModel: string; carYear: string; chassis?: string }
 ): Promise<{ ok: boolean; car?: ClientCar; error?: string }> {
-  const result = await addClientCar(clientId, {
+  const result = await addClientCarService({
+    clientId,
     carMake: data.carMake.trim(),
     carModel: data.carModel.trim(),
     carYear: data.carYear.trim(),
@@ -75,7 +74,7 @@ export async function updateClientCarAction(
   carId: string,
   data: Partial<{ carMake: string; carModel: string; carYear: string; chassis: string }>
 ): Promise<{ ok: boolean; car?: ClientCar }> {
-  const result = await updateClientCar(clientId, carId, data);
+  const result = await updateClientCarService(carId, data);
   if ("error" in result) return { ok: false };
   return { ok: true, car: result.data ?? undefined };
 }
@@ -85,7 +84,7 @@ export async function deleteClientCarAction(
   clientId: string,
   carId: string
 ): Promise<{ ok: boolean }> {
-  const result = await deleteClientCar(clientId, carId);
+  const result = await deleteClientCarService(carId);
   if ("error" in result) return { ok: false };
   return { ok: true };
 }

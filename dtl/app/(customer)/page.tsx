@@ -8,13 +8,19 @@ import {
   Phone,
   Mail,
 } from "lucide-react";
-import { getFeatureFlags } from "@/lib/feature-flags";
-import { getPublicSiteSettings } from "@/lib/settings";
+import {
+  getFeatureFlags,
+  getPublicSiteSettings,
+} from "@/lib/services";
 import { t } from "@/lib/i18n";
 import { getMapsUrl } from "@/lib/maps";
 import { InteractiveMap } from "@/components/customer/InteractiveMap";
 import { ImageWithFallback } from "@/components/shared/ImageWithFallback";
-import { isBookingEnabled, isModuleEnabled } from "@/lib/feature-flags";
+import {
+  DEFAULT_FEATURE_FLAGS,
+  isBookingEnabled,
+  isModuleEnabled,
+} from "@/lib/feature-flags";
 
 const HERO_IMAGE =
   "https://images.unsplash.com/photo-1581092160562-40aa08e78837?q=80&w=1080";
@@ -61,8 +67,13 @@ function formatHours(hours: Record<string, string> | undefined): string {
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
-  const flags = await getFeatureFlags();
-  const settings = await getPublicSiteSettings();
+  const flagsResult = await getFeatureFlags();
+  const flags =
+    "data" in flagsResult
+      ? { ...DEFAULT_FEATURE_FLAGS, ...flagsResult.data }
+      : DEFAULT_FEATURE_FLAGS;
+  const settingsResult = await getPublicSiteSettings();
+  const settings = "data" in settingsResult ? settingsResult.data : {};
   const showBooking = isBookingEnabled(flags, "general");
   const showTyre = isModuleEnabled(flags, "tyre");
   const showCarWash = isModuleEnabled(flags, "carWash");
