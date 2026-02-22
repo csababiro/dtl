@@ -10,6 +10,7 @@ TODO
 0. Email thing
 1. Maps api key
 2. Fcm key
+3. AI SEO md
 
 
 demo@dtl.ro
