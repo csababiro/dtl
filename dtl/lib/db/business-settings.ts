@@ -15,6 +15,10 @@ export async function putBusinessSettingsInDb(
 ): Promise<BusinessSettings> {
   const current = await getBusinessSettingsFromDb();
   const stored = { ...current, ...payload };
-  await sql`UPDATE business_settings SET data = ${JSON.stringify(stored)}::jsonb WHERE id = 1`;
+  // Upsert so save works even if schema INSERT never ran (no row id=1 yet)
+  await sql`
+    INSERT INTO business_settings (id, data) VALUES (1, ${JSON.stringify(stored)}::jsonb)
+    ON CONFLICT (id) DO UPDATE SET data = EXCLUDED.data
+  `;
   return stored;
 }

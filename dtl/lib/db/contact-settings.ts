@@ -20,6 +20,10 @@ export async function putContactSettingsInDb(
 ): Promise<ContactSettings> {
   const current = await getContactSettingsFromDb();
   const stored = { ...current, ...payload };
-  await sql`UPDATE contact_settings SET data = ${JSON.stringify(stored)}::jsonb WHERE id = 1`;
+  // Upsert so save works even if schema INSERT never ran (no row id=1 yet)
+  await sql`
+    INSERT INTO contact_settings (id, data) VALUES (1, ${JSON.stringify(stored)}::jsonb)
+    ON CONFLICT (id) DO UPDATE SET data = EXCLUDED.data
+  `;
   return stored;
 }

@@ -19,6 +19,10 @@ export async function putWorkingHoursInDb(
   schedule: WorkingHoursSchedule
 ): Promise<WorkingHoursSchedule> {
   const data = { days: schedule.days.slice(0, 6) };
-  await sql`UPDATE working_hours SET data = ${JSON.stringify(data)}::jsonb WHERE id = 1`;
+  // Upsert so save works even if schema INSERT never ran (no row id=1 yet)
+  await sql`
+    INSERT INTO working_hours (id, data) VALUES (1, ${JSON.stringify(data)}::jsonb)
+    ON CONFLICT (id) DO UPDATE SET data = EXCLUDED.data
+  `;
   return { days: data.days as WorkingHoursSchedule["days"] };
 }
