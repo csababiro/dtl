@@ -140,7 +140,7 @@ export function Header({
         address={address}
         centerContent={
           <Link
-            href="/oferte-dtl.html"
+            href="/oferte.html"
             target="_blank"
             rel="noopener noreferrer"
             className="font-bold text-lg text-white hover:underline"
@@ -161,7 +161,7 @@ export function Header({
             ) : (
               <>
                 <span className="text-3xl font-black text-blue-700 tracking-tighter">
-                  DTL
+                  Nexora
                 </span>
                 <span className="text-sm font-semibold text-slate-500 hidden sm:inline">
                   SERVICE AUTO

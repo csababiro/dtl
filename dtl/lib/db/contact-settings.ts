@@ -2,7 +2,7 @@ import type { ContactSettings } from "@/lib/contact-settings";
 import { sql } from "./index";
 
 const DEFAULTS: ContactSettings = {
-  companyName: "DTL Service",
+  companyName: "Nexora Service Auto",
   phone: "",
   email: "",
   address: "",

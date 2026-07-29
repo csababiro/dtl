@@ -116,7 +116,7 @@ export function AdminSidebar({ mobileOpen = false, onMobileClose }: AdminSidebar
           <Wrench size={24} className="text-white" />
         </div>
         <div>
-          <h1 className="text-white font-black text-xl leading-none">DTL</h1>
+          <h1 className="text-white font-black text-xl leading-none">Nexora</h1>
           <p className="text-[10px] uppercase tracking-widest font-bold">Admin Panel</p>
         </div>
         {onMobileClose && (

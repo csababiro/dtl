@@ -53,7 +53,7 @@
     "createAccountLater": "Mai târziu"
   },
   "home": {
-    "title": "DTL Service",
+    "title": "Nexora Service Auto",
     "heroTitle": "Servicii auto complete",
     "heroSubtitle": "Service general, anvelope, spălătorie – totul într-un singur loc.",
     "heroSubtitleSuffix": " – totul într-un singur loc.",
@@ -206,9 +206,9 @@
     "searchPlaceholder": "Caută programări, clienți...",
     "notifications": "Notificări",
     "staffDashboard": "Staff Dashboard",
-    "loginSubtitle": "Accesează panoul de administrare DTL Service",
+    "loginSubtitle": "Accesează panoul de administrare Nexora Service Auto",
     "backToSite": "Înapoi la site-ul principal",
-    "secureBadge": "Securizat de DTL Security System",
+    "secureBadge": "Securizat de Nexora Security System",
     "dashboard": "Panou",
     "dashboardTitle": "Panou General",
     "dashboardSubtitle": "Bun venit înapoi! Iată situația la zi.",

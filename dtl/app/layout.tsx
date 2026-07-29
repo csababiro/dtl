@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "DTL Service",
+  title: "Nexora Service Auto",
   description: "Servicii auto complete – service general, anvelope, spălătorie.",
 };
 

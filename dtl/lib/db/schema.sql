@@ -161,7 +161,7 @@ INSERT INTO gallery_items (id, title, caption, image_url, "order", created_at) V
   ('gal-seed-5', 'Service auto', NULL, 'https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?q=80&w=600', 5, '2025-01-19T08:00:00.000Z'),
   ('gal-seed-6', 'Lift și echipament', NULL, 'https://images.unsplash.com/photo-1502877338535-766e1452684a?q=80&w=600', 6, '2025-01-20T10:00:00.000Z'),
   ('gal-seed-7', 'Detalii lucrări', NULL, 'https://images.unsplash.com/photo-1619642751034-765dfdf7c58e?q=80&w=600', 7, '2025-01-21T12:00:00.000Z'),
-  ('gal-seed-8', 'Echipa DTL', NULL, 'https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?q=80&w=600', 8, '2025-01-22T09:00:00.000Z')
+  ('gal-seed-8', 'Echipa Nexora', NULL, 'https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?q=80&w=600', 8, '2025-01-22T09:00:00.000Z')
 ON CONFLICT (id) DO NOTHING;
 
 -- Seed testimonials (same as frontend testimoniale page); safe to re-run
@@ -169,5 +169,5 @@ INSERT INTO testimonials (id, author, role, content, rating, created_at, visible
   ('test-seed-1', 'Maria P.', 'Clientă, VW Golf', 'Serviciu rapid și profesional. Am revenit de mai multe ori pentru revizie și anvelope. Recomand cu căldură.', 5, '2025-02-01T12:00:00.000Z', true),
   ('test-seed-2', 'Ion I.', 'Client, Dacia Duster', 'Prețuri corecte, echipă serioasă. Mi-au explicat tot ce trebuia făcut la mașină. Mulțumesc!', 5, '2025-02-05T10:00:00.000Z', true),
   ('test-seed-3', 'Elena M.', 'Clientă, BMW 320', 'Cel mai bun service din zonă. Programare ușoară, lucrări de calitate. Voi reveni sigur.', 5, '2025-02-08T14:00:00.000Z', true),
-  ('test-seed-4', 'Andrei S.', 'Client, Skoda Octavia', 'Spălătoria lor e impecabilă. Și service-ul general la fel. Recomand DTL.', 5, '2025-02-10T09:00:00.000Z', true)
+  ('test-seed-4', 'Andrei S.', 'Client, Skoda Octavia', 'Spălătoria lor e impecabilă. Și service-ul general la fel. Recomand Nexora.', 5, '2025-02-10T09:00:00.000Z', true)
 ON CONFLICT (id) DO NOTHING;

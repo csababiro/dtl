@@ -54,7 +54,7 @@ export default async function ServiciiToatePage() {
             {t("servicii.allServicesTitle")}
           </h1>
           <p className="text-xl text-slate-400 max-w-2xl mx-auto">
-            Lista completă de servicii oferite de DTL.
+            Lista completă de servicii oferite de Nexora.
           </p>
           <Link
             href="/servicii"

@@ -45,7 +45,7 @@ export function AdminContactClient() {
               setSettings((f) => ({ ...f, companyName: e.target.value }))
             }
             className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-            placeholder="DTL Service"
+            placeholder="Nexora Service Auto"
           />
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">

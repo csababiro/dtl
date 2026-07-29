@@ -27,7 +27,7 @@ export function AdminDashboardShell({
         >
           <Menu size={24} />
         </button>
-        <span className="font-semibold text-lg">DTL Admin</span>
+        <span className="font-semibold text-lg">Nexora Admin</span>
       </div>
       {/* Content area: on desktop (lg) use margin-left so it never goes under the fixed sidebar */}
       <div className="pt-14 lg:pt-0 lg:ml-64 min-h-screen">

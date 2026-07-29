@@ -50,7 +50,7 @@ export function Footer({
         <div className="col-span-1 md:col-span-1">
           <Link href="/" className="flex items-center gap-2 mb-6">
             <span className="text-3xl font-black text-white tracking-tighter">
-              DTL
+              Nexora
             </span>
             <span className="text-sm font-semibold text-slate-500">
               SERVICE AUTO
@@ -175,7 +175,7 @@ export function Footer({
       </div>
 
       <div className="max-w-7xl mx-auto px-4 pt-8 border-t border-slate-900 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-slate-600">
-        <p>© {new Date().getFullYear()} DTL Service Auto. Toate drepturile rezervate.</p>
+        <p>© {new Date().getFullYear()} Nexora Service Auto. Toate drepturile rezervate.</p>
       </div>
     </footer>
   );

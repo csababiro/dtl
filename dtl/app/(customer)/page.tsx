@@ -227,7 +227,7 @@ export default async function HomePage() {
         <div className="max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
           <div>
             <p className="text-blue-600 font-bold uppercase tracking-widest text-sm mb-4">
-              De ce DTL?
+              De ce Nexora?
             </p>
             <h2 className="text-4xl font-black text-slate-900 mb-8 leading-tight">
               Pasiune pentru mecanică, respect pentru client

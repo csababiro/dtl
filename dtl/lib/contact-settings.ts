@@ -15,7 +15,7 @@ export interface ContactSettings {
 }
 
 const DEFAULTS: ContactSettings = {
-  companyName: "DTL Service",
+  companyName: "Nexora Service Auto",
   phone: "",
   email: "",
   address: "",
